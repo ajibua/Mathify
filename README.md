@@ -67,45 +67,17 @@ python manage.py runserver
 
 ## API endpoints at a glance
 
-| App        | Base URL                  | Key routes                                      |
-|------------|---------------------------|-------------------------------------------------|
-| auth       | `/api/auth/`              | `token/`, `token/refresh/`                      |
-| accounts   | `/api/accounts/`          | `register/`, `me/`, `me/profile/`, `users/<id>/`|
-| feed       | `/api/feed/`              | `posts/`, `posts/<id>/like/`, `follows/`        |
-| social     | `/api/social/`            | `groups/`, `groups/<id>/join/`, `messages/`     |
-| library    | `/api/library/`           | `resources/`, `resources/<id>/bookmark/`        |
-| studio     | `/api/studio/`            | `formulas/`, `creations/`                       |
-| rankings   | `/api/rankings/`          | `leaderboard/?period=weekly`, `competitions/`   |
-| ai_tutor   | `/api/ai-tutor/`          | `tutors/`, `sessions/`, `sessions/<id>/send/`   |
-| notify     | `/api/`                   | `notifications/`, `notifications/<id>/read/`   |
-
----
-
-## Wiring up the AI (ai_tutor app)
-
-Open `ai_tutor/views.py` and replace the `_get_ai_reply()` stub with your SDK
-call. Examples for both Anthropic and OpenAI are included as comments in that
-method.
-
----
-
-## Switching to Postgres (recommended for production)
-
-```python
-# mathify/settings.py
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mathify',
-        'USER': 'postgres',
-        'PASSWORD': 'yourpassword',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
-```
-
-Add `psycopg2-binary` to `requirements.txt`.
+| App      | Base URL         | Key routes                                       |
+| -------- | ---------------- | ------------------------------------------------ |
+| auth     | `/api/auth/`     | `token/`, `token/refresh/`                       |
+| accounts | `/api/accounts/` | `register/`, `me/`, `me/profile/`, `users/<id>/` |
+| feed     | `/api/feed/`     | `posts/`, `posts/<id>/like/`, `follows/`         |
+| social   | `/api/social/`   | `groups/`, `groups/<id>/join/`, `messages/`      |
+| library  | `/api/library/`  | `resources/`, `resources/<id>/bookmark/`         |
+| studio   | `/api/studio/`   | `formulas/`, `creations/`                        |
+| rankings | `/api/rankings/` | `leaderboard/?period=weekly`, `competitions/`    |
+| ai_tutor | `/api/ai-tutor/` | `tutors/`, `sessions/`, `sessions/<id>/send/`    |
+| notify   | `/api/`          | `notifications/`, `notifications/<id>/read/`     |
 
 ---
 
