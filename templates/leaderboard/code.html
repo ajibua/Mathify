@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist:wght@100;300;400;500;700;900&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Mathify | Leaderboard</title>
+  <style>
+    body {
+      background-color: #131313;
+      color: #e5e2e1;
+      font-family: 'Geist', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .math-glass {
+      background: rgba(18, 18, 18, 0.7);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .neon-glow-primary {
+      box-shadow: 0 0 20px rgba(0, 218, 248, 0.15);
+    }
+
+    .podium-gradient {
+      background: linear-gradient(180deg, rgba(186, 242, 255, 0.1) 0%, rgba(186, 242, 255, 0) 100%);
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    .math-symbol-overlay {
+      position: absolute;
+      opacity: 0.03;
+      font-family: serif;
+      pointer-events: none;
+      user-select: none;
+    }
+  </style>
+  <style>
+    body {
+      min-height: 100dvh;
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-surface">
+  <!-- Top App Bar -->
+  <header
+    class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-margin-mobile h-16">
+    <div class="flex items-center gap-md">
+      <div class="w-8 h-8 rounded-full overflow-hidden border border-primary/30">
+        <img alt="Profile" class="w-full h-full object-cover"
+          data-alt="A detailed digital 3D avatar profile picture of a young scholar wearing tech-wear inspired academic robes. The character has sharp features and a focused expression, set against a dark background with floating blue mathematical equations. The lighting is neon-centric, with high-contrast electric blue highlights reflecting off the skin and hair, maintaining a premium social app aesthetic."
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLB88Ngj7-LK8Vk77CS14upllmBMl1C7_CsyMQQ4iQAwvXdAVL27FJrwz6ZiJAEyzE-3mADht1Cjy8YRGqtsYfk9vTcccyezP_SF7ZTuwKPse6aXsJYZa60tHSmRMMB4uwCKa4wbNPeCrBxKYvxJk95Xn9VXLRQZSgP86ShXoHmbHSTpVJSmrGNcTKStjJV4xbMHFV-8ZHZw3ku-vxB0nRMY7aEQqp3fowpQtEhgJTEzAvmIdFE9yDvVBm2vTzvH30Ee3XW9XjLzY" />
+      </div>
+      <h1 class="font-headline-md text-headline-md font-bold tracking-tighter text-primary dark:text-primary-fixed-dim">
+        MATH_AXIOM</h1>
+    </div>
+    <button
+      class="material-symbols-outlined text-primary hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
+      data-notification-bell>
+      notifications
+      <span
+        class="hidden absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold items-center justify-center"
+        data-notification-count></span>
+    </button>
+  </header>
+  <main class="pt-24 pb-32 px-margin-mobile max-w-[1200px] mx-auto min-h-screen relative">
+    <!-- Atmospheric Background Formulas -->
+    <div class="math-symbol-overlay top-20 left-10 text-[80px]">∫ e^x dx</div>
+    <div class="math-symbol-overlay top-60 right-20 text-[100px]">Σn=1^∞</div>
+    <div class="math-symbol-overlay bottom-40 left-5 text-[60px]">∂u/∂t = α∇²u</div>
+    <!-- Section Title -->
+    <div class="mb-xl text-center">
+      <h2
+        class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary tracking-tight">
+        Axiom Rank</h2>
+      <p class="font-body-sm text-body-sm text-outline uppercase tracking-widest mt-xs">Global Computational Standing
+      </p>
+    </div>
+    <!-- Weekly Challenge Card -->
+    <div class="mb-xl math-glass rounded-xl p-md flex items-center justify-between neon-glow-primary">
+      <div class="flex items-center gap-md">
+        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+          <span class="material-symbols-outlined text-primary text-[32px]">bolt</span>
+        </div>
+        <div>
+          <h3 class="font-headline-sm text-headline-sm text-primary">Riemann Hypothesis Sprint</h3>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">48h remaining • <span
+              class="text-secondary-fixed-dim">+500 Axioms</span></p>
+        </div>
+      </div>
+      <div class="hidden sm:block text-right">
+        <div class="h-1 w-32 bg-white/10 rounded-full overflow-hidden mb-xs">
+          <div class="h-full bg-gradient-to-r from-primary to-secondary-fixed-dim w-3/4"></div>
+        </div>
+        <p class="font-label-caps text-label-caps text-primary">75% COMPLETE</p>
+      </div>
+    </div>
+    <!-- Podium Section -->
+    <div class="flex items-end justify-center gap-sm md:gap-lg mb-xl mt-8">
+      <!-- Rank 2 -->
+      <div class="flex flex-col items-center group w-1/3 max-w-[140px]">
+        <div class="relative mb-md">
+          <div
+            class="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-outline p-1 transition-transform group-hover:scale-105">
+            <img class="rounded-full w-full h-full object-cover"
+              data-alt="A futuristic digital avatar of a female mathematician with vibrant purple accents. She is set against a dark, tech-inspired background with subtle glowing geometry. The art style is crisp vector art with high information density, featuring sharp lines and high-contrast lighting that fits a technical social environment."
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVCDOZxuyxeOzprIT4B-BCzZSv9QYK4q03UxLA_MqdqQ5so0G0qB9ulXUtPFP7pCTBWaaE15_7VR4HfYTcw9wMdxF6MFFuVGnvNVZuzIkP62IA3q7dPb9kEL23M4oaRJJ4GsQ_7Ik_LrGYo4wHw5Wbj_ZF2hArqdwgKKjPx55fHFy9PLhgWyAMi9FnEhvckrujA8SCWEoJZeqWXN3XrSvp6ckjW31XReCrlxLITVquGutR1k2uApvKEifIxi5ZlMUNdz4c6TPBUKo" />
+          </div>
+          <div
+            class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-outline text-background font-bold px-2 py-0.5 rounded text-[10px]">
+            2nd</div>
+        </div>
+        <div
+          class="math-glass w-full rounded-t-xl podium-gradient h-24 flex flex-col items-center justify-center border-b-0">
+          <span class="font-headline-sm text-headline-sm truncate w-full text-center px-xs">Ada_L</span>
+          <span class="font-label-caps text-label-caps text-primary">12.4k AP</span>
+        </div>
+      </div>
+      <!-- Rank 1 -->
+      <div class="flex flex-col items-center group w-1/3 max-w-[160px] -translate-y-4">
+        <div class="relative mb-md">
+          <div class="absolute -top-6 left-1/2 -translate-x-1/2">
+            <span class="material-symbols-outlined text-secondary-fixed-dim text-[32px]"
+              style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+          </div>
+          <div
+            class="w-20 h-20 md:w-28 md:h-28 rounded-full border-4 border-secondary-fixed-dim p-1 transition-transform group-hover:scale-110 neon-glow-primary">
+            <img class="rounded-full w-full h-full object-cover"
+              data-alt="A portrait of a male intellectual avatar with a sharp beard and glasses, styled in a dark-mode neon aesthetic. The background is a pitch-black digital space filled with glowing lime green mathematical symbols and diagrams. The lighting is dramatic, highlighting the contours of the face with lime green and electric blue rim lights."
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnrbyq3PPaM5I54ScKFENesxbD-3Z-mvVSb4ehMe0qZZ_DE2RBLMytX9OISitJfGES2rAr5ed_GNwH4zXQPQJ7DsVGsDQBHAlBJKOHZrioRj8PBnWEC8HkRPkZKgKhZmw27FaBYqznV1Neeiqa1t_oQIeYdX7p_gIIAAeA6G2u7rpm1DTdNdmOvk-MHhg8LqmJlYVtSf9PnKyn8VWikULrJzRuZY4N3GBg48agSWbedXDbhRdzNP5Udt-9nkzvHwppK4hVcrKEDDY" />
+          </div>
+          <div
+            class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-secondary-fixed-dim text-on-secondary-fixed font-bold px-3 py-1 rounded text-xs">
+            1st</div>
+        </div>
+        <div
+          class="math-glass w-full rounded-t-xl podium-gradient h-36 flex flex-col items-center justify-center border-b-0 border-primary/20">
+          <span class="font-headline-sm text-headline-sm truncate w-full text-center px-xs">Euler_Proof</span>
+          <span class="font-label-caps text-label-caps text-secondary-fixed-dim">15.9k AP</span>
+        </div>
+      </div>
+      <!-- Rank 3 -->
+      <div class="flex flex-col items-center group w-1/3 max-w-[140px]">
+        <div class="relative mb-md">
+          <div
+            class="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-on-primary-container p-1 transition-transform group-hover:scale-105">
+            <img class="rounded-full w-full h-full object-cover"
+              data-alt="A digital avatar of a young mathematician with a focused gaze and short hair, rendered in a sleek high-tech style. The palette consists of deep charcoals and bright electric blue highlights. The background features blurred differential equations and a grid-like structure, creating a sense of deep mathematical focus and technical premium quality."
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxrd2Rg-fdS9H9ZEvQkvIVNl6xTGOUfbuKrNZK2jzog6shSMObCsEk8GKs-gJwymqY-7dd1xUShUFfa9JTaPD6w2D63mx1GqEMUX8z2lB7VUxEQA94k8qyUrJglof_8lA93kKDMAbuvkYu6UV4gRVB9JyHkLrH27s58R2-xJ9j1nNVcj_RhKi4ArUROpC_Oy6tut8Pbs1vZ8fhx4-AD9OQN_Ll3eg0DZXeObj9gK6gVRj_DGnksMos8D7B-lj__Z4YuDjtRubDqwc" />
+          </div>
+          <div
+            class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-on-primary-container text-primary font-bold px-2 py-0.5 rounded text-[10px]">
+            3rd</div>
+        </div>
+        <div
+          class="math-glass w-full rounded-t-xl podium-gradient h-20 flex flex-col items-center justify-center border-b-0">
+          <span class="font-headline-sm text-headline-sm truncate w-full text-center px-xs">Gauss_99</span>
+          <span class="font-label-caps text-label-caps text-primary">10.1k AP</span>
+        </div>
+      </div>
+    </div>
+    <!-- Ranking List -->
+    <div class="space-y-sm">
+      <div class="px-md pb-xs flex justify-between font-label-caps text-label-caps text-outline uppercase">
+        <span>Rank &amp; Entity</span>
+        <span>Calculated AP</span>
+      </div>
+      <div class="space-y-sm" data-leaderboard>
+        <!-- Rank Item 4 -->
+        <div
+          class="math-glass rounded-lg p-md flex items-center justify-between hover:bg-surface-container-high transition-colors cursor-pointer group">
+          <div class="flex items-center gap-md">
+            <span class="font-headline-sm text-headline-sm text-outline group-hover:text-primary w-6">4</span>
+            <div class="w-10 h-10 rounded-full border border-white/10 overflow-hidden">
+              <img alt="Avatar" class="w-full h-full object-cover"
+                data-alt="A sophisticated female scholar avatar in a dark aesthetic. The lighting is moody and technical with cyan accents. Her expression is calm and analytical, framed by a dark charcoal background with faint geometric patterns. The overall look is modern, minimal, and high-contrast, fitting a professional academic social platform."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2UnGcuaG3aeLPI-qdAE377oAakrUMe_cp5angyG8XfAa9Bfa12JYJXiCvQCRa-dsjcHrP-s3hE_DyU6p1BvuKVAfnLDZ01wUUaSjaGEir0jn-Fmdt1FjRCYSUuoYovTqLaM6GH1RqxZUKQ2aa2XN4CZGWh4J_63olj0k32R-co9knpr90JXSVAYSYvG47MvmgVI4_PL2QW7AxiP7zMSy6f97q26VL1-zt16D65TNfDQqVci6yDTz-sSWVQ4bFBRdW0QnlX-MvTuo" />
+            </div>
+            <div>
+              <p class="font-body-md text-body-md font-bold text-on-surface">Noetherian_Ring</p>
+              <span
+                class="text-[10px] px-2 py-0.5 rounded bg-primary/10 text-primary font-bold border border-primary/20">Algebra
+                Specialist</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-xs">
+            <span class="font-math-display text-math-display text-secondary-fixed-dim">9,842</span>
+            <span class="material-symbols-outlined text-secondary-fixed-dim text-sm">functions</span>
+          </div>
+        </div>
+        <!-- Rank Item 5 -->
+        <div
+          class="math-glass rounded-lg p-md flex items-center justify-between hover:bg-surface-container-high transition-colors cursor-pointer group">
+          <div class="flex items-center gap-md">
+            <span class="font-headline-sm text-headline-sm text-outline group-hover:text-primary w-6">5</span>
+            <div class="w-10 h-10 rounded-full border border-white/10 overflow-hidden">
+              <img alt="Avatar" class="w-full h-full object-cover"
+                data-alt="A minimalist digital avatar of a tech-focused intellectual with dark-rimmed glasses. The scene is illuminated by low-key lighting with sharp lime green accents that emphasize the futuristic theme. The character is set against a matte black surface with subtle glowing circuit lines, conveying a sense of computational intelligence and high-end design."
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPCdWfn1N4EgVx-ko22qh-vdQuQ8BdY3nr7mcdUdize4wk4W4JUPPHc6i1P65Wljy6dtM5rePAtuYUsdqk7zeTL94oyTfGc0LLR48stIrO2mOkot_fveKP2kGjUq0_3Bslj2vy0YgcytNgZCey8_IkccMk4VXEq516M252YCYCx-4_PCL9PNOVtoqv6sAvQA2E5bTSs_K56tnWX5tJwWIpRkt3-qkciMeggFutAR-QMdDpPjkIPVkJ9B-An5iksGXaSYI_I4kvlG8" />
+            </div>
+            <div>
+              <p class="font-body-md text-body-md font-bold text-on-surface">Enigma_Master</p>
+              <span
+                class="text-[10px] px-2 py-0.5 rounded bg-on-tertiary-container/20 text-tertiary-fixed-dim font-bold border border-tertiary-container/30">Topology
+                Specialist</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-xs">
+            <span class="font-math-display text-math-display text-primary">8,210</span>
+            <span class="material-symbols-outlined text-primary text-sm">waves</span>
+          </div>
+        </div>
+      </div>
+      <!-- User's Fixed Rank Position -->
+      <div
+        class="py-md border-y border-primary/20 bg-primary/5 -mx-margin-mobile px-margin-mobile flex items-center justify-between mt-md relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent"></div>
+        <div class="flex items-center gap-md z-10">
+          <span class="font-headline-sm text-headline-sm text-primary w-6">42</span>
+          <div class="w-10 h-10 rounded-full border-2 border-primary overflow-hidden">
+            <img alt="Avatar" class="w-full h-full object-cover"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAD7ZFegLSQhT3F4MMjMJiUB7zuF2sZRU_6rjJ71ehZpc-hqMb2rzfCmXKEplXJdmoYeTtAkAc4owXll1GFbLv3e-X8_pa4woVcWhklOb86E6ZRvGJj_EPCnL9qhXzSiLsviE157k8uzl3yd-wHuNS0vzzSd2wRgaQD0HcMcVeFMIjbo2ZG4aW06CSoEVci3KhZ0MgJlO56p7Csxv69YrUqpCY-XuqVzhQw52EoOh-s9mENfYQYyWVTuzZVMIFmJ-2M05b5LAb6VFU" />
+          </div>
+          <div>
+            <p class="font-body-md text-body-md font-bold text-on-surface">Sigma Student (You)</p>
+            <span class="font-label-caps text-label-caps text-primary">Rank: Euler</span>
+          </div>
+        </div>
+        <div class="flex flex-col items-end z-10">
+          <div class="flex items-center gap-xs">
+            <span class="font-math-display text-math-display text-primary font-bold">2,140</span>
+            <span class="material-symbols-outlined text-primary text-sm">calculate</span>
+          </div>
+          <span class="text-[10px] text-primary/60">+12 this session</span>
+        </div>
+      </div>
+      <!-- Rank Item 6 onwards... -->
+      <div
+        class="math-glass rounded-lg p-md flex items-center justify-between opacity-70 hover:opacity-100 transition-all cursor-pointer group">
+        <div class="flex items-center gap-md">
+          <span class="font-headline-sm text-headline-sm text-outline group-hover:text-primary w-6">6</span>
+          <div class="w-10 h-10 rounded-full border border-white/10 overflow-hidden">
+            <img alt="Avatar" class="w-full h-full object-cover"
+              data-alt="A portrait-style avatar of a digital mathematician with a sharp, academic look. The color palette is restricted to deep blacks and vibrant neon blue highlights. He is positioned in a modern workspace filled with holographic mathematical charts and graphs. The lighting is soft but directed, creating a premium and focused atmosphere."
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxX9zh6O-OhAm79FTOxznADwefT8ypp5G3eqZGlLRZUMnbvOgC4HgOYEjK9WDg7ihWclh2f2M8Ha52H7WSmajUVt2SOp3Ef0ISjyMr4MaLK6Mlhlv9qOf1s9g9gG2B3PQXrUv4nGwzshdHGQ8L_AqOdBwA1lsTKQJKicWyfFUzPm5OzyN2OTXhgV-uGrq-m6K1vzugpAj_V8o_A080I7IUvpffFp3QVskTupOKBAmT_bXbfAHT3La6UfL4WZX0Zn8KGZm4P2LKBOc" />
+          </div>
+          <div>
+            <p class="font-body-md text-body-md font-bold text-on-surface">Zeta_Hunter</p>
+            <span
+              class="text-[10px] px-2 py-0.5 rounded bg-surface-variant text-on-surface-variant font-bold border border-white/5">Calculus
+              Pro</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-xs">
+          <span class="font-math-display text-math-display text-outline">7,950</span>
+          <span class="material-symbols-outlined text-outline text-sm">grid_view</span>
+        </div>
+      </div>
+    </div>
+  </main>
+  <!-- Desktop Bottom Nav -->
+  <nav
+    class="hidden md:flex fixed bottom-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-t border-white/10 justify-around items-center h-16 px-gutter">
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/">
+      <span class="material-symbols-outlined">dynamic_feed</span>
+      <span class="font-label-caps text-[10px]">Feed</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/groups/">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="font-label-caps text-[10px]">Groups</span>
+    </a>
+    <div class="relative -top-4">
+      <a href="/studio/"
+        class="w-14 h-14 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg neon-glow active:scale-95 transition-transform duration-200">
+        <span class="material-symbols-outlined text-3xl">function</span>
+      </a>
+    </div>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/library/">
+      <span class="material-symbols-outlined">menu_book</span>
+      <span class="font-label-caps text-[10px]">Library</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/tutor/">
+      <span class="material-symbols-outlined">smart_toy</span>
+      <span class="font-label-caps text-[10px]">Mathify AI</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/profile/">
+      <span class="material-symbols-outlined">person</span>
+      <span class="font-label-caps text-[10px]">Profile</span>
+    </a>
+  </nav>
+
+  <!-- Mobile Bottom NavBar (dropdown style) -->
+  <div class="md:hidden fixed bottom-0 w-full z-50 flex flex-col items-center">
+    <!-- The upward dropdown menu -->
+    <div id="mobile-nav-dropdown"
+      class="hidden w-[92%] mb-2 glass-panel rounded-xl shadow-xl p-xs flex flex-col gap-xs border border-white/10 text-on-surface backdrop-blur-xl bg-surface/90">
+      <a href="/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">dynamic_feed</span>
+        <span class="text-sm">Feed</span>
+      </a>
+      <a href="/groups/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">groups</span>
+        <span class="text-sm">Groups</span>
+      </a>
+      <a href="/studio/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">function</span>
+        <span class="text-sm">Studio</span>
+      </a>
+      <a href="/library/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">menu_book</span>
+        <span class="text-sm">Library</span>
+      </a>
+      <a href="/tutor/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">smart_toy</span>
+        <span class="text-sm">Mathify AI</span>
+      </a>
+      <a href="/profile/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">person</span>
+        <span class="text-sm">Profile</span>
+      </a>
+    </div>
+
+    <!-- The main compact bottom bar -->
+    <button id="mobile-nav-toggle"
+      class="w-full bg-surface/90 backdrop-blur-xl border-t border-white/10 flex justify-between items-center h-12 px-margin-mobile text-on-surface cursor-pointer focus:outline-none">
+      <div class="flex items-center gap-sm text-primary">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+        <span class="text-xs font-bold uppercase tracking-wider">Leaderboard</span>
+      </div>
+      <div class="flex items-center gap-xs text-outline">
+        <span class="text-[10px] font-semibold">Menu</span>
+        <span class="material-symbols-outlined text-md transition-transform duration-200"
+          id="mobile-nav-chevron">expand_less</span>
+      </div>
+    </button>
+  </div>
+  <script>
+    // Smooth reveal animation for list items
+    document.addEventListener('DOMContentLoaded', () => {
+      const items = document.querySelectorAll('.math-glass');
+      items.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          item.style.transition = 'all 0.6s cubic-bezier(0.22, 1, 0.36, 1)';
+          item.style.opacity = '1';
+          item.style.transform = 'translateY(0)';
+        }, 100 + (index * 50));
+      });
+    });
+  </script>
+
+  <script>
+    // ── Mathify API ────────────────────────────────────────────────────────────────
+    const API = {
+      getAccess: () => localStorage.getItem('mx_access'),
+      getRefresh: () => localStorage.getItem('mx_refresh'),
+      setTokens(a, r) {
+        localStorage.setItem('mx_access', a);
+        if (r) localStorage.setItem('mx_refresh', r);
+      },
+      clearTokens() {
+        localStorage.removeItem('mx_access');
+        localStorage.removeItem('mx_refresh');
+      },
+      async refresh() {
+        const r = this.getRefresh();
+        if (!r) return false;
+        const res = await fetch('/api/auth/token/refresh/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh: r })
+        });
+        if (res.ok) { const d = await res.json(); this.setTokens(d.access); return true; }
+        return false;
+      },
+      async req(url, opts = {}) {
+        const headers = {
+          'Content-Type': 'application/json',
+          ...(this.getAccess() ? { 'Authorization': `Bearer ${this.getAccess()}` } : {}),
+          ...(opts.headers || {})
+        };
+        let res = await fetch(url, { ...opts, headers });
+        if (res.status === 401) {
+          const ok = await this.refresh();
+          if (ok) {
+            headers['Authorization'] = `Bearer ${this.getAccess()}`;
+            res = await fetch(url, { ...opts, headers });
+          } else { this.clearTokens(); window.location.href = '/login/'; return null; }
+        }
+        return res;
+      },
+      requireAuth() { if (!this.getAccess()) window.location.href = '/login/'; },
+      logout() { this.clearTokens(); window.location.href = '/login/'; }
+    };
+
+    async function loadNotificationCount() {
+      const res = await API.req('/api/notifications/?unread=true');
+      if (!res) return;
+      const data = await res.json();
+      const count = data.count ?? (data.results ? data.results.length : 0);
+      document.querySelectorAll('[data-notification-bell]').forEach(bell => {
+        const badge = bell.querySelector('[data-notification-count]');
+        if (!badge) return;
+        if (count > 0) {
+          badge.textContent = count > 99 ? '99+' : String(count);
+          badge.classList.remove('hidden');
+        } else {
+          badge.textContent = '';
+          badge.classList.add('hidden');
+        }
+      });
+    }
+  </script>
+
+  <script>
+    API.requireAuth();
+    loadNotificationCount();
+  </script>
+
+  <script>
+    (async () => {
+      API.requireAuth();
+
+      const period = new URLSearchParams(window.location.search).get('period') || 'all_time';
+      const res = await API.req(`/api/rankings/leaderboard/?period=${period}`);
+      if (!res) return;
+      const entries = await res.json();
+
+      const table = document.querySelector('table tbody, [data-leaderboard]');
+      if (!table) return;
+
+      table.innerHTML = entries.slice(0, 20).map((e, i) => `
+    <div class="math-glass rounded-lg p-md flex items-center justify-between hover:bg-surface-container-high transition-colors cursor-pointer group">
+      <div class="flex items-center gap-md">
+        <span class="font-headline-sm text-headline-sm text-outline group-hover:text-primary w-6">${e.rank}</span>
+        <div class="w-10 h-10 rounded-full border border-white/10 overflow-hidden bg-surface-variant flex items-center justify-center">
+          <span class="material-symbols-outlined text-[24px]">account_circle</span>
+        </div>
+        <div>
+          <p class="font-body-md text-body-md font-bold text-on-surface">${e.user.split('@')[0]}</p>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-primary/10 text-primary font-bold border border-primary/20">${e.badge_count} badges</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-xs">
+        <span class="font-math-display text-math-display text-secondary-fixed-dim">${e.points.toLocaleString()}</span>
+        <span class="material-symbols-outlined text-secondary-fixed-dim text-sm">functions</span>
+      </div>
+    </div>`).join('');
+
+      // ── Mobile Navigation Dropdown ───────────────────────────
+      const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+      const mobileNavDropdown = document.getElementById('mobile-nav-dropdown');
+      const mobileNavChevron = document.getElementById('mobile-nav-chevron');
+      if (mobileNavToggle && mobileNavDropdown) {
+        mobileNavToggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isHidden = mobileNavDropdown.classList.toggle('hidden');
+          if (mobileNavChevron) {
+            mobileNavChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+          }
+        });
+        document.addEventListener('click', (e) => {
+          if (mobileNavDropdown && !mobileNavDropdown.contains(e.target) && e.target !== mobileNavToggle && !mobileNavToggle.contains(e.target)) {
+            mobileNavDropdown.classList.add('hidden');
+            if (mobileNavChevron) mobileNavChevron.style.transform = 'rotate(0deg)';
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

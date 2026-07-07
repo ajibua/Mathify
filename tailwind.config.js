@@ -1,0 +1,115 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: 'class',
+  content: ['./templates/**/*.html'],
+  theme: {
+    extend: {
+      colors: {
+        // Surfaces
+        'surface':                    '#131313',
+        'surface-dim':                '#131313',
+        'surface-bright':             '#393939',
+        'surface-variant':            '#353534',
+        'surface-container-lowest':   '#0e0e0e',
+        'surface-container-low':      '#1c1b1b',
+        'surface-container':          '#201f1f',
+        'surface-container-high':     '#2a2a2a',
+        'surface-container-highest':  '#353534',
+        'surface-tint':               '#00daf8',
+        'on-surface':                 '#e5e2e1',
+        'on-surface-variant':         '#bac9cd',
+        'inverse-surface':            '#e5e2e1',
+        'inverse-on-surface':         '#313030',
+        // Outline
+        'outline':                    '#859397',
+        'outline-variant':            '#3b494c',
+        // Primary – Electric Blue
+        'primary':                    '#baf2ff',
+        'on-primary':                 '#00363f',
+        'primary-container':          '#00e0ff',
+        'on-primary-container':       '#005f6d',
+        'inverse-primary':            '#006877',
+        'primary-fixed':              '#a5eeff',
+        'primary-fixed-dim':          '#00daf8',
+        'on-primary-fixed':           '#001f25',
+        'on-primary-fixed-variant':   '#004e5a',
+        // Secondary – Lime Green
+        'secondary':                  '#ffffff',
+        'on-secondary':               '#223600',
+        'secondary-container':        '#a9f900',
+        'on-secondary-container':     '#496f00',
+        'secondary-fixed':            '#a9f900',
+        'secondary-fixed-dim':        '#94db00',
+        'on-secondary-fixed':         '#121f00',
+        'on-secondary-fixed-variant': '#334f00',
+        // Tertiary – Purple
+        'tertiary':                   '#efe4ff',
+        'on-tertiary':                '#3c0090',
+        'tertiary-container':         '#d6c3ff',
+        'on-tertiary-container':      '#6900f1',
+        'tertiary-fixed':             '#e9ddff',
+        'tertiary-fixed-dim':         '#d1bcff',
+        'on-tertiary-fixed':          '#23005b',
+        'on-tertiary-fixed-variant':  '#5700c9',
+        // Error
+        'error':                      '#ffb4ab',
+        'on-error':                   '#690005',
+        'error-container':            '#93000a',
+        'on-error-container':         '#ffdad6',
+        // Background
+        'background':                 '#131313',
+        'on-background':              '#e5e2e1',
+      },
+
+      spacing: {
+        'unit':           '4px',
+        'xs':             '4px',
+        'sm':             '8px',
+        'md':             '16px',
+        'lg':             '24px',
+        'xl':             '40px',
+        'gutter':         '16px',
+        'margin-mobile':  '16px',
+        'margin-desktop': '64px',
+      },
+
+      borderRadius: {
+        DEFAULT: '0.25rem',
+        'sm':    '0.25rem',
+        'lg':    '0.5rem',
+        'xl':    '0.75rem',
+        '2xl':   '1rem',
+        '3xl':   '1.5rem',
+        'full':  '9999px',
+      },
+
+      fontFamily: {
+        'headline-lg':        ['Space Grotesk', 'sans-serif'],
+        'headline-lg-mobile': ['Space Grotesk', 'sans-serif'],
+        'headline-md':        ['Space Grotesk', 'sans-serif'],
+        'headline-sm':        ['Space Grotesk', 'sans-serif'],
+        'body-lg':            ['Geist', 'sans-serif'],
+        'body-md':            ['Geist', 'sans-serif'],
+        'body-sm':            ['Geist', 'sans-serif'],
+        'label-caps':         ['Geist', 'sans-serif'],
+        'math-display':       ['Geist', 'sans-serif'],
+      },
+
+      fontSize: {
+        'headline-lg':        ['40px', { lineHeight:'1.1', letterSpacing:'-0.02em', fontWeight:'700' }],
+        'headline-lg-mobile': ['32px', { lineHeight:'1.1', letterSpacing:'-0.02em', fontWeight:'700' }],
+        'headline-md':        ['24px', { lineHeight:'1.2', fontWeight:'600' }],
+        'headline-sm':        ['20px', { lineHeight:'1.2', fontWeight:'600' }],
+        'body-lg':            ['18px', { lineHeight:'1.6', fontWeight:'400' }],
+        'body-md':            ['16px', { lineHeight:'1.6', fontWeight:'400' }],
+        'body-sm':            ['14px', { lineHeight:'1.5', fontWeight:'400' }],
+        'label-caps':         ['12px', { lineHeight:'1',   letterSpacing:'0.05em', fontWeight:'700' }],
+        'math-display':       ['20px', { lineHeight:'1.4', letterSpacing:'0.02em', fontWeight:'500' }],
+      },
+    },
+  },
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/container-queries'),
+  ],
+}

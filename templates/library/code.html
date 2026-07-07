@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist:wght@100;300;400;500;700;900&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Mathify | Library</title>
+  <style>
+    body {
+      background-color: #000000;
+      color: #e5e2e1;
+      font-family: 'Geist', sans-serif;
+    }
+
+    .glass-panel {
+      background: rgba(18, 18, 18, 0.7);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .neon-glow-primary {
+      box-shadow: 0 0 15px rgba(186, 242, 255, 0.2);
+    }
+
+    .math-accent-border {
+      border-left: 3px solid #a9f900;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+  <style>
+    body {
+      min-height: 100dvh;
+    }
+  </style>
+</head>
+
+<body class="bg-black overflow-x-hidden">
+  <!-- TopAppBar -->
+  <header
+    class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-margin-mobile h-16">
+    <div class="flex items-center gap-md">
+      <div
+        class="w-10 h-10 rounded-full overflow-hidden border border-primary/20 cursor-pointer active:scale-95 duration-150">
+        <img alt="user_profile_avatar" class="w-full h-auto"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNR6_bbp4LGM-l3X_VFqQX61HdJmx8nlSec62cyunD8Pywhtro8nXR36wJFs_b4NtVZvhAQXINWvpxgTaA9hivWo0aVSYsRrRB6W4lJkBQB4Mwe5wAM_cxF_hLRWG63cCe-0bPYkU9zaSUPYrgctciWQZRrNZc7sUqG1ERnb18j4AEAvRNLyKrbD_S5aEnC1zYhXZZrq_Qq4pP88iIREZpSLhy6j868wUBIhEzf7thaj5qEcE-5LxuTd8BqpPpst_A47n9Gx0pw2k" />
+      </div>
+      <span
+        class="font-headline-md text-headline-md font-bold tracking-tighter text-primary dark:text-primary-fixed-dim">Mathify</span>
+    </div>
+    <div class="flex items-center gap-md relative">
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150"
+        data-search-btn>search</button>
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
+        data-notification-bell>
+        notifications
+        <span
+          class="hidden absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold items-center justify-center"
+          data-notification-count></span>
+      </button>
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
+        data-profile-menu-btn>
+        account_circle
+      </button>
+      <div id="notification-dropdown"
+        class="hidden absolute right-0 w-80 glass-panel rounded-xl shadow-xl p-md flex flex-col gap-sm max-h-[400px] border border-white/10 text-on-surface z-50"
+        style="top: 52px;">
+        <div class="flex items-center justify-between border-b border-white/10 pb-xs">
+          <span class="font-bold text-body-sm text-primary">Notifications</span>
+          <button class="text-[10px] text-outline hover:text-primary transition-colors"
+            id="clear-notifications-btn">Mark all read</button>
+        </div>
+        <div class="overflow-y-auto flex flex-col gap-sm flex-1 pr-xs" id="notifications-list-container"
+          style="max-height: 300px;">
+          <div class="text-[12px] text-outline text-center py-md">Loading notifications...</div>
+        </div>
+      </div>
+      <div id="profile-dropdown"
+        class="hidden absolute right-0 w-48 glass-panel rounded-xl shadow-xl p-sm flex flex-col gap-sm border border-white/10 text-on-surface z-50"
+        style="top: 52px;">
+        <div class="flex flex-col gap-xs" id="profile-dropdown-container">
+          <!-- Dynamic dropdown menu options will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </header>
+  <main class="pt-20 pb-24 px-margin-mobile max-w-7xl mx-auto">
+    <!-- Search Bar (Toggleable) -->
+    <section class="mb-lg hidden" id="search-section">
+      <div
+        class="relative flex items-center bg-surface-container-high rounded-xl border border-white/5 px-md py-sm group focus-within:border-primary/50 transition-all">
+        <span class="material-symbols-outlined text-outline mr-sm">search</span>
+        <input id="library-search-input"
+          class="bg-transparent border-none focus:ring-0 text-body-md w-full placeholder:text-outline/50 focus:outline-none"
+          placeholder="Search library resources..." type="text" />
+        <div class="flex gap-xs">
+          <span
+            class="px-xs py-1 rounded bg-surface-container-lowest text-[10px] text-outline border border-white/5">⌘K</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Search & Filter Section -->
+    <section class="mb-xl">
+      <h1
+        class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-md text-primary">
+        Library</h1>
+      <div class="flex gap-sm overflow-x-auto scrollbar-hide pb-xs" id="category-filters">
+        <button
+          class="px-md py-xs rounded-full font-label-caps text-label-caps whitespace-nowrap bg-primary text-on-primary font-bold duration-150"
+          data-filter="all">All Knowledge</button>
+        <button
+          class="px-md py-xs rounded-full font-label-caps text-label-caps whitespace-nowrap bg-surface-container text-on-surface-variant border border-white/5 hover:border-primary/50 transition-colors duration-150"
+          data-filter="saved">Saved Proofs</button>
+        <button
+          class="px-md py-xs rounded-full font-label-caps text-label-caps whitespace-nowrap bg-surface-container text-on-surface-variant border border-white/5 hover:border-primary/50 transition-colors duration-150"
+          data-filter="video">Lectures</button>
+        <button
+          class="px-md py-xs rounded-full font-label-caps text-label-caps whitespace-nowrap bg-surface-container text-on-surface-variant border border-white/5 hover:border-primary/50 transition-colors duration-150"
+          data-filter="formula_sheet">Cheat Sheets</button>
+        <button
+          class="px-md py-xs rounded-full font-label-caps text-label-caps whitespace-nowrap bg-surface-container text-on-surface-variant border border-white/5 hover:border-primary/50 transition-colors duration-150"
+          data-filter="problem_set">Datasets</button>
+      </div>
+    </section>
+
+    <!-- Global Library Resources -->
+    <section class="mb-xl">
+      <div class="flex justify-between items-end mb-md">
+        <h2 class="font-headline-sm text-headline-sm text-secondary" id="grid-title">All Library Resources</h2>
+      </div>
+      <div id="library-resources-grid" class="grid grid-cols-1 md:grid-cols-3 gap-md">
+        <div class="bg-surface-container rounded-xl p-md animate-pulse h-32"></div>
+        <div class="bg-surface-container rounded-xl p-md animate-pulse h-32"></div>
+        <div class="bg-surface-container rounded-xl p-md animate-pulse h-32"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Desktop Bottom Nav -->
+  <nav
+    class="hidden md:flex fixed bottom-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-t border-white/10 justify-around items-center h-16 px-gutter">
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/">
+      <span class="material-symbols-outlined">dynamic_feed</span>
+      <span class="font-label-caps text-[10px]">Feed</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/groups/">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="font-label-caps text-[10px]">Groups</span>
+    </a>
+    <div class="relative -top-4">
+      <a href="/studio/"
+        class="w-14 h-14 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg neon-glow active:scale-95 transition-transform duration-200">
+        <span class="material-symbols-outlined text-3xl">function</span>
+      </a>
+    </div>
+    <a class="flex flex-col items-center justify-center text-primary relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-primary after:rounded-full duration-200"
+      href="/library/">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+      <span class="font-label-caps text-[10px]">Library</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/tutor/">
+      <span class="material-symbols-outlined">smart_toy</span>
+      <span class="font-label-caps text-[10px]">Mathify AI</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/profile/">
+      <span class="material-symbols-outlined">person</span>
+      <span class="font-label-caps text-[10px]">Profile</span>
+    </a>
+  </nav>
+
+  <!-- Mobile Bottom NavBar (dropdown style) -->
+  <div class="md:hidden fixed bottom-0 w-full z-50 flex flex-col items-center">
+    <!-- The upward dropdown menu -->
+    <div id="mobile-nav-dropdown"
+      class="hidden w-[92%] mb-2 glass-panel rounded-xl shadow-xl p-xs flex flex-col gap-xs border border-white/10 text-on-surface backdrop-blur-xl bg-surface/90">
+      <a href="/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">dynamic_feed</span>
+        <span class="text-sm">Feed</span>
+      </a>
+      <a href="/groups/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">groups</span>
+        <span class="text-sm">Groups</span>
+      </a>
+      <a href="/studio/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">function</span>
+        <span class="text-sm">Studio</span>
+      </a>
+      <a href="/library/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-primary font-semibold">
+        <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+        <span class="text-sm">Library</span>
+      </a>
+      <a href="/tutor/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">smart_toy</span>
+        <span class="text-sm">Mathify AI</span>
+      </a>
+      <a href="/profile/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">person</span>
+        <span class="text-sm">Profile</span>
+      </a>
+    </div>
+
+    <!-- The main compact bottom bar -->
+    <button id="mobile-nav-toggle"
+      class="w-full bg-surface/90 backdrop-blur-xl border-t border-white/10 flex justify-between items-center h-12 px-margin-mobile text-on-surface cursor-pointer focus:outline-none">
+      <div class="flex items-center gap-sm text-primary">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+        <span class="text-xs font-bold uppercase tracking-wider">Library</span>
+      </div>
+      <div class="flex items-center gap-xs text-outline">
+        <span class="text-[10px] font-semibold">Menu</span>
+        <span class="material-symbols-outlined text-md transition-transform duration-200"
+          id="mobile-nav-chevron">expand_less</span>
+      </div>
+    </button>
+  </div>
+
+  <script>
+    // ── Mathify API ────────────────────────────────────────────────────────────────
+    const API = {
+      getAccess: () => localStorage.getItem('mx_access'),
+      getRefresh: () => localStorage.getItem('mx_refresh'),
+      getCurrentUserId() {
+        const token = this.getAccess();
+        if (!token) return null;
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          return payload.user_id;
+        } catch (e) {
+          return null;
+        }
+      },
+      setTokens(a, r) {
+        localStorage.setItem('mx_access', a);
+        if (r) localStorage.setItem('mx_refresh', r);
+      },
+      clearTokens() {
+        localStorage.removeItem('mx_access');
+        localStorage.removeItem('mx_refresh');
+      },
+      async refresh() {
+        const r = this.getRefresh();
+        if (!r) return false;
+        const res = await fetch('/api/auth/token/refresh/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh: r })
+        });
+        if (res.ok) { const d = await res.json(); this.setTokens(d.access); return true; }
+        return false;
+      },
+      async req(url, opts = {}) {
+        const headers = {
+          'Content-Type': 'application/json',
+          ...(this.getAccess() ? { 'Authorization': `Bearer ${this.getAccess()}` } : {}),
+          ...(opts.headers || {})
+        };
+        let res = await fetch(url, { ...opts, headers });
+        if (res.status === 401) {
+          const ok = await this.refresh();
+          if (ok) {
+            headers['Authorization'] = `Bearer ${this.getAccess()}`;
+            res = await fetch(url, { ...opts, headers });
+          } else { this.clearTokens(); window.location.href = '/login/'; return null; }
+        }
+        return res;
+      },
+      requireAuth() { if (!this.getAccess()) window.location.href = '/login/'; },
+      logout() { this.clearTokens(); window.location.href = '/login/'; }
+    };
+
+    // ── Custom Modal Dialog System ───────────────────────────
+    function showCustomAlert(message, title = 'Notification') {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.innerHTML = `
+      <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+          <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+          <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+            <span class="material-symbols-outlined text-md">close</span>
+          </button>
+        </div>
+        <div class="text-body-md text-on-surface-variant leading-relaxed">${message}</div>
+        <div class="flex justify-end mt-sm">
+          <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm">OK</button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(overlay);
+        const card = overlay.querySelector('.glass-panel');
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+        });
+
+        const close = () => {
+          overlay.classList.add('opacity-0');
+          card.classList.add('scale-95');
+          setTimeout(() => {
+            overlay.remove();
+            resolve();
+          }, 300);
+        };
+
+        overlay.querySelector('.close-modal-btn').onclick = close;
+        overlay.querySelector('.confirm-modal-btn').onclick = close;
+      });
+    }
+
+    function showCustomConfirm(message, title = 'Confirmation') {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.innerHTML = `
+      <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+          <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+          <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+            <span class="material-symbols-outlined text-md">close</span>
+          </button>
+        </div>
+        <div class="text-body-md text-on-surface-variant leading-relaxed">${message}</div>
+        <div class="flex gap-sm justify-end mt-sm">
+          <button class="cancel-modal-btn px-md py-sm border border-outline-variant/30 text-on-surface font-semibold rounded-lg text-sm transition-colors hover:bg-white/5 active:scale-95 duration-150">Cancel</button>
+          <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm">Confirm</button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(overlay);
+        const card = overlay.querySelector('.glass-panel');
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+        });
+
+        const dismiss = (value) => {
+          overlay.classList.add('opacity-0');
+          card.classList.add('scale-95');
+          setTimeout(() => {
+            overlay.remove();
+            resolve(value);
+          }, 300);
+        };
+
+        overlay.querySelector('.close-modal-btn').onclick = () => dismiss(false);
+        overlay.querySelector('.cancel-modal-btn').onclick = () => dismiss(false);
+        overlay.querySelector('.confirm-modal-btn').onclick = () => dismiss(true);
+      });
+    }
+
+    // Override global alert/confirm
+    window.alert = showCustomAlert;
+    window.confirm = showCustomConfirm;
+
+    async function loadNotificationCount() {
+      const res = await API.req('/api/notifications/?unread=true');
+      if (!res) return;
+      const data = await res.json();
+      const count = data.count ?? (data.results ? data.results.length : 0);
+      document.querySelectorAll('[data-notification-bell]').forEach(bell => {
+        const badge = bell.querySelector('[data-notification-count]');
+        if (!badge) return;
+        if (count > 0) {
+          badge.textContent = count > 99 ? '99+' : String(count);
+          badge.classList.remove('hidden');
+        } else {
+          badge.textContent = '';
+          badge.classList.add('hidden');
+        }
+      });
+    }
+  </script>
+
+  <script>
+    API.requireAuth();
+    loadNotificationCount();
+  </script>
+
+  <script>
+    (async () => {
+      API.requireAuth();
+
+      let activeFilter = 'all';
+      let loadedResources = [];
+
+      const grid = document.getElementById('library-resources-grid');
+      const searchInput = document.getElementById('library-search-input');
+      const searchSection = document.getElementById('search-section');
+      const searchBtn = document.querySelector('[data-search-btn]');
+
+      const typeIcon = {
+        note: 'description',
+        formula_sheet: 'function',
+        video: 'play_circle',
+        problem_set: 'quiz',
+        textbook: 'menu_book'
+      };
+
+      const filterTitles = {
+        all: 'All Library Resources',
+        saved: 'Saved Proofs',
+        video: 'Video Lectures',
+        formula_sheet: 'Formula Cheat Sheets',
+        problem_set: 'Problem Sets & Datasets'
+      };
+
+      // Render resources list inside grid
+      function renderResources() {
+        if (!grid) return;
+        if (!loadedResources.length) {
+          grid.innerHTML = `
+        <div class="col-span-full text-outline text-sm text-center py-xl">No resources found matching criteria.</div>
+      `;
+          return;
+        }
+
+        grid.innerHTML = loadedResources.map(r => {
+          const isBookmarked = !!r.is_bookmarked;
+          return `
+      <div class="bg-surface-container-high rounded-2xl p-lg flex flex-col gap-sm hover:bg-surface-bright transition-all cursor-pointer relative group duration-200 border border-white/5 hover:border-primary/30" data-resource-id="${r.id}" style="transform: translateY(0px);">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-xs">
+            <span class="material-symbols-outlined text-primary-fixed-dim text-xl">${typeIcon[r.resource_type] || 'article'}</span>
+            <span class="font-label-caps text-label-caps text-outline uppercase">${r.resource_type.replace('_', ' ')}</span>
+          </div>
+          <button class="material-symbols-outlined text-primary hover:opacity-85 active:scale-90 transition-transform duration-100 p-1 rounded-full hover:bg-white/5" data-bookmark-btn style="font-variation-settings: 'FILL' ${isBookmarked ? 1 : 0};">
+            bookmark
+          </button>
+        </div>
+        <h3 class="font-headline-sm text-headline-sm text-on-surface line-clamp-2 mt-xs font-semibold">${r.title}</h3>
+        <p class="font-body-sm text-body-sm text-outline line-clamp-2">${r.description || 'No description provided.'}</p>
+        <div class="flex justify-between items-center mt-auto pt-xs border-t border-white/5">
+          <p class="font-label-caps text-label-caps text-outline truncate max-w-[120px]">${r.uploaded_by}</p>
+          <div class="flex items-center gap-xs text-[12px] text-outline">
+            <span class="material-symbols-outlined text-[16px]">bookmark</span>
+            <span data-bookmark-count>${r.bookmark_count || 0}</span>
+          </div>
+        </div>
+      </div>`;
+        }).join('');
+
+        // Apply micro-interactions for dynamic cards
+        grid.querySelectorAll('[data-resource-id]').forEach(card => {
+          card.addEventListener('mouseenter', () => {
+            card.style.transform = 'translateY(-4px)';
+          });
+          card.addEventListener('mouseleave', () => {
+            card.style.transform = 'translateY(0px)';
+          });
+        });
+      }
+
+      // Load resources from API
+      async function loadResources() {
+        const params = new URLSearchParams();
+        if (activeFilter === 'saved') {
+          params.set('bookmarked', 'true');
+        } else if (activeFilter !== 'all') {
+          params.set('type', activeFilter);
+        }
+
+        if (searchInput && searchInput.value.trim()) {
+          params.set('q', searchInput.value.trim());
+        }
+
+        if (grid) {
+          grid.innerHTML = `
+        <div class="bg-surface-container rounded-xl p-md animate-pulse h-32"></div>
+        <div class="bg-surface-container rounded-xl p-md animate-pulse h-32"></div>
+        <div class="bg-surface-container rounded-xl p-md animate-pulse h-32"></div>
+      `;
+        }
+
+        const url = `/api/library/resources/${params.toString() ? `?${params.toString()}` : ''}`;
+        const res = await API.req(url);
+        if (!res) return;
+        const data = await res.json();
+        loadedResources = data.results || data || [];
+        renderResources();
+      }
+
+      // Toggle search bar visibility
+      if (searchBtn && searchInput && searchSection) {
+        searchBtn.addEventListener('click', () => {
+          searchSection.classList.toggle('hidden');
+          if (!searchSection.classList.contains('hidden')) {
+            searchInput.focus();
+          }
+        });
+      }
+
+      // Search input debouncing
+      if (searchInput) {
+        let timer;
+        searchInput.addEventListener('input', () => {
+          clearTimeout(timer);
+          timer = setTimeout(loadResources, 300);
+        });
+      }
+
+      // Category filter buttons
+      const filtersContainer = document.getElementById('category-filters');
+      if (filtersContainer) {
+        filtersContainer.addEventListener('click', async (e) => {
+          const btn = e.target.closest('[data-filter]');
+          if (!btn) return;
+
+          activeFilter = btn.getAttribute('data-filter');
+
+          // Update button visual active state
+          filtersContainer.querySelectorAll('[data-filter]').forEach(b => {
+            if (b === btn) {
+              b.className = "px-md py-xs rounded-full font-label-caps text-label-caps whitespace-nowrap bg-primary text-on-primary font-bold duration-150";
+            } else {
+              b.className = "px-md py-xs rounded-full font-label-caps text-label-caps whitespace-nowrap bg-surface-container text-on-surface-variant border border-white/5 hover:border-primary/50 transition-colors duration-150";
+            }
+          });
+
+          // Update grid title
+          const gridTitle = document.getElementById('grid-title');
+          if (gridTitle) {
+            gridTitle.textContent = filterTitles[activeFilter] || 'Library Resources';
+          }
+
+          await loadResources();
+        });
+      }
+
+      // Grid click delegations (Bookmarks & Resource opening)
+      if (grid) {
+        grid.addEventListener('click', async (e) => {
+          const bookmarkBtn = e.target.closest('[data-bookmark-btn]');
+          const card = e.target.closest('[data-resource-id]');
+          if (!card) return;
+
+          const resourceId = card.getAttribute('data-resource-id');
+
+          if (bookmarkBtn) {
+            e.stopPropagation();
+            const res = await API.req(`/api/library/resources/${resourceId}/bookmark/`, { method: 'POST' });
+            if (!res) return;
+            const data = await res.json();
+
+            // Find and update loadedResources item state locally
+            const resObj = loadedResources.find(r => String(r.id) === String(resourceId));
+            if (resObj) {
+              resObj.is_bookmarked = data.bookmarked;
+              resObj.bookmark_count = data.bookmarked ? (resObj.bookmark_count || 0) + 1 : Math.max(0, (resObj.bookmark_count || 0) - 1);
+            }
+
+            // If we are currently viewing 'Saved Proofs' and we unbookmarked, we remove it from grid
+            if (activeFilter === 'saved' && !data.bookmarked) {
+              card.remove();
+              if (!grid.querySelector('[data-resource-id]')) {
+                grid.innerHTML = `<div class="col-span-full text-outline text-sm text-center py-xl">No saved proofs found.</div>`;
+              }
+            } else {
+              const countEl = card.querySelector('[data-bookmark-count]');
+              if (countEl && resObj) {
+                countEl.textContent = String(resObj.bookmark_count);
+              }
+              bookmarkBtn.style.fontVariationSettings = `'FILL' ${data.bookmarked ? 1 : 0}`;
+            }
+            return;
+          }
+
+          // Handle card click to open url or file
+          const resObj = loadedResources.find(r => String(r.id) === String(resourceId));
+          if (resObj) {
+            const destination = resObj.file || resObj.url;
+            if (destination) {
+              window.open(destination, '_blank');
+            }
+          }
+        });
+      }
+
+      // Ctrl+K / Cmd+K search toggling
+      document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          if (searchSection && searchInput) {
+            searchSection.classList.remove('hidden');
+            searchInput.focus();
+          }
+        }
+      });
+
+      // ── Header Notifications & Profile Menu Interactivity ───────────────────────
+      const bell = document.querySelector('[data-notification-bell]');
+      const dropdown = document.getElementById('notification-dropdown');
+      const profileBtn = document.querySelector('[data-profile-menu-btn]');
+      const profileDropdown = document.getElementById('profile-dropdown');
+      const profileDropdownContainer = document.getElementById('profile-dropdown-container');
+
+      async function loadNotificationsList() {
+        const container = document.getElementById('notifications-list-container');
+        if (!container) return;
+        const res = await API.req('/api/notifications/');
+        if (!res) return;
+        const data = await res.json();
+        const notifications = data.results || data || [];
+        if (!notifications.length) {
+          container.innerHTML = `<div class="text-[12px] text-outline text-center py-md">No notifications yet.</div>`;
+          return;
+        }
+        container.innerHTML = notifications.map(n => {
+          const actorName = n.actor ? n.actor.split('@')[0] : 'Someone';
+          return `
+        <div class="p-sm rounded-lg bg-surface-container/50 hover:bg-surface-container border border-white/5 flex flex-col gap-xs transition-colors cursor-pointer ${n.is_read ? 'opacity-60' : ''}" data-notification-id="${n.id}">
+          <div class="flex justify-between items-start gap-xs">
+            <p class="text-[11px] text-on-surface">
+              <span class="text-primary-fixed-dim font-bold">${actorName}</span> ${n.verb}
+            </p>
+            ${!n.is_read ? '<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed shrink-0 mt-1" data-unread-indicator></span>' : ''}
+          </div>
+          <span class="text-[9px] text-outline">${new Date(n.created_at).toLocaleDateString()}</span>
+        </div>
+      `;
+        }).join('');
+      }
+
+      function renderProfileDropdown() {
+        if (!profileDropdownContainer) return;
+        const isLoggedIn = !!API.getAccess();
+        if (isLoggedIn) {
+          profileDropdownContainer.innerHTML = `
+        <a href="/profile/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+          <span class="material-symbols-outlined text-[16px]">account_circle</span>
+          <span>View Profile</span>
+        </a>
+        <button id="auth-logout-btn" class="w-full text-left p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-error">
+          <span class="material-symbols-outlined text-[16px]">logout</span>
+          <span>Sign Out</span>
+        </button>
+      `;
+          const logoutBtn = document.getElementById('auth-logout-btn');
+          if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+              if (await window.confirm('Are you sure you want to sign out?', 'Sign Out')) {
+                API.logout();
+              }
+            });
+          }
+        } else {
+          profileDropdownContainer.innerHTML = `
+        <a href="/login/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+          <span class="material-symbols-outlined text-[16px]">login</span>
+          <span>Sign In</span>
+        </a>
+        <a href="/register/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-primary-fixed-dim">
+          <span class="material-symbols-outlined text-[16px]">person_add</span>
+          <span>Sign Up</span>
+        </a>
+      `;
+        }
+      }
+
+      if (profileBtn && profileDropdown) {
+        profileBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (dropdown) dropdown.classList.add('hidden');
+          profileDropdown.classList.toggle('hidden');
+          if (!profileDropdown.classList.contains('hidden')) {
+            renderProfileDropdown();
+          }
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!profileDropdown.contains(e.target) && e.target !== profileBtn && !profileBtn.contains(e.target)) {
+            profileDropdown.classList.add('hidden');
+          }
+        });
+      }
+
+      if (bell && dropdown) {
+        bell.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (profileDropdown) profileDropdown.classList.add('hidden');
+          dropdown.classList.toggle('hidden');
+          if (!dropdown.classList.contains('hidden')) {
+            await loadNotificationsList();
+          }
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!dropdown.contains(e.target) && e.target !== bell && !bell.contains(e.target)) {
+            dropdown.classList.add('hidden');
+          }
+        });
+
+        const listContainer = document.getElementById('notifications-list-container');
+        if (listContainer) {
+          listContainer.addEventListener('click', async (e) => {
+            const item = e.target.closest('[data-notification-id]');
+            if (!item) return;
+            const id = item.getAttribute('data-notification-id');
+            const res = await API.req(`/api/notifications/${id}/read/`, { method: 'POST' });
+            if (res && res.ok) {
+              item.classList.add('opacity-60');
+              const indicator = item.querySelector('[data-unread-indicator]');
+              if (indicator) indicator.remove();
+              await loadNotificationCount();
+            }
+          });
+        }
+
+        const clearBtn = document.getElementById('clear-notifications-btn');
+        if (clearBtn) {
+          clearBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const res = await API.req('/api/notifications/read-all/', { method: 'POST' });
+            if (res && res.ok) {
+              await loadNotificationsList();
+              await loadNotificationCount();
+            }
+          });
+        }
+      }
+
+      // Initial load
+      await loadResources();
+
+      // ── Mobile Navigation Dropdown ───────────────────────────
+      const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+      const mobileNavDropdown = document.getElementById('mobile-nav-dropdown');
+      const mobileNavChevron = document.getElementById('mobile-nav-chevron');
+      if (mobileNavToggle && mobileNavDropdown) {
+        mobileNavToggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isHidden = mobileNavDropdown.classList.toggle('hidden');
+          if (mobileNavChevron) {
+            mobileNavChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+          }
+        });
+        document.addEventListener('click', (e) => {
+          if (mobileNavDropdown && !mobileNavDropdown.contains(e.target) && e.target !== mobileNavToggle && !mobileNavToggle.contains(e.target)) {
+            mobileNavDropdown.classList.add('hidden');
+            if (mobileNavChevron) mobileNavChevron.style.transform = 'rotate(0deg)';
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+
+</html>

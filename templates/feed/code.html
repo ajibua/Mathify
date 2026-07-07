@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist:wght@100;300;400;500;700;900&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Mathify | Feed</title>
+  <style>
+    body {
+      background-color: #000000;
+      color: #e5e2e1;
+      font-family: 'Geist', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .math-tok-scroll {
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .math-tok-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .math-tok-card {
+      scroll-snap-align: start;
+    }
+
+    .glass-panel {
+      backdrop-filter: blur(20px);
+      background: rgba(19, 19, 19, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .neon-glow {
+      box-shadow: 0 0 15px rgba(0, 218, 248, 0.2);
+    }
+
+    .math-inset {
+      background: #0e0e0e;
+      border-left: 3px solid #94db00;
+    }
+  </style>
+  <style>
+    body {
+      min-height: 100dvh;
+    }
+  </style>
+</head>
+
+<body class="bg-black text-on-background selection:bg-primary-container selection:text-on-primary-container">
+  <!-- TopAppBar -->
+  <header
+    class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-margin-mobile h-16">
+    <div class="flex items-center gap-md">
+      <div
+        class="w-10 h-10 rounded-full overflow-hidden border border-primary/20 cursor-pointer active:scale-95 duration-150">
+        <img alt="user_profile_avatar" class="w-full h-auto"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNR6_bbp4LGM-l3X_VFqQX61HdJmx8nlSec62cyunD8Pywhtro8nXR36wJFs_b4NtVZvhAQXINWvpxgTaA9hivWo0aVSYsRrRB6W4lJkBQB4Mwe5wAM_cxF_hLRWG63cCe-0bPYkU9zaSUPYrgctciWQZRrNZc7sUqG1ERnb18j4AEAvRNLyKrbD_S5aEnC1zYhXZZrq_Qq4pP88iIREZpSLhy6j868wUBIhEzf7thaj5qEcE-5LxuTd8BqpPpst_A47n9Gx0pw2k" />
+      </div>
+      <span
+        class="font-headline-md text-headline-md font-bold tracking-tighter text-primary dark:text-primary-fixed-dim">Mathify</span>
+    </div>
+    <div class="flex items-center gap-md relative">
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150"
+        data-search-btn>search</button>
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
+        data-notification-bell>
+        notifications
+        <span
+          class="hidden absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold items-center justify-center"
+          data-notification-count></span>
+      </button>
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
+        data-profile-menu-btn>
+        account_circle
+      </button>
+      <div id="notification-dropdown"
+        class="hidden absolute right-0 w-80 glass-panel rounded-xl shadow-xl p-md flex flex-col gap-sm max-h-[400px] border border-white/10 text-on-surface z-50"
+        style="top: 52px;">
+        <div class="flex items-center justify-between border-b border-white/10 pb-xs">
+          <span class="font-bold text-body-sm text-primary">Notifications</span>
+          <button class="text-[10px] text-outline hover:text-primary transition-colors"
+            id="clear-notifications-btn">Mark all read</button>
+        </div>
+        <div class="overflow-y-auto flex flex-col gap-sm flex-1 pr-xs" id="notifications-list-container"
+          style="max-height: 300px;">
+          <div class="text-[12px] text-outline text-center py-md">Loading notifications...</div>
+        </div>
+      </div>
+      <div id="profile-dropdown"
+        class="hidden absolute right-0 w-48 glass-panel rounded-xl shadow-xl p-sm flex flex-col gap-sm border border-white/10 text-on-surface z-50"
+        style="top: 52px;">
+        <div class="flex flex-col gap-xs" id="profile-dropdown-container">
+          <!-- Dynamic dropdown menu options will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </header>
+  <main class="pt-20 pb-12 md:pb-24 max-w-[1200px] mx-auto px-margin-mobile md:px-gutter">
+    <!-- Search & Filter Bar (Mobile Optimized) -->
+    <section class="mb-lg hidden" id="search-section">
+      <div
+        class="relative flex items-center bg-surface-container-high rounded-xl border border-white/5 px-md py-sm group focus-within:border-primary/50 transition-all">
+        <span class="material-symbols-outlined text-outline mr-sm">search</span>
+        <input class="bg-transparent border-none focus:ring-0 text-body-md w-full placeholder:text-outline/50"
+          placeholder="Search Calculus, Group Theory, or Proofs..." type="text" />
+        <div class="flex gap-xs">
+          <span
+            class="px-xs py-1 rounded bg-surface-container-lowest text-[10px] text-outline border border-white/5">⌘K</span>
+        </div>
+      </div>
+    </section>
+    <!-- Create Post -->
+    <section class="mb-lg">
+      <form class="bg-surface-container-high rounded-xl border border-white/5 p-md flex flex-col gap-sm"
+        id="feed-composer">
+        <div class="flex items-center gap-sm">
+          <span class="material-symbols-outlined text-primary">edit</span>
+          <span class="font-label-caps text-label-caps text-outline">Create Post</span>
+        </div>
+        <textarea
+          class="w-full bg-surface-container-lowest rounded-lg border border-outline-variant/30 p-sm text-body-md text-on-surface placeholder:text-outline/50 focus:ring-0"
+          name="content" placeholder="Share a proof, insight, or question..." rows="3"></textarea>
+        <input
+          class="w-full bg-surface-container-lowest rounded-lg border border-outline-variant/30 p-sm text-body-sm text-on-surface placeholder:text-outline/50"
+          name="latex_content" placeholder="LaTeX (optional, required for formula posts)" type="text" />
+        <div class="flex flex-wrap gap-sm">
+          <select
+            class="bg-surface-container-lowest rounded-lg border border-outline-variant/30 px-sm py-xs text-body-sm text-on-surface"
+            name="post_type">
+            <option value="text">Text</option>
+            <option value="formula">Formula</option>
+            <option value="image">Image</option>
+            <option value="video">Video</option>
+          </select>
+          <input class="text-body-sm text-on-surface" name="media" type="file" />
+          <button
+            class="ml-auto px-md py-xs bg-primary-container text-on-primary-container rounded-lg font-bold active:scale-95 transition-transform"
+            type="submit">Post</button>
+        </div>
+      </form>
+    </section>
+    <!-- General Feed Section -->
+    <section class="mb-xl">
+      <div class="flex justify-between items-end mb-md">
+        <h2 class="font-headline-sm text-headline-sm text-primary flex items-center gap-sm">
+          <span class="material-symbols-outlined">forum</span>
+          Global Axioms Feed
+        </h2>
+      </div>
+      <div id="general-posts-feed" class="flex flex-col gap-md">
+        <div class="bg-surface-container p-md rounded-xl animate-pulse h-24"></div>
+        <div class="bg-surface-container p-md rounded-xl animate-pulse h-24"></div>
+      </div>
+    </section>
+
+    <!-- Progress Indicator -->
+    <div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden mb-xl">
+      <div class="h-full bg-gradient-to-r from-primary-fixed-dim to-secondary-fixed-dim w-1/3 neon-glow"></div>
+    </div>
+  </main>
+  <!-- Desktop Bottom Nav -->
+  <nav
+    class="hidden md:flex fixed bottom-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-t border-white/10 justify-around items-center h-16 px-gutter">
+    <a class="flex flex-col items-center justify-center text-primary relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-primary after:rounded-full duration-200"
+      href="/">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dynamic_feed</span>
+      <span class="font-label-caps text-[10px]">Feed</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/groups/">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="font-label-caps text-[10px]">Groups</span>
+    </a>
+    <div class="relative -top-4">
+      <a href="/studio/"
+        class="w-14 h-14 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg neon-glow active:scale-95 transition-transform duration-200">
+        <span class="material-symbols-outlined text-3xl">function</span>
+      </a>
+    </div>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/library/">
+      <span class="material-symbols-outlined">menu_book</span>
+      <span class="font-label-caps text-[10px]">Library</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/tutor/">
+      <span class="material-symbols-outlined">smart_toy</span>
+      <span class="font-label-caps text-[10px]">Mathify AI</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/profile/">
+      <span class="material-symbols-outlined">person</span>
+      <span class="font-label-caps text-[10px]">Profile</span>
+    </a>
+  </nav>
+
+  <!-- Mobile Bottom NavBar (dropdown style) -->
+  <div class="md:hidden fixed bottom-0 w-full z-50 flex flex-col items-center">
+    <!-- The upward dropdown menu -->
+    <div id="mobile-nav-dropdown"
+      class="hidden w-[92%] mb-2 glass-panel rounded-xl shadow-xl p-xs flex flex-col gap-xs border border-white/10 text-on-surface backdrop-blur-xl bg-surface/90">
+      <a href="/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-primary font-semibold">
+        <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">dynamic_feed</span>
+        <span class="text-sm">Feed</span>
+      </a>
+      <a href="/groups/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">groups</span>
+        <span class="text-sm">Groups</span>
+      </a>
+      <a href="/studio/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">function</span>
+        <span class="text-sm">Studio</span>
+      </a>
+      <a href="/library/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">menu_book</span>
+        <span class="text-sm">Library</span>
+      </a>
+      <a href="/tutor/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">smart_toy</span>
+        <span class="text-sm">Mathify AI</span>
+      </a>
+      <a href="/profile/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">person</span>
+        <span class="text-sm">Profile</span>
+      </a>
+    </div>
+
+    <!-- The main compact bottom bar -->
+    <button id="mobile-nav-toggle"
+      class="w-full bg-surface/90 backdrop-blur-xl border-t border-white/10 flex justify-between items-center h-12 px-margin-mobile text-on-surface cursor-pointer focus:outline-none">
+      <div class="flex items-center gap-sm text-primary">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dynamic_feed</span>
+        <span class="text-xs font-bold uppercase tracking-wider">Feed</span>
+      </div>
+      <div class="flex items-center gap-xs text-outline">
+        <span class="text-[10px] font-semibold">Menu</span>
+        <span class="material-symbols-outlined text-md transition-transform duration-200"
+          id="mobile-nav-chevron">expand_less</span>
+      </div>
+    </button>
+  </div>
+  <script>
+    // Micro-interactions for horizontal scroll
+    const scrollContainer = document.querySelector('.math-tok-scroll');
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    scrollContainer.addEventListener('mousedown', (e) => {
+      isDown = true;
+      startX = e.pageX - scrollContainer.offsetLeft;
+      scrollLeft = scrollContainer.scrollLeft;
+    });
+    scrollContainer.addEventListener('mouseleave', () => {
+      isDown = false;
+    });
+    scrollContainer.addEventListener('mouseup', () => {
+      isDown = false;
+    });
+    scrollContainer.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - scrollContainer.offsetLeft;
+      const walk = (x - startX) * 2;
+      scrollContainer.scrollLeft = scrollLeft - walk;
+    });
+
+    // Search bar interaction
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        const searchSection = document.getElementById('search-section');
+        const searchInput = document.querySelector('input[placeholder^="Search"]');
+        if (searchSection && searchInput) {
+          searchSection.classList.remove('hidden');
+          searchInput.focus();
+        }
+      }
+    });
+  </script>
+
+  <script>
+
+    // Mathify API
+    const API = {
+      getAccess: () => localStorage.getItem('mx_access'),
+      getRefresh: () => localStorage.getItem('mx_refresh'),
+      getCurrentUserId() {
+        const token = this.getAccess();
+        if (!token) return null;
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          return payload.user_id;
+        } catch (e) {
+          return null;
+        }
+      },
+      setTokens(a, r) {
+        localStorage.setItem('mx_access', a);
+        if (r) localStorage.setItem('mx_refresh', r);
+      },
+      clearTokens() {
+        localStorage.removeItem('mx_access');
+        localStorage.removeItem('mx_refresh');
+      },
+      async refresh() {
+        const r = this.getRefresh();
+        if (!r) return false;
+        const res = await fetch('/api/auth/token/refresh/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh: r })
+        });
+        if (res.ok) { const d = await res.json(); this.setTokens(d.access); return true; }
+        return false;
+      },
+      async req(url, opts = {}) {
+        const headers = {
+          'Content-Type': 'application/json',
+          ...(this.getAccess() ? { 'Authorization': `Bearer ${this.getAccess()}` } : {}),
+          ...(opts.headers || {})
+        };
+        let res = await fetch(url, { ...opts, headers });
+        if (res.status === 401) {
+          const ok = await this.refresh();
+          if (ok) {
+            headers['Authorization'] = `Bearer ${this.getAccess()}`;
+            res = await fetch(url, { ...opts, headers });
+          } else { this.clearTokens(); window.location.href = '/login/'; return null; }
+        }
+        return res;
+      },
+      requireAuth() { if (!this.getAccess()) window.location.href = '/login/'; },
+      logout() { this.clearTokens(); window.location.href = '/login/'; }
+    };
+
+    // ── Custom Modal Dialog System ───────────────────────────
+    function showCustomAlert(message, title = 'Notification') {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.innerHTML = `
+      <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+          <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+          <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+            <span class="material-symbols-outlined text-md">close</span>
+          </button>
+        </div>
+        <div class="text-body-md text-on-surface-variant leading-relaxed">${message}</div>
+        <div class="flex justify-end mt-sm">
+          <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm">OK</button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(overlay);
+        const card = overlay.querySelector('.glass-panel');
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+        });
+
+        const close = () => {
+          overlay.classList.add('opacity-0');
+          card.classList.add('scale-95');
+          setTimeout(() => {
+            overlay.remove();
+            resolve();
+          }, 300);
+        };
+
+        overlay.querySelector('.close-modal-btn').onclick = close;
+        overlay.querySelector('.confirm-modal-btn').onclick = close;
+      });
+    }
+
+    function showCustomConfirm(message, title = 'Confirmation') {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.innerHTML = `
+      <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+          <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+          <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+            <span class="material-symbols-outlined text-md">close</span>
+          </button>
+        </div>
+        <div class="text-body-md text-on-surface-variant leading-relaxed">${message}</div>
+        <div class="flex gap-sm justify-end mt-sm">
+          <button class="cancel-modal-btn px-md py-sm border border-outline-variant/30 text-on-surface font-semibold rounded-lg text-sm transition-colors hover:bg-white/5 active:scale-95 duration-150">Cancel</button>
+          <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm">Confirm</button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(overlay);
+        const card = overlay.querySelector('.glass-panel');
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+        });
+
+        const dismiss = (value) => {
+          overlay.classList.add('opacity-0');
+          card.classList.add('scale-95');
+          setTimeout(() => {
+            overlay.remove();
+            resolve(value);
+          }, 300);
+        };
+
+        overlay.querySelector('.close-modal-btn').onclick = () => dismiss(false);
+        overlay.querySelector('.cancel-modal-btn').onclick = () => dismiss(false);
+        overlay.querySelector('.confirm-modal-btn').onclick = () => dismiss(true);
+      });
+    }
+
+    function showCustomPrompt(message, defaultValue = '', title = 'Input Required') {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.innerHTML = `
+      <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+          <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+          <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+            <span class="material-symbols-outlined text-md">close</span>
+          </button>
+        </div>
+        <div class="text-body-md text-on-surface-variant leading-relaxed mb-xs">${message}</div>
+        <input type="text" class="prompt-input-field w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-sm text-on-surface focus:outline-none focus:border-primary text-body-md" value="${defaultValue}" />
+        <div class="flex gap-sm justify-end mt-sm">
+          <button class="cancel-modal-btn px-md py-sm border border-outline-variant/30 text-on-surface font-semibold rounded-lg text-sm transition-colors hover:bg-white/5 active:scale-95 duration-150">Cancel</button>
+          <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm">OK</button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(overlay);
+        const card = overlay.querySelector('.glass-panel');
+        const input = overlay.querySelector('.prompt-input-field');
+
+        setTimeout(() => { input.focus(); }, 100);
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+        });
+
+        const dismiss = (value) => {
+          overlay.classList.add('opacity-0');
+          card.classList.add('scale-95');
+          setTimeout(() => {
+            overlay.remove();
+            resolve(value);
+          }, 300);
+        };
+
+        overlay.querySelector('.close-modal-btn').onclick = () => dismiss(null);
+        overlay.querySelector('.cancel-modal-btn').onclick = () => dismiss(null);
+        overlay.querySelector('.confirm-modal-btn').onclick = () => dismiss(input.value);
+
+        input.onkeydown = (e) => {
+          if (e.key === 'Enter') {
+            dismiss(input.value);
+          }
+        };
+      });
+    }
+
+    // Override global alert/confirm/prompt
+    window.alert = showCustomAlert;
+    window.confirm = showCustomConfirm;
+    window.prompt = showCustomPrompt;
+
+    async function loadNotificationCount() {
+      const res = await API.req('/api/notifications/?unread=true');
+      if (!res) return;
+      const data = await res.json();
+      const count = data.count ?? (data.results ? data.results.length : 0);
+      document.querySelectorAll('[data-notification-bell]').forEach(bell => {
+        const badge = bell.querySelector('[data-notification-count]');
+        if (!badge) return;
+        if (count > 0) {
+          badge.textContent = count > 99 ? '99+' : String(count);
+          badge.classList.remove('hidden');
+        } else {
+          badge.textContent = '';
+          badge.classList.add('hidden');
+        }
+      });
+    }
+  </script>
+
+  <script>
+    API.requireAuth();
+    loadNotificationCount();
+  </script>
+
+  <script>
+    (async () => {
+      API.requireAuth();
+
+      const feedContainer = document.getElementById('general-posts-feed');
+      const searchInput = document.querySelector('input[placeholder^="Search"]');
+      const composer = document.getElementById('feed-composer');
+
+      function renderPosts(posts) {
+        if (!feedContainer) return;
+        if (!posts.length) {
+          feedContainer.innerHTML = `
+        <div class="w-full text-outline text-sm px-md">No posts yet. Share something to start the grid!</div>
+      `;
+          return;
+        }
+
+        const currentUserId = API.getCurrentUserId();
+        feedContainer.innerHTML = posts.map(p => {
+          const isVideo = p.media && /\.(mp4|webm|ogg)$/i.test(p.media);
+          const isImage = p.media && /\.(png|jpe?g|gif|webp)$/i.test(p.media);
+          const isAuthor = currentUserId && (Number(p.author_id) === Number(currentUserId));
+          return `
+      <div class="rounded-2xl border border-outline-variant/30 bg-surface-container-high p-md flex flex-col gap-sm hover:border-primary/40 transition-colors" data-post-id="${p.id}">
+        <div class="flex items-center justify-between">
+          <p class="font-label-caps text-label-caps text-primary-fixed-dim font-bold">${p.author.split('@')[0]}</p>
+          <span class="text-[10px] text-outline">${new Date(p.created_at).toLocaleDateString()}</span>
+        </div>
+        <p class="font-body-md text-on-surface">${p.content || ''}</p>
+        ${p.latex_content ? `<div class="p-sm rounded bg-black/40 text-secondary-fixed font-math-display text-math-display overflow-x-auto">${p.latex_content}</div>` : ''}
+        ${p.media ? `
+          <div class="max-h-64 rounded-lg overflow-hidden border border-white/5 bg-black/20">
+            ${isVideo ? `<video class="w-full h-full object-cover" src="${p.media}" controls></video>` : ''}
+            ${isImage ? `<img class="w-full h-full object-cover" src="${p.media}" alt=""/>` : ''}
+          </div>
+        ` : ''}
+        <div class="flex items-center gap-md text-[12px] mt-xs">
+          <button class="flex items-center gap-1 text-outline" data-like>
+            <span class="material-symbols-outlined text-[16px] ${p.is_liked ? 'text-primary' : ''}">favorite</span>
+            <span data-like-count>${p.likes_count}</span>
+          </button>
+          <button class="flex items-center gap-1 text-outline" data-comment>
+            <span class="material-symbols-outlined text-[16px]">comment</span>
+            <span data-comment-count>${p.comments_count}</span>
+          </button>
+          ${isAuthor ? `
+          <button class="flex items-center gap-1 text-outline hover:text-error transition-colors" data-delete>
+            <span class="material-symbols-outlined text-[16px]">delete</span>
+            <span>Delete</span>
+          </button>
+          ` : ''}
+        </div>
+      </div>`;
+        }).join('');
+      }
+
+      async function loadPosts() {
+        const params = new URLSearchParams();
+        if (searchInput && searchInput.value.trim()) {
+          params.set('q', searchInput.value.trim());
+        }
+
+        const url = `/api/feed/posts/${params.toString() ? `?${params}` : ''}`;
+        const res = await API.req(url);
+        if (!res) return;
+        const data = await res.json();
+        const posts = data.results || data || [];
+        renderPosts(posts);
+      }
+
+      async function createPost(form) {
+        const content = form.elements.content.value.trim();
+        const latex = form.elements.latex_content.value.trim();
+        const postType = form.elements.post_type.value;
+        const mediaFile = form.elements.media.files[0];
+
+        if (!content && !latex && !mediaFile) return;
+
+        if (mediaFile) {
+          const body = new FormData();
+          body.append('post_type', postType);
+          if (content) body.append('content', content);
+          if (latex) body.append('latex_content', latex);
+          body.append('media', mediaFile);
+
+          const res = await fetch('/api/feed/posts/', {
+            method: 'POST',
+            headers: {
+              ...(API.getAccess() ? { 'Authorization': `Bearer ${API.getAccess()}` } : {}),
+            },
+            body,
+          });
+          if (!res.ok) return;
+        } else {
+          const res = await API.req('/api/feed/posts/', {
+            method: 'POST',
+            body: JSON.stringify({
+              content,
+              latex_content: latex,
+              post_type: postType,
+            })
+          });
+          if (!res) return;
+          if (!res.ok) return;
+        }
+
+        form.reset();
+        await loadPosts();
+      }
+
+      if (feedContainer) {
+        feedContainer.addEventListener('click', async (event) => {
+          const likeBtn = event.target.closest('[data-like]');
+          const commentBtn = event.target.closest('[data-comment]');
+          const card = event.target.closest('[data-post-id]');
+          if (!card) return;
+          const postId = card.getAttribute('data-post-id');
+
+          if (likeBtn) {
+            const res = await API.req(`/api/feed/posts/${postId}/like/`, { method: 'POST' });
+            if (!res) return;
+            const data = await res.json();
+            const countEl = likeBtn.querySelector('[data-like-count]');
+            const icon = likeBtn.querySelector('.material-symbols-outlined');
+            const current = Number(countEl.textContent || 0);
+            const next = data.liked ? current + 1 : Math.max(0, current - 1);
+            countEl.textContent = String(next);
+            icon.classList.toggle('text-primary', data.liked);
+          }
+
+          if (commentBtn) {
+            const content = await window.prompt('Add a comment', '', 'New Comment');
+            if (!content || !content.trim()) return;
+            const res = await API.req(`/api/feed/posts/${postId}/comments/`, {
+              method: 'POST',
+              body: JSON.stringify({ content: content.trim() })
+            });
+            if (!res) return;
+            const countEl = commentBtn.querySelector('[data-comment-count]');
+            const current = Number(countEl.textContent || 0);
+            countEl.textContent = String(current + 1);
+          }
+
+          const deleteBtn = event.target.closest('[data-delete]');
+          if (deleteBtn) {
+            const confirmDelete = await window.confirm('Are you sure you want to delete this axiom?', 'Delete Axiom');
+            if (!confirmDelete) return;
+            const res = await API.req(`/api/feed/posts/${postId}/`, {
+              method: 'DELETE'
+            });
+            if (res && res.ok) {
+              await loadPosts();
+            }
+          }
+        });
+      }
+
+      if (searchInput) {
+        let timer;
+        searchInput.addEventListener('input', () => {
+          clearTimeout(timer);
+          timer = setTimeout(loadPosts, 300);
+        });
+      }
+
+      // ── Search Button Focus
+      const searchBtn = document.querySelector('[data-search-btn]');
+      const searchSection = document.getElementById('search-section');
+      if (searchBtn && searchInput && searchSection) {
+        searchBtn.addEventListener('click', () => {
+          searchSection.classList.toggle('hidden');
+          if (!searchSection.classList.contains('hidden')) {
+            searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            searchInput.focus();
+          }
+        });
+      }
+
+      // Notifications dropdown 
+      async function loadNotificationsList() {
+        const container = document.getElementById('notifications-list-container');
+        if (!container) return;
+        const res = await API.req('/api/notifications/');
+        if (!res) return;
+        const data = await res.json();
+        const notifications = data.results || data || [];
+        if (!notifications.length) {
+          container.innerHTML = `<div class="text-[12px] text-outline text-center py-md">No notifications yet.</div>`;
+          return;
+        }
+        container.innerHTML = notifications.map(n => {
+          const actorName = n.actor ? n.actor.split('@')[0] : 'Someone';
+          return `
+        <div class="p-sm rounded-lg bg-surface-container/50 hover:bg-surface-container border border-white/5 flex flex-col gap-xs transition-colors cursor-pointer ${n.is_read ? 'opacity-60' : ''}" data-notification-id="${n.id}">
+          <div class="flex justify-between items-start gap-xs">
+            <p class="text-[11px] text-on-surface">
+              <span class="text-primary-fixed-dim font-bold">${actorName}</span> ${n.verb}
+            </p>
+            ${!n.is_read ? '<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed shrink-0 mt-1" data-unread-indicator></span>' : ''}
+          </div>
+          <span class="text-[9px] text-outline">${new Date(n.created_at).toLocaleDateString()}</span>
+        </div>
+      `;
+        }).join('');
+      }
+
+      const bell = document.querySelector('[data-notification-bell]');
+      const dropdown = document.getElementById('notification-dropdown');
+      const profileBtn = document.querySelector('[data-profile-menu-btn]');
+      const profileDropdown = document.getElementById('profile-dropdown');
+      const profileDropdownContainer = document.getElementById('profile-dropdown-container');
+
+      function renderProfileDropdown() {
+        if (!profileDropdownContainer) return;
+        const isLoggedIn = !!API.getAccess();
+        if (isLoggedIn) {
+          profileDropdownContainer.innerHTML = `
+        <a href="/profile/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+          <span class="material-symbols-outlined text-[16px]">account_circle</span>
+          <span>View Profile</span>
+        </a>
+        <button id="auth-logout-btn" class="w-full text-left p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-error">
+          <span class="material-symbols-outlined text-[16px]">logout</span>
+          <span>Sign Out</span>
+        </button>
+      `;
+          const logoutBtn = document.getElementById('auth-logout-btn');
+          if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+              if (await window.confirm('Are you sure you want to sign out?', 'Sign Out')) {
+                API.logout();
+              }
+            });
+          }
+        } else {
+          profileDropdownContainer.innerHTML = `
+        <a href="/login/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+          <span class="material-symbols-outlined text-[16px]">login</span>
+          <span>Sign In</span>
+        </a>
+        <a href="/register/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-primary-fixed-dim">
+          <span class="material-symbols-outlined text-[16px]">person_add</span>
+          <span>Sign Up</span>
+        </a>
+      `;
+        }
+      }
+
+      if (profileBtn && profileDropdown) {
+        profileBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (dropdown) dropdown.classList.add('hidden');
+          profileDropdown.classList.toggle('hidden');
+          if (!profileDropdown.classList.contains('hidden')) {
+            renderProfileDropdown();
+          }
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!profileDropdown.contains(e.target) && e.target !== profileBtn && !profileBtn.contains(e.target)) {
+            profileDropdown.classList.add('hidden');
+          }
+        });
+      }
+
+      if (bell && dropdown) {
+        bell.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (profileDropdown) profileDropdown.classList.add('hidden');
+          dropdown.classList.toggle('hidden');
+          if (!dropdown.classList.contains('hidden')) {
+            await loadNotificationsList();
+          }
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!dropdown.contains(e.target) && e.target !== bell && !bell.contains(e.target)) {
+            dropdown.classList.add('hidden');
+          }
+        });
+
+        const listContainer = document.getElementById('notifications-list-container');
+        if (listContainer) {
+          listContainer.addEventListener('click', async (e) => {
+            const item = e.target.closest('[data-notification-id]');
+            if (!item) return;
+            const id = item.getAttribute('data-notification-id');
+            const res = await API.req(`/api/notifications/${id}/read/`, { method: 'POST' });
+            if (res && res.ok) {
+              item.classList.add('opacity-60');
+              const indicator = item.querySelector('[data-unread-indicator]');
+              if (indicator) indicator.remove();
+              await loadNotificationCount();
+            }
+          });
+        }
+
+        const clearBtn = document.getElementById('clear-notifications-btn');
+        if (clearBtn) {
+          clearBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const res = await API.req('/api/notifications/read-all/', { method: 'POST' });
+            if (res && res.ok) {
+              await loadNotificationsList();
+              await loadNotificationCount();
+            }
+          });
+        }
+      }
+
+      if (composer) {
+        composer.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          await createPost(composer);
+        });
+      }
+
+      // ── Mobile Navigation Dropdown ───────────────────────────
+      const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+      const mobileNavDropdown = document.getElementById('mobile-nav-dropdown');
+      const mobileNavChevron = document.getElementById('mobile-nav-chevron');
+      if (mobileNavToggle && mobileNavDropdown) {
+        mobileNavToggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isHidden = mobileNavDropdown.classList.toggle('hidden');
+          if (mobileNavChevron) {
+            mobileNavChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+          }
+        });
+        document.addEventListener('click', (e) => {
+          if (mobileNavDropdown && !mobileNavDropdown.contains(e.target) && e.target !== mobileNavToggle && !mobileNavToggle.contains(e.target)) {
+            mobileNavDropdown.classList.add('hidden');
+            if (mobileNavChevron) mobileNavChevron.style.transform = 'rotate(0deg)';
+          }
+        });
+      }
+
+      await loadPosts();
+    })();
+  </script>
+
+</body>
+
+</html>

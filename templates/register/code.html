@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist:wght@100;300;400;500;700;900&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Mathify | Sign Up</title>
+  <!-- Google Fonts: Space Grotesk for Headlines, Geist for Body/Math -->
+  <!-- Material Symbols -->
+  <style>
+    body {
+      background-color: #000000;
+      color: #e5e2e1;
+      margin: 0;
+      padding: 0;
+    }
+
+    .glass-panel {
+      background: rgba(18, 18, 18, 0.7);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .neon-glow-primary:focus-within {
+      box-shadow: 0 0 15px rgba(0, 218, 248, 0.2);
+      border-color: #00daf8;
+    }
+
+    .progress-indicator {
+      height: 4px;
+      background: #282828;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 50%;
+      /* Step 1 of 2 */
+      background: linear-gradient(90deg, #00daf8 0%, #a9f900 100%);
+    }
+
+    .math-input-container {
+      background: #121212;
+      border: 1px solid #282828;
+      transition: all 0.2s ease;
+    }
+
+    .custom-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23859397'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      background-size: 1.5em;
+    }
+  </style>
+  <style>
+    body {
+      min-height: 100dvh;
+    }
+  </style>
+</head>
+
+<body class="font-body-md overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+  <!-- Hero Background Element -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div class="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-primary/5 blur-[120px] rounded-full"></div>
+    <div class="absolute -bottom-[20%] -right-[10%] w-[50%] h-[50%] bg-secondary-fixed/5 blur-[120px] rounded-full">
+    </div>
+  </div>
+  <!-- Navigation (Transactional Suppression Applied) -->
+  <!-- Minimal Header for Identity -->
+  <header
+    class="fixed top-0 w-full z-50 flex items-center justify-between px-margin-mobile md:px-margin-desktop h-16 bg-surface/80 backdrop-blur-xl border-b border-white/10">
+    <div class="font-headline-md text-headline-md font-bold tracking-tighter text-primary">
+      Mathify
+    </div>
+    <div class="flex items-center gap-md">
+      <span class="font-label-caps text-label-caps text-outline uppercase tracking-widest hidden md:block">Identity
+        Verification</span>
+      <span class="material-symbols-outlined text-outline" data-icon="security">security</span>
+    </div>
+  </header>
+  <main class="relative z-10 pt-32 pb-xl px-margin-mobile flex flex-col items-center min-h-screen">
+    <!-- Sign Up Container -->
+    <div class="w-full max-w-[480px] space-y-lg">
+      <!-- Step Header -->
+      <div class="space-y-sm">
+        <div class="flex justify-between items-end">
+          <h1
+            class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-secondary">
+            Establish Axiom
+          </h1>
+          <span class="font-label-caps text-label-caps text-primary pb-xs">Step 1 of 2</span>
+        </div>
+        <div class="progress-indicator">
+          <div class="progress-fill"></div>
+        </div>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          Begin your descent into the department of computational logic and proof.
+        </p>
+      </div>
+      <!-- Form -->
+      <form action="#" class="space-y-md">
+        <!-- Full Name -->
+        <div class="space-y-xs group">
+          <label
+            class="font-label-caps text-label-caps text-outline-variant group-focus-within:text-primary transition-colors"
+            for="full_name">
+            Candidate Full Name
+          </label>
+          <div class="math-input-container neon-glow-primary rounded-lg flex items-center px-md">
+            <span class="material-symbols-outlined text-outline text-[20px] mr-sm" data-icon="person">person</span>
+            <input
+              class="bg-transparent border-none w-full py-md focus:ring-0 text-secondary placeholder:text-surface-variant font-body-md"
+              id="full_name" name="full_name" placeholder="Euler S. Sigma" required="" type="text" />
+          </div>
+        </div>
+        <!-- Email -->
+        <div class="space-y-xs group">
+          <label
+            class="font-label-caps text-label-caps text-outline-variant group-focus-within:text-primary transition-colors"
+            for="email">
+            Institutional Email
+          </label>
+          <div class="math-input-container neon-glow-primary rounded-lg flex items-center px-md">
+            <span class="material-symbols-outlined text-outline text-[20px] mr-sm"
+              data-icon="alternate_email">alternate_email</span>
+            <input
+              class="bg-transparent border-none w-full py-md focus:ring-0 text-secondary placeholder:text-surface-variant font-body-md"
+              id="email" name="email" placeholder="sigma@mathaxiom.edu" required="" type="email" />
+          </div>
+        </div>
+        <!-- Password -->
+        <div class="space-y-xs group">
+          <label
+            class="font-label-caps text-label-caps text-outline-variant group-focus-within:text-primary transition-colors"
+            for="password">
+            Access Key (Secure)
+          </label>
+          <div class="math-input-container neon-glow-primary rounded-lg flex items-center px-md">
+            <span class="material-symbols-outlined text-outline text-[20px] mr-sm" data-icon="key">key</span>
+            <input
+              class="bg-transparent border-none w-full py-md focus:ring-0 text-secondary placeholder:text-surface-variant font-body-md"
+              id="password" name="password" placeholder="••••••••••••" required="" type="password" />
+          </div>
+        </div>
+        <!-- Mathematical Interest Dropdown -->
+        <div class="space-y-xs group">
+          <label
+            class="font-label-caps text-label-caps text-outline-variant group-focus-within:text-primary transition-colors"
+            for="interest">
+            Primary Field of Inquiry
+          </label>
+          <div class="math-input-container neon-glow-primary rounded-lg flex items-center px-md">
+            <span class="material-symbols-outlined text-outline text-[20px] mr-sm" data-icon="function">function</span>
+            <select
+              class="custom-select bg-transparent border-none w-full py-md focus:ring-0 text-secondary font-body-md cursor-pointer"
+              id="interest" name="interest" required="">
+              <option class="bg-surface" disabled="" selected="" value="">Select Specialization</option>
+              <option class="bg-surface" value="calculus">Calculus &amp; Analysis</option>
+              <option class="bg-surface" value="linear_algebra">Linear Algebra</option>
+              <option class="bg-surface" value="topology">Topology</option>
+              <option class="bg-surface" value="quantum">Quantum Mechanics</option>
+              <option class="bg-surface" value="number_theory">Number Theory</option>
+              <option class="bg-surface" value="differential">Differential Geometry</option>
+            </select>
+          </div>
+        </div>
+        <!-- Primary Action -->
+        <div class="pt-md">
+          <button
+            class="w-full bg-primary-container text-on-primary-container font-headline-sm text-headline-sm py-md rounded-xl transition-all active:scale-[0.98] hover:bg-primary-fixed-dim hover:shadow-[0_0_20px_rgba(0,218,248,0.4)] flex items-center justify-center gap-sm group"
+            type="submit">
+            Join the Department
+            <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform"
+              data-icon="arrow_forward">arrow_forward</span>
+          </button>
+        </div>
+        <!-- Legal Ties -->
+        <p class="font-body-sm text-body-sm text-center text-outline-variant px-md">
+          By establishing this axiom, you agree to the
+          <a class="text-secondary underline underline-offset-4 hover:text-primary transition-colors" href="#">Terms of
+            Service</a>
+          and
+          <a class="text-secondary underline underline-offset-4 hover:text-primary transition-colors" href="#">Privacy
+            Policy</a>.
+        </p>
+      </form>
+      <!-- Footer Link -->
+      <div class="text-center pt-lg border-t border-white/5">
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          Already have an account?
+          <a class="text-primary font-bold hover:underline transition-all" href="#">Sign In</a>
+        </p>
+      </div>
+    </div>
+    <!-- Abstract Visual Grid Card -->
+    <div class="mt-xl w-full max-w-[600px] hidden md:block">
+      <div class="glass-panel p-lg rounded-2xl grid grid-cols-3 gap-md relative overflow-hidden">
+        <!-- Mathematical Background Decoration -->
+        <div class="absolute inset-0 opacity-5 pointer-events-none">
+          <div class="w-full h-full"
+            style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
+        </div>
+        <div class="space-y-sm relative z-10">
+          <span class="material-symbols-outlined text-primary text-headline-md" data-icon="grid_view">grid_view</span>
+          <h3 class="font-headline-sm text-headline-sm text-secondary">Multidimensional</h3>
+          <p class="font-body-sm text-body-sm text-outline">Collaborative lattices for algebraic discovery.</p>
+        </div>
+        <div class="space-y-sm relative z-10 border-l border-white/10 pl-md">
+          <span class="material-symbols-outlined text-secondary-fixed text-headline-md" data-icon="waves">waves</span>
+          <h3 class="font-headline-sm text-headline-sm text-secondary">Fluid Logic</h3>
+          <p class="font-body-sm text-body-sm text-outline">Real-time derivation streaming for deep research.</p>
+        </div>
+        <div class="space-y-sm relative z-10 border-l border-white/10 pl-md">
+          <span class="material-symbols-outlined text-tertiary-fixed-dim text-headline-md"
+            data-icon="all_inclusive">all_inclusive</span>
+          <h3 class="font-headline-sm text-headline-sm text-secondary">Immutable</h3>
+          <p class="font-body-sm text-body-sm text-outline">Verified proofs archived within the global mesh.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+  <!-- Visual Polish: Interactive Grain & Glow -->
+  <div class="fixed inset-0 z-50 pointer-events-none opacity-[0.03] mix-blend-overlay">
+    <svg viewbox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <filter id="noise">
+        <feturbulence basefrequency="0.65" numoctaves="3" stitchtiles="stitch" type="fractalNoise"></feturbulence>
+      </filter>
+      <rect filter="url(#noise)" height="100%" width="100%"></rect>
+    </svg>
+  </div>
+  <script>
+    // Micro-interaction for input glow tracking
+    document.querySelectorAll('.math-input-container').forEach(container => {
+      container.addEventListener('focusin', () => {
+        container.style.boxShadow = "0 0 25px rgba(0, 218, 248, 0.15)";
+      });
+      container.addEventListener('focusout', () => {
+        container.style.boxShadow = "none";
+      });
+    });
+
+    // Form Submission Micro-Interaction
+    const form = document.querySelector('form');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button');
+      const originalContent = btn.innerHTML;
+      btn.innerHTML = `<span class='material-symbols-outlined animate-spin' data-icon='sync'>sync</span> Compiling Axioms...`;
+      btn.classList.add('opacity-80');
+      btn.disabled = true;
+
+      setTimeout(() => {
+        btn.innerHTML = `<span class='material-symbols-outlined' data-icon='check_circle'>check_circle</span> Axiom Initialized`;
+        btn.classList.replace('bg-primary-container', 'bg-secondary-container');
+        btn.classList.replace('text-on-primary-container', 'text-on-secondary-container');
+      }, 1500);
+    });
+  </script>
+
+  <script>
+    // ── Mathify API ───
+    const API = {
+      getAccess: () => localStorage.getItem('mx_access'),
+      getRefresh: () => localStorage.getItem('mx_refresh'),
+      setTokens(a, r) {
+        localStorage.setItem('mx_access', a);
+        if (r) localStorage.setItem('mx_refresh', r);
+      },
+      clearTokens() {
+        localStorage.removeItem('mx_access');
+        localStorage.removeItem('mx_refresh');
+      },
+      async refresh() {
+        const r = this.getRefresh();
+        if (!r) return false;
+        const res = await fetch('/api/auth/token/refresh/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh: r })
+        });
+        if (res.ok) { const d = await res.json(); this.setTokens(d.access); return true; }
+        return false;
+      },
+      async req(url, opts = {}) {
+        const headers = {
+          'Content-Type': 'application/json',
+          ...(this.getAccess() ? { 'Authorization': `Bearer ${this.getAccess()}` } : {}),
+          ...(opts.headers || {})
+        };
+        let res = await fetch(url, { ...opts, headers });
+        if (res.status === 401) {
+          const ok = await this.refresh();
+          if (ok) {
+            headers['Authorization'] = `Bearer ${this.getAccess()}`;
+            res = await fetch(url, { ...opts, headers });
+          } else { this.clearTokens(); window.location.href = '/login/'; return null; }
+        }
+        return res;
+      },
+      requireAuth() { if (!this.getAccess()) window.location.href = '/login/'; },
+      logout() { this.clearTokens(); window.location.href = '/login/'; }
+    };
+  </script>
+
+  <script>
+    document.querySelector('form').onsubmit = async (e) => {
+      e.preventDefault();
+      const d = Object.fromEntries(new FormData(e.target));
+      const btn = e.target.querySelector('button[type=submit]');
+      const orig = btn.innerHTML;
+
+      btn.disabled = true;
+      btn.innerHTML = `<span class='material-symbols-outlined animate-spin'>sync</span> Compiling Axioms...`;
+
+      // Split full_name into first/last
+      const [first_name = '', ...rest] = (d.full_name || '').split(' ');
+      const last_name = rest.join(' ');
+      const username = d.email.split('@')[0];
+
+      const res = await fetch('/api/accounts/register/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: d.email, password: d.password, password2: d.password,
+          username, first_name, last_name
+        })
+      });
+
+      if (res.ok) {
+        // Auto-login after register
+        const loginRes = await fetch('/api/auth/token/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: d.email, password: d.password })
+        });
+        if (loginRes.ok) {
+          const tokens = await loginRes.json();
+          API.setTokens(tokens.access, tokens.refresh);
+        }
+        btn.innerHTML = `<span class='material-symbols-outlined'>check_circle</span> Axiom Initialized`;
+        btn.classList.add('bg-secondary-container');
+        setTimeout(() => window.location.href = '/', 800);
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = orig;
+        const err = await res.json();
+        const el = document.createElement('p');
+        el.className = 'text-error text-body-sm text-center mt-sm';
+        el.textContent = Object.values(err).flat().join(' ');
+        e.target.appendChild(el);
+      }
+    };
+
+    // Fix Sign In link
+    document.querySelectorAll('a[href="#"]').forEach(a => {
+      if (a.textContent.trim().toLowerCase().includes('sign in')) a.href = '/login/';
+    });
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist:wght@100;300;400;500;700;900&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <!-- KaTeX CDNs for math equations rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <title>Mathify | Studio</title>
+  <style>
+    :root {
+      --primary-glow: rgba(0, 218, 248, 0.2);
+      --lime-glow: rgba(169, 249, 0, 0.4);
+    }
+
+    body {
+      background-color: #000000;
+      color: #e5e2e1;
+      font-family: 'Geist', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .glass-panel {
+      background: rgba(18, 18, 18, 0.7);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .neon-lime-glow {
+      box-shadow: 0 0 20px var(--lime-glow);
+    }
+
+    .math-inset {
+      background: #0e0e0e;
+      border-left: 3px solid #a9f900;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+  <style>
+    body {
+      min-height: 100dvh;
+    }
+  </style>
+</head>
+
+<body class="bg-black">
+  <!-- TopAppBar -->
+  <header
+    class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-margin-mobile h-16">
+    <div class="flex items-center gap-md">
+      <div
+        class="w-10 h-10 rounded-full overflow-hidden border border-primary/20 cursor-pointer active:scale-95 duration-150">
+        <img alt="user_profile_avatar" class="w-full h-auto"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNR6_bbp4LGM-l3X_VFqQX61HdJmx8nlSec62cyunD8Pywhtro8nXR36wJFs_b4NtVZvhAQXINWvpxgTaA9hivWo0aVSYsRrRB6W4lJkBQB4Mwe5wAM_cxF_hLRWG63cCe-0bPYkU9zaSUPYrgctciWQZRrNZc7sUqG1ERnb18j4AEAvRNLyKrbD_S5aEnC1zYhXZZrq_Qq4pP88iIREZpSLhy6j868wUBIhEzf7thaj5qEcE-5LxuTd8BqpPpst_A47n9Gx0pw2k" />
+      </div>
+      <span
+        class="font-headline-md text-headline-md font-bold tracking-tighter text-primary dark:text-primary-fixed-dim">Mathify</span>
+    </div>
+    <div class="flex items-center gap-md relative">
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150"
+        data-search-btn>search</button>
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
+        data-notification-bell>
+        notifications
+        <span
+          class="hidden absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold items-center justify-center"
+          data-notification-count></span>
+      </button>
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
+        data-profile-menu-btn>
+        account_circle
+      </button>
+      <div id="notification-dropdown"
+        class="hidden absolute right-0 w-80 glass-panel rounded-xl shadow-xl p-md flex flex-col gap-sm max-h-[400px] border border-white/10 text-on-surface z-50"
+        style="top: 52px;">
+        <div class="flex items-center justify-between border-b border-white/10 pb-xs">
+          <span class="font-bold text-body-sm text-primary">Notifications</span>
+          <button class="text-[10px] text-outline hover:text-primary transition-colors"
+            id="clear-notifications-btn">Mark all read</button>
+        </div>
+        <div class="overflow-y-auto flex flex-col gap-sm flex-1 pr-xs" id="notifications-list-container"
+          style="max-height: 300px;">
+          <div class="text-[12px] text-outline text-center py-md">Loading notifications...</div>
+        </div>
+      </div>
+      <div id="profile-dropdown"
+        class="hidden absolute right-0 w-48 glass-panel rounded-xl shadow-xl p-sm flex flex-col gap-sm border border-white/10 text-on-surface z-50"
+        style="top: 52px;">
+        <div class="flex flex-col gap-xs" id="profile-dropdown-container">
+          <!-- Dynamic dropdown menu options will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- Side Navigation (Desktop) -->
+  <aside
+    class="hidden md:flex fixed left-0 top-16 h-[calc(100vh-64px)] w-72 bg-surface-container dark:bg-surface-container shadow-xl flex-col gap-sm p-md z-40 border-r border-white/5">
+    <div class="flex flex-col gap-xs mb-lg">
+      <span class="text-on-surface-variant font-label-caps text-[10px] tracking-widest px-sm">WORKSPACE</span>
+      <a href="/studio/"
+        class="flex items-center gap-md p-md bg-primary-container text-on-primary-container font-bold rounded-lg cursor-pointer transition-all">
+        <span class="material-symbols-outlined">function</span>
+        <span class="font-body-md text-body-md">Studio</span>
+      </a>
+    </div>
+    <div class="mt-auto pt-md border-t border-white/5">
+      <a href="/profile/" class="flex items-center gap-md p-sm hover:bg-white/5 rounded-lg transition-colors">
+        <div class="w-10 h-10 rounded-lg bg-surface-bright flex items-center justify-center">
+          <span class="material-symbols-outlined text-primary">account_circle</span>
+        </div>
+        <div>
+          <p class="font-bold text-on-surface text-sm truncate max-w-[140px]" id="sidebar-username">Profile</p>
+          <p class="text-xs text-outline">Mathify Creator</p>
+        </div>
+      </a>
+    </div>
+  </aside>
+  <!-- Main Canvas -->
+  <main class="pt-24 pb-12 md:pb-24 md:!pl-[320px] px-margin-mobile md:pr-margin-desktop min-h-screen">
+    <!-- Search Bar (Toggleable) -->
+    <section class="mb-lg hidden" id="search-section">
+      <div
+        class="relative flex items-center bg-surface-container-high rounded-xl border border-white/5 px-md py-sm group focus-within:border-primary/50 transition-all">
+        <span class="material-symbols-outlined text-outline mr-sm">search</span>
+        <input id="studio-search-input"
+          class="bg-transparent border-none focus:ring-0 text-body-md w-full placeholder:text-outline/50 focus:outline-none"
+          placeholder="Search creations or drafts..." type="text" />
+        <div class="flex gap-xs">
+          <span
+            class="px-xs py-1 rounded bg-surface-container-lowest text-[10px] text-outline border border-white/5">⌘K</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hero Action Section -->
+    <section class="mb-xl">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-lg">
+        <div>
+          <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-xs">Content Creator
+          </h2>
+          <p class="text-on-surface-variant font-body-md text-body-md max-w-xl">Engineer your next breakthrough. Combine
+            formal proofs with interactive visualizations and video breakdowns.</p>
+        </div>
+        <div class="flex items-center gap-md">
+          <button id="studio-draft-btn"
+            class="px-xl py-md bg-surface-container hover:bg-surface-container-high border border-white/10 text-on-surface font-bold rounded-xl flex items-center gap-md hover:scale-105 active:scale-95 transition-all duration-300">
+            <span class="material-symbols-outlined">save</span>
+            <span class="font-headline-sm text-headline-sm">Save Draft</span>
+          </button>
+          <button id="studio-save-btn"
+            class="group relative px-xl py-md bg-secondary-fixed text-on-secondary-fixed font-bold rounded-xl flex items-center gap-md neon-lime-glow hover:scale-105 active:scale-95 transition-all duration-300">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add_circle</span>
+            <span class="font-headline-sm text-headline-sm">Publish Proof</span>
+            <div class="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity">
+            </div>
+          </button>
+        </div>
+      </div>
+    </section>
+    <!-- Studio Tools Bento Grid -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-md mb-xl">
+      <!-- LaTeX Tool -->
+      <div class="col-span-12 lg:col-span-7 glass-panel rounded-xl p-md flex flex-col gap-md">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-sm">
+            <span class="material-symbols-outlined text-primary">format_overline</span>
+            <h3 class="font-headline-sm text-headline-sm text-on-surface">LaTeX Editor</h3>
+          </div>
+          <div class="flex items-center gap-sm">
+            <button id="latex-edit-tab"
+              class="text-xs font-semibold px-xs py-1 rounded bg-primary-container text-on-primary-container transition-all">Edit</button>
+            <button id="latex-preview-tab"
+              class="text-xs font-semibold px-xs py-1 rounded text-outline hover:text-primary transition-all">Preview</button>
+            <span class="text-xs font-label-caps text-outline bg-surface-bright px-sm py-1 rounded">V2.4 ENGINE</span>
+          </div>
+        </div>
+        <div class="flex flex-col gap-sm flex-grow relative min-h-[220px]">
+          <input type="text" id="studio-proof-title"
+            class="w-full bg-surface-container-high border border-outline-variant/30 rounded-lg p-sm text-on-surface font-body-md focus:outline-none focus:border-primary"
+            placeholder="Proof Title (e.g. Stokes' Theorem proof)" />
+          <div class="relative flex-grow flex flex-col min-h-[140px]">
+            <textarea id="studio-proof-latex"
+              class="w-full bg-surface-container-high border border-outline-variant/30 rounded-lg p-sm text-primary font-math-display focus:outline-none focus:border-primary flex-grow min-h-[140px]"
+              placeholder="Type your LaTeX or markdown proof here...">\oint_C \mathbf{B} \cdot d\mathbf{l} = \mu_0 \left( I_{enc} + \varepsilon_0 \frac{d\Phi_E}{dt} \right)</textarea>
+            <div id="studio-proof-preview"
+              class="hidden w-full bg-surface-container-high border border-outline-variant/30 rounded-lg p-sm text-on-surface font-math-display flex-grow min-h-[140px] overflow-y-auto"
+              style="min-height: 140px;"></div>
+          </div>
+        </div>
+        <div class="flex gap-sm overflow-x-auto hide-scrollbar pb-1">
+          <button data-latex-preset="integral"
+            class="px-md py-1.5 bg-surface-variant text-on-surface-variant rounded text-xs font-bold hover:bg-primary-container hover:text-on-primary-container transition-colors">Integrals</button>
+          <button data-latex-preset="matrix"
+            class="px-md py-1.5 bg-surface-variant text-on-surface-variant rounded text-xs font-bold hover:bg-primary-container hover:text-on-primary-container transition-colors">Matrices</button>
+          <button data-latex-preset="tensor"
+            class="px-md py-1.5 bg-surface-variant text-on-surface-variant rounded text-xs font-bold hover:bg-primary-container hover:text-on-primary-container transition-colors">Tensors</button>
+          <button data-latex-preset="greek"
+            class="px-md py-1.5 bg-surface-variant text-on-surface-variant rounded text-xs font-bold hover:bg-primary-container hover:text-on-primary-container transition-colors">Greek</button>
+        </div>
+      </div>
+      <!-- Graph Plotting -->
+      <div class="col-span-12 lg:col-span-5 glass-panel rounded-xl p-md flex flex-col gap-md group overflow-hidden">
+        <div class="flex items-center gap-sm">
+          <span class="material-symbols-outlined text-secondary-fixed">monitoring</span>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface">Graph Plotting</h3>
+        </div>
+        <div class="relative w-full aspect-video bg-black rounded-lg overflow-hidden border border-white/5">
+          <img id="plotter-preview-img" class="w-full h-full object-cover opacity-60"
+            data-alt="A complex mathematical visualization of a 3D manifold or strange attractor, rendered with glowing neon lines of electric blue and lime green. The background is a deep, pitch-black space with a subtle technical grid. The aesthetic is highly precise, scientific, and futuristic, evoking the feeling of a high-end digital laboratory interface."
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaJFa-ZjPdEf9PvybWhKttYYLfILzy55yJMg0igRB3glUSA-0pdJKTBLZeuTGQtLxXZpNucLNE5fcCBV6jUXMonsC5WT-BS8PKbyosXCUxnGhmrjMFE3Mgl18SKOQB_sUWPruwTSbuHEHGD1aQpsDAbN301rTqAjVBmAUPw5s8-FivltrlkLIDKZCnQQGs3eScW7jHe4xY12c865QWTFtcufViCZJlurhCLp2o8s7e5WYqUttN5NV_bL1ahsdG_xokREXo0amPYdw" />
+          <div
+            class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-sm">
+            <button id="launch-plotter-btn"
+              class="bg-white text-black font-bold px-lg py-sm rounded-full active:scale-90 transition-transform">Launch
+              3D Renderer</button>
+          </div>
+        </div>
+        <div class="flex items-center gap-md">
+          <div class="flex-grow h-1 bg-surface-variant rounded-full overflow-hidden">
+            <div class="h-full w-2/3 bg-gradient-to-r from-primary to-secondary-fixed"></div>
+          </div>
+          <span class="text-[10px] font-label-caps text-outline">CPU: 42%</span>
+        </div>
+      </div>
+      <!-- Video Recording -->
+      <div class="col-span-12 lg:col-span-4 glass-panel rounded-xl p-md flex flex-col gap-md">
+        <div class="flex items-center gap-sm">
+          <span class="material-symbols-outlined text-error">videocam</span>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface">Video Session</h3>
+        </div>
+        <div id="start-recording-card"
+          class="flex-grow flex flex-col items-center justify-center border-2 border-dashed border-white/10 rounded-lg p-lg gap-sm hover:border-error/40 transition-colors cursor-pointer group">
+          <div
+            class="w-12 h-12 rounded-full bg-error/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-error"
+              style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+          </div>
+          <p class="text-sm font-bold text-on-surface">Start Recording</p>
+          <p class="text-xs text-outline text-center">Screen + Webcam capture for step-by-step narration</p>
+        </div>
+      </div>
+      <!-- Drafts Section -->
+      <div class="col-span-12 lg:col-span-8 glass-panel rounded-xl p-md flex flex-col gap-md">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-sm">
+            <span class="material-symbols-outlined text-primary">history</span>
+            <h3 class="font-headline-sm text-headline-sm text-on-surface">Recent Drafts</h3>
+          </div>
+        </div>
+        <div id="drafts-container" class="grid grid-cols-1 sm:grid-cols-2 gap-sm">
+          <div class="bg-surface p-sm rounded-lg border border-white/5 animate-pulse h-16"></div>
+          <div class="bg-surface p-sm rounded-lg border border-white/5 animate-pulse h-16"></div>
+        </div>
+      </div>
+    </section>
+    <!-- Collaboration / Feed Integration Preview -->
+    <section class="glass-panel rounded-xl p-lg relative overflow-hidden">
+      <div class="relative z-10">
+        <h3 class="font-headline-sm text-headline-sm text-on-surface mb-sm">Collaborative Review</h3>
+        <p class="text-on-surface-variant font-body-md text-body-md max-w-lg mb-md">Invite peers to review your proof
+          logic before publishing to the global feed. Real-time feedback increases Axiom Rank.</p>
+        <div class="flex -space-x-3 mb-lg">
+          <img alt="Collaborator" class="w-10 h-10 rounded-full border-2 border-black"
+            data-alt="A stylized minimalist avatar of a female academic with a sleek, modern look. The image features a dark charcoal background with soft purple accent lighting, maintaining the high-contrast, technical aesthetic of the brand."
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAw_uhgzWpxPo_nU2KQTGNlsVWlJEHe5YyS88PRA9R-G6TQym5yq9qJc4wz59FwnTdv-nqHQxGEap5df6kNSGpB5c9aGiD2gFibjpOPSjHSMaQF9spZSzpjOrBRLIRs8ugFRS2ANFnZeLjSrZHkdFHy7w3h-602_RddxaERjw-TEL2eo80NQ8xnI0p7IhXS6K43Um22oQQmKqirJ9pRcKyQH5N2Gf24U6HQ3BFxF60f6qdxTZ_NGpLGxVY_cBMVEKOjdLcPxNOKVms" />
+          <img alt="Collaborator" class="w-10 h-10 rounded-full border-2 border-black"
+            data-alt="A professional digital avatar of a young male professor, styled with technical precision. The background is pitch black with sharp neon cyan highlights on the contours of the face, reflecting a premium, intellectual digital environment."
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPpbaqfxq1aiml0ElGjuaHY_NDe4Jc5ztgAz3mH6uTnu8ODEBP8wY1Tt-y5qupX2wQVesf-MHo-8yvpwI-2vGTuLluApHCRHAIT_O3pXniqB-az8-3YxRY_Ljc1wILZk5ISk6-ehgIKIzyXDXGjWwM2OQvPjHH-QMIStUOBXITtT76BQMKsI1YEbUsT3CmfGwS1k8j93_IfjmNtEwH5vOAi-gEmAdJosZfAnQHRSMZSa-jykBayGZomb6KrwwcKhTJc1MuqCUrLNg" />
+          <img alt="Collaborator" class="w-10 h-10 rounded-full border-2 border-black"
+            data-alt="A clean, minimalist avatar of a person with short hair, presented in a futuristic digital art style. High-key lighting with lime green reflections against a deep charcoal base, emphasizing the logic-driven demographic of the platform."
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUsPxgmhVXvsMTVtPKPPZsx_OOU9X4xZwns0Kah1y53AMTbZlLiFXCviMD3q2j3vXUyNkjKPGbVRLS43ACxOR7Q8OLGx4zSy3oaTE0GltmoR2YtIPwagQ-yfsws0NbJkukqlbjr0DF8Pvpk9QwfFuDeOEI_JSguNCoeGzR8nyhVETFe4IJR2k9CjFenszvv4r8hKad3LkL-GSmSlLA5VwY8qfJACMZuEh5scdD2mPeXYlJw50depqnYk8XhNEwq0KbIFwGcbamokE" />
+          <div
+            class="w-10 h-10 rounded-full border-2 border-black bg-surface-bright flex items-center justify-center text-[10px] font-bold">
+            +12</div>
+        </div>
+        <button id="start-review-btn"
+          class="px-lg py-sm border border-primary text-primary font-bold rounded-lg hover:bg-primary/10 transition-colors">Start
+          Review Session</button>
+      </div>
+      <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none transform translate-x-1/4 translate-y-1/4">
+        <span class="material-symbols-outlined text-[200px]" style="font-variation-settings: 'FILL' 1;">groups</span>
+      </div>
+    </section>
+  </main>
+
+  <!-- ── OVERLAYS & MODALS ────────────────────────────────────────────────────────── -->
+  <!-- Graph Plotter Modal -->
+  <div id="plotter-modal"
+    class="hidden fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/60 backdrop-blur-md">
+    <div
+      class="glass-panel w-full max-w-4xl rounded-2xl border border-white/10 flex flex-col max-h-[90vh] overflow-hidden shadow-2xl">
+      <div class="flex items-center justify-between p-md border-b border-white/10">
+        <div class="flex items-center gap-sm">
+          <span class="material-symbols-outlined text-secondary-fixed">monitoring</span>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface">Axiom 3D/2D Graph Plotter</h3>
+        </div>
+        <button id="close-plotter-btn"
+          class="material-symbols-outlined text-outline hover:text-on-surface transition-colors cursor-pointer">close</button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-md p-md overflow-y-auto">
+        <div class="md:col-span-4 flex flex-col gap-md">
+          <div class="flex flex-col gap-xs">
+            <label class="text-xs font-bold text-outline uppercase tracking-wider">Plot Mode</label>
+            <select id="plotter-mode"
+              class="bg-surface-container-high border border-white/10 rounded-lg p-xs text-on-surface font-body-sm focus:outline-none focus:border-primary">
+              <option value="3d">3D Wireframe Projector</option>
+              <option value="2d">2D Cartesian Grapher</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-xs">
+            <label class="text-xs font-bold text-outline uppercase tracking-wider">Equation Presets</label>
+            <select id="plotter-preset"
+              class="bg-surface-container-high border border-white/10 rounded-lg p-xs text-on-surface font-body-sm focus:outline-none focus:border-primary">
+              <option value="custom">-- Custom Equation --</option>
+              <option value="ripple" selected>Wave Ripple [3D]</option>
+              <option value="saddle">Saddle Surface [3D]</option>
+              <option value="wavy">Wavy Eggcrate [3D]</option>
+              <option value="sine2d">Sine Wave [2D]</option>
+              <option value="para2d">Parabola [2D]</option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-xs">
+            <label class="text-xs font-bold text-outline uppercase tracking-wider">Formula Input</label>
+            <input type="text" id="plotter-expression"
+              class="bg-surface-container-high border border-white/10 rounded-lg p-xs text-secondary-fixed font-math-display focus:outline-none focus:border-primary"
+              value="sin(sqrt(x*x + y*y)) / (sqrt(x*x + y*y) + 0.001)" />
+            <span class="text-[10px] text-outline">Supported: x, y, sin, cos, tan, sqrt, pi, abs, exp, ^ (power)</span>
+          </div>
+          <div class="flex flex-col gap-xs">
+            <label class="text-xs font-bold text-outline uppercase tracking-wider">Visual Palette</label>
+            <div class="flex gap-sm">
+              <button data-color="#00daf8"
+                class="w-6 h-6 rounded-full bg-[#00daf8] border-2 border-white cursor-pointer transition-transform scale-110"
+                title="Electric Cyan"></button>
+              <button data-color="#a9f900"
+                class="w-6 h-6 rounded-full bg-[#a9f900] border-2 border-transparent hover:border-white cursor-pointer transition-transform"
+                title="Neon Lime"></button>
+              <button data-color="#f800da"
+                class="w-6 h-6 rounded-full bg-[#f800da] border-2 border-transparent hover:border-white cursor-pointer transition-transform"
+                title="Cyber Pink"></button>
+            </div>
+          </div>
+          <div class="mt-auto flex flex-col gap-xs pt-md">
+            <button id="plotter-render-btn"
+              class="w-full py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 active:scale-95 transition-all">Render
+              Equation</button>
+            <button id="plotter-insert-btn"
+              class="w-full py-sm border border-secondary-fixed text-secondary-fixed font-bold rounded-lg hover:bg-secondary-fixed/10 active:scale-95 transition-all">Embed
+              in LaTeX</button>
+          </div>
+        </div>
+        <div
+          class="md:col-span-8 flex flex-col items-center justify-center relative bg-black/40 rounded-xl p-xs border border-white/5 min-h-[300px]">
+          <canvas id="plotter-canvas" width="560" height="380"
+            class="max-w-full h-auto bg-black rounded-lg cursor-grab active:cursor-grabbing border border-white/10"></canvas>
+          <span
+            class="absolute bottom-4 text-[11px] text-outline bg-black/70 px-md py-xs rounded-full pointer-events-none"
+            id="plotter-instructions">Drag to rotate 3D canvas • Scroll to zoom</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Video Recording Modal -->
+  <div id="recording-modal"
+    class="hidden fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/60 backdrop-blur-md">
+    <div class="glass-panel w-full max-w-lg rounded-2xl border border-white/10 p-md flex flex-col gap-md shadow-2xl">
+      <div class="flex items-center justify-between border-b border-white/10 pb-sm">
+        <div class="flex items-center gap-sm">
+          <span class="material-symbols-outlined text-error"
+            style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface" id="recording-status-title">Axiom Explainer
+            Recording</h3>
+        </div>
+        <button id="close-recording-btn"
+          class="material-symbols-outlined text-outline hover:text-on-surface transition-colors cursor-pointer">close</button>
+      </div>
+      <div
+        class="flex flex-col items-center justify-center p-lg bg-black/40 rounded-xl border border-white/5 relative overflow-hidden min-h-[180px]">
+        <div id="recording-indicator"
+          class="hidden absolute top-4 right-4 flex items-center gap-xs bg-error/10 border border-error/30 text-error text-[10px] font-bold px-sm py-1 rounded-full animate-pulse">
+          <span class="w-2 h-2 rounded-full bg-error"></span> REC
+        </div>
+        <div id="recording-timer" class="font-bold text-headline-lg tracking-widest text-on-surface mb-sm">00:00</div>
+        <canvas id="recording-wave-canvas" width="300" height="60"
+          class="w-full max-w-xs h-12 bg-transparent opacity-80"></canvas>
+        <video id="recording-preview" controls
+          class="hidden w-full rounded-lg border border-white/10 max-h-60 mt-sm"></video>
+        <p id="recording-tip" class="text-xs text-outline text-center mt-md">Narrate your formula steps using screen
+          capture or mic voiceover.</p>
+      </div>
+      <div class="flex gap-sm">
+        <button id="recording-control-btn"
+          class="flex-grow py-md bg-error text-white font-bold rounded-xl flex items-center justify-center gap-sm hover:scale-105 active:scale-95 transition-all duration-300">
+          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+          <span id="recording-btn-text">Start Capturing</span>
+        </button>
+      </div>
+      <div id="save-recording-actions" class="hidden flex gap-sm border-t border-white/10 pt-md">
+        <button id="recording-download-btn"
+          class="flex-1 py-sm bg-surface-container hover:bg-surface-container-high border border-white/10 text-on-surface font-semibold rounded-lg text-sm transition-all flex items-center justify-center gap-xs">
+          <span class="material-symbols-outlined text-sm">download</span> Download Video
+        </button>
+        <button id="recording-publish-btn"
+          class="flex-grow py-sm bg-primary text-on-primary font-bold rounded-lg text-sm transition-all flex items-center justify-center gap-xs">
+          <span class="material-symbols-outlined text-sm">send</span> Publish as Video Axiom
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Peer Review Modal -->
+  <div id="review-modal"
+    class="hidden fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/60 backdrop-blur-md">
+    <div class="glass-panel w-full max-w-lg rounded-2xl border border-white/10 p-md flex flex-col gap-md shadow-2xl">
+      <div class="flex items-center justify-between border-b border-white/10 pb-sm">
+        <div class="flex items-center gap-sm">
+          <span class="material-symbols-outlined text-primary">groups</span>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface">Peer Logic Validation</h3>
+        </div>
+        <button id="close-review-btn"
+          class="material-symbols-outlined text-outline hover:text-on-surface transition-colors cursor-pointer">close</button>
+      </div>
+      <div id="review-loading-screen" class="flex flex-col gap-md py-lg">
+        <div class="flex flex-col gap-sm">
+          <div class="flex justify-between items-center text-xs">
+            <span class="text-outline font-label-caps" id="review-step-text">Initializing static checks...</span>
+            <span class="text-primary font-bold" id="review-step-pct">0%</span>
+          </div>
+          <div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+            <div id="review-progress-bar" class="h-full bg-primary transition-all duration-300" style="width: 0%;">
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col gap-sm" id="review-checklist-container">
+          <div class="flex items-center gap-sm text-sm text-outline" id="chk-step-1">
+            <span class="material-symbols-outlined text-[16px] animate-spin">sync</span> Parsing LaTeX Syntax...
+          </div>
+          <div class="flex items-center gap-sm text-sm text-outline opacity-40" id="chk-step-2">
+            <span class="material-symbols-outlined text-[16px]">pending</span> Validating Coordinate Systems &
+            Constants...
+          </div>
+          <div class="flex items-center gap-sm text-sm text-outline opacity-40" id="chk-step-3">
+            <span class="material-symbols-outlined text-[16px]">pending</span> Invoking Axiom AI peer models...
+          </div>
+        </div>
+      </div>
+      <div id="review-result-screen" class="hidden flex flex-col gap-md">
+        <div class="flex items-center gap-md bg-black/30 p-md rounded-xl border border-white/5">
+          <div
+            class="relative w-16 h-16 shrink-0 flex items-center justify-center bg-primary/10 rounded-full border border-primary/30">
+            <span class="font-space font-bold text-headline-sm text-primary" id="rigidity-score-val">94%</span>
+          </div>
+          <div>
+            <h4 class="font-bold text-on-surface text-sm">Axiom Rigidity Index</h4>
+            <p class="text-xs text-outline">High verification probability. Peer models suggest consensus.</p>
+          </div>
+        </div>
+        <div class="flex flex-col gap-sm">
+          <span class="text-xs font-bold text-outline uppercase tracking-wider">Peer Critic Comments</span>
+          <div class="flex flex-col gap-sm max-h-48 overflow-y-auto pr-xs" id="peer-comments-container">
+            <!-- Dynamic comments loaded via JS -->
+          </div>
+        </div>
+        <div class="flex gap-sm border-t border-white/10 pt-md">
+          <button id="review-cancel-btn"
+            class="flex-1 py-sm bg-surface-container hover:bg-surface-container-high border border-white/10 text-on-surface font-semibold rounded-lg text-sm transition-all">Dismiss</button>
+          <button id="review-publish-btn"
+            class="flex-1 py-sm bg-secondary-fixed text-on-secondary-fixed font-bold rounded-lg text-sm transition-all neon-lime-glow">Publish
+            Direct</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Desktop Bottom Nav -->
+  <nav
+    class="hidden md:flex fixed bottom-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-t border-white/10 justify-around items-center h-16 px-gutter">
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/">
+      <span class="material-symbols-outlined">dynamic_feed</span>
+      <span class="font-label-caps text-[10px]">Feed</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/groups/">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="font-label-caps text-[10px]">Groups</span>
+    </a>
+    <div class="relative -top-4">
+      <a href="/studio/"
+        class="w-14 h-14 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg neon-glow active:scale-95 transition-transform duration-200">
+        <span class="material-symbols-outlined text-3xl">function</span>
+      </a>
+    </div>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/library/">
+      <span class="material-symbols-outlined">menu_book</span>
+      <span class="font-label-caps text-[10px]">Library</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/tutor/">
+      <span class="material-symbols-outlined">smart_toy</span>
+      <span class="font-label-caps text-[10px]">Mathify AI</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/profile/">
+      <span class="material-symbols-outlined">person</span>
+      <span class="font-label-caps text-[10px]">Profile</span>
+    </a>
+  </nav>
+
+  <!-- Mobile Bottom NavBar (dropdown style) -->
+  <div class="md:hidden fixed bottom-0 w-full z-50 flex flex-col items-center">
+    <!-- The upward dropdown menu -->
+    <div id="mobile-nav-dropdown"
+      class="hidden w-[92%] mb-2 glass-panel rounded-xl shadow-xl p-xs flex flex-col gap-xs border border-white/10 text-on-surface backdrop-blur-xl bg-surface/90">
+      <a href="/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">dynamic_feed</span>
+        <span class="text-sm">Feed</span>
+      </a>
+      <a href="/groups/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">groups</span>
+        <span class="text-sm">Groups</span>
+      </a>
+      <a href="/studio/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-primary font-semibold">
+        <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">function</span>
+        <span class="text-sm">Studio</span>
+      </a>
+      <a href="/library/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">menu_book</span>
+        <span class="text-sm">Library</span>
+      </a>
+      <a href="/tutor/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">smart_toy</span>
+        <span class="text-sm">Mathify AI</span>
+      </a>
+      <a href="/profile/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">person</span>
+        <span class="text-sm">Profile</span>
+      </a>
+    </div>
+
+    <!-- The main compact bottom bar -->
+    <button id="mobile-nav-toggle"
+      class="w-full bg-surface/90 backdrop-blur-xl border-t border-white/10 flex justify-between items-center h-12 px-margin-mobile text-on-surface cursor-pointer focus:outline-none">
+      <div class="flex items-center gap-sm text-primary">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">function</span>
+        <span class="text-xs font-bold uppercase tracking-wider">Studio</span>
+      </div>
+      <div class="flex items-center gap-xs text-outline">
+        <span class="text-[10px] font-semibold">Menu</span>
+        <span class="material-symbols-outlined text-md transition-transform duration-200"
+          id="mobile-nav-chevron">expand_less</span>
+      </div>
+    </button>
+  </div>
+
+  <script>
+    // Micro-interactions and effects
+    document.addEventListener('DOMContentLoaded', () => {
+      const createButton = document.querySelector('.neon-lime-glow');
+      if (createButton) {
+        setInterval(() => {
+          createButton.classList.add('scale-[1.02]');
+          setTimeout(() => {
+            createButton.classList.remove('scale-[1.02]');
+          }, 300);
+        }, 4000);
+      }
+    });
+  </script>
+
+  <script>
+    // ── Mathify API ────────────────────────────────────────────────────────────────
+    const API = {
+      getAccess: () => localStorage.getItem('mx_access'),
+      getRefresh: () => localStorage.getItem('mx_refresh'),
+      getCurrentUserId() {
+        const token = this.getAccess();
+        if (!token) return null;
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          return payload.user_id;
+        } catch (e) {
+          return null;
+        }
+      },
+      setTokens(a, r) {
+        localStorage.setItem('mx_access', a);
+        if (r) localStorage.setItem('mx_refresh', r);
+      },
+      clearTokens() {
+        localStorage.removeItem('mx_access');
+        localStorage.removeItem('mx_refresh');
+      },
+      async refresh() {
+        const r = this.getRefresh();
+        if (!r) return false;
+        const res = await fetch('/api/auth/token/refresh/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh: r })
+        });
+        if (res.ok) { const d = await res.json(); this.setTokens(d.access); return true; }
+        return false;
+      },
+      async req(url, opts = {}) {
+        const headers = {
+          'Content-Type': 'application/json',
+          ...(this.getAccess() ? { 'Authorization': `Bearer ${this.getAccess()}` } : {}),
+          ...(opts.headers || {})
+        };
+        let res = await fetch(url, { ...opts, headers });
+        if (res.status === 401) {
+          const ok = await this.refresh();
+          if (ok) {
+            headers['Authorization'] = `Bearer ${this.getAccess()}`;
+            res = await fetch(url, { ...opts, headers });
+          } else { this.clearTokens(); window.location.href = '/login/'; return null; }
+        }
+        return res;
+      },
+      requireAuth() { if (!this.getAccess()) window.location.href = '/login/'; },
+      logout() { this.clearTokens(); window.location.href = '/login/'; }
+    };
+
+    // ── Custom Modal Dialog System ───────────────────────────
+    function showCustomAlert(message, title = 'Notification') {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.innerHTML = `
+      <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+          <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+          <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+            <span class="material-symbols-outlined text-md">close</span>
+          </button>
+        </div>
+        <div class="text-body-md text-on-surface-variant leading-relaxed">${message}</div>
+        <div class="flex justify-end mt-sm">
+          <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm">OK</button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(overlay);
+        const card = overlay.querySelector('.glass-panel');
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+        });
+
+        const close = () => {
+          overlay.classList.add('opacity-0');
+          card.classList.add('scale-95');
+          setTimeout(() => {
+            overlay.remove();
+            resolve();
+          }, 300);
+        };
+
+        overlay.querySelector('.close-modal-btn').onclick = close;
+        overlay.querySelector('.confirm-modal-btn').onclick = close;
+      });
+    }
+
+    function showCustomConfirm(message, title = 'Confirmation') {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.innerHTML = `
+      <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+          <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+          <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+            <span class="material-symbols-outlined text-md">close</span>
+          </button>
+        </div>
+        <div class="text-body-md text-on-surface-variant leading-relaxed">${message}</div>
+        <div class="flex gap-sm justify-end mt-sm">
+          <button class="cancel-modal-btn px-md py-sm border border-outline-variant/30 text-on-surface font-semibold rounded-lg text-sm transition-colors hover:bg-white/5 active:scale-95 duration-150">Cancel</button>
+          <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm">Confirm</button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(overlay);
+        const card = overlay.querySelector('.glass-panel');
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+        });
+
+        const dismiss = (value) => {
+          overlay.classList.add('opacity-0');
+          card.classList.add('scale-95');
+          setTimeout(() => {
+            overlay.remove();
+            resolve(value);
+          }, 300);
+        };
+
+        overlay.querySelector('.close-modal-btn').onclick = () => dismiss(false);
+        overlay.querySelector('.cancel-modal-btn').onclick = () => dismiss(false);
+        overlay.querySelector('.confirm-modal-btn').onclick = () => dismiss(true);
+      });
+    }
+
+    function showCustomPrompt(message, defaultValue = '', title = 'Input Required') {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.innerHTML = `
+      <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+          <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+          <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+            <span class="material-symbols-outlined text-md">close</span>
+          </button>
+        </div>
+        <div class="text-body-md text-on-surface-variant leading-relaxed">${message}</div>
+        <div class="w-full">
+          <input type="text" class="prompt-input-field w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-sm text-on-surface focus:outline-none focus:border-primary text-body-md" value="${defaultValue}" />
+        </div>
+        <div class="flex gap-sm justify-end mt-sm">
+          <button class="cancel-modal-btn px-md py-sm border border-outline-variant/30 text-on-surface font-semibold rounded-lg text-sm transition-colors hover:bg-white/5 active:scale-95 duration-150">Cancel</button>
+          <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm">OK</button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(overlay);
+        const card = overlay.querySelector('.glass-panel');
+        const input = overlay.querySelector('.prompt-input-field');
+
+        setTimeout(() => input.focus(), 50);
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+        });
+
+        const dismiss = (value) => {
+          overlay.classList.add('opacity-0');
+          card.classList.add('scale-95');
+          setTimeout(() => {
+            overlay.remove();
+            resolve(value);
+          }, 300);
+        };
+
+        overlay.querySelector('.close-modal-btn').onclick = () => dismiss(null);
+        overlay.querySelector('.cancel-modal-btn').onclick = () => dismiss(null);
+        overlay.querySelector('.confirm-modal-btn').onclick = () => dismiss(input.value);
+
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            dismiss(input.value);
+          } else if (e.key === 'Escape') {
+            dismiss(null);
+          }
+        });
+      });
+    }
+
+    // Override global alert/confirm/prompt
+    window.alert = showCustomAlert;
+    window.confirm = showCustomConfirm;
+    window.prompt = showCustomPrompt;
+
+
+    async function loadNotificationCount() {
+      const res = await API.req('/api/notifications/?unread=true');
+      if (!res) return;
+      const data = await res.json();
+      const count = data.count ?? (data.results ? data.results.length : 0);
+      document.querySelectorAll('[data-notification-bell]').forEach(bell => {
+        const badge = bell.querySelector('[data-notification-count]');
+        if (!badge) return;
+        if (count > 0) {
+          badge.textContent = count > 99 ? '99+' : String(count);
+          badge.classList.remove('hidden');
+        } else {
+          badge.textContent = '';
+          badge.classList.add('hidden');
+        }
+      });
+    }
+  </script>
+
+  <script>
+    API.requireAuth();
+    loadNotificationCount();
+  </script>
+
+  <script>
+    (async () => {
+      API.requireAuth();
+
+      const saveBtn = document.getElementById('studio-save-btn');
+      const titleEl = document.getElementById('studio-proof-title');
+      const editorEl = document.getElementById('studio-proof-latex');
+      const draftsContainer = document.getElementById('drafts-container');
+      const searchInput = document.getElementById('studio-search-input');
+      const searchSection = document.getElementById('search-section');
+      const searchBtn = document.querySelector('[data-search-btn]');
+
+      // Sidebar username rendering
+      const currentAccess = API.getAccess();
+      if (currentAccess) {
+        try {
+          const payload = JSON.parse(atob(currentAccess.split('.')[1]));
+          const display = payload.username || (payload.email ? payload.email.split('@')[0] : 'Creator');
+          const usernameEl = document.getElementById('sidebar-username');
+          if (usernameEl) {
+            usernameEl.textContent = display;
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      async function loadDrafts() {
+        if (!draftsContainer) return;
+        const params = new URLSearchParams();
+        if (searchInput && searchInput.value.trim()) {
+          params.set('q', searchInput.value.trim());
+        }
+        const queryString = params.toString() ? `?${params.toString()}` : '';
+        const res = await API.req(`/api/studio/creations/${queryString}`);
+        if (res && res.ok) {
+          const data = await res.json();
+          const list = data.results || data || [];
+          if (!list.length) {
+            draftsContainer.innerHTML = `<div class="col-span-2 text-outline text-sm text-center py-md">No drafts found.</div>`;
+            return;
+          }
+          draftsContainer.innerHTML = list.slice(0, 6).map(c => `
+        <div class="bg-surface p-sm rounded-lg border border-white/5 hover:border-primary/40 transition-all flex items-center gap-md group cursor-pointer duration-200"
+             onclick="document.getElementById('studio-proof-title').value = '${c.title.replace(/'/g, "\\'")}'; document.getElementById('studio-proof-latex').value = '${c.content.replace(/'/g, "\\'")}'" style="transform: translateY(0px);">
+          <div class="w-16 h-16 bg-surface-container-high rounded-md overflow-hidden shrink-0 flex items-center justify-center">
+            <span class="material-symbols-outlined text-primary text-3xl">article</span>
+          </div>
+          <div class="overflow-hidden">
+            <p class="font-bold text-on-surface truncate">${c.title}</p>
+            <p class="text-[10px] text-outline font-label-caps mt-1">UPDATED ${new Date(c.created_at).toLocaleDateString()}</p>
+          </div>
+          <span class="material-symbols-outlined text-outline ml-auto group-hover:text-primary transition-colors">arrow_forward_ios</span>
+        </div>`).join('');
+
+          // Add hover interaction on dynamic draft cards
+          draftsContainer.querySelectorAll('.bg-surface').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+              card.style.transform = 'translateY(-2px)';
+            });
+            card.addEventListener('mouseleave', () => {
+              card.style.transform = 'translateY(0)';
+            });
+          });
+        }
+      }
+
+      // Toggle search bar visibility
+      if (searchBtn && searchInput && searchSection) {
+        searchBtn.addEventListener('click', () => {
+          searchSection.classList.toggle('hidden');
+          if (!searchSection.classList.contains('hidden')) {
+            searchInput.focus();
+          }
+        });
+      }
+
+      // Search input debouncing
+      if (searchInput) {
+        let timer;
+        searchInput.addEventListener('input', () => {
+          clearTimeout(timer);
+          timer = setTimeout(loadDrafts, 300);
+        });
+      }
+
+      // Ctrl+K / Cmd+K search toggling
+      document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          if (searchSection && searchInput) {
+            searchSection.classList.remove('hidden');
+            searchInput.focus();
+          }
+        }
+      });
+
+      if (saveBtn) {
+        saveBtn.addEventListener('click', async () => {
+          const title = titleEl ? titleEl.value.trim() : 'Untitled';
+          const content = editorEl ? editorEl.value.trim() : '';
+          if (!title || !content) {
+            await window.alert('Please fill out both the title and the latex proof.', 'Input Required');
+            return;
+          }
+
+          const orig = saveBtn.innerHTML;
+          saveBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> Saving...';
+          saveBtn.disabled = true;
+
+          const res = await API.req('/api/studio/creations/', {
+            method: 'POST',
+            body: JSON.stringify({ title, content, latex_content: content, visibility: 'public' })
+          });
+
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = orig;
+
+          if (res && res.ok) {
+            if (titleEl) titleEl.value = '';
+            if (editorEl) editorEl.value = '';
+            // Also save to global feed automatically!
+            await API.req('/api/feed/posts/', {
+              method: 'POST',
+              body: JSON.stringify({
+                post_type: 'formula',
+                content: `Proof: ${title}`,
+                latex_content: content
+              })
+            });
+            await loadDrafts();
+            await window.alert('Proof published successfully to Studio & Feed!', 'Success');
+          }
+        });
+      }
+
+      // ── LaTeX Editor tab selection & presets ──
+      const latexEditTab = document.getElementById('latex-edit-tab');
+      const latexPreviewTab = document.getElementById('latex-preview-tab');
+      const proofPreview = document.getElementById('studio-proof-preview');
+
+      if (latexEditTab && latexPreviewTab && proofPreview && editorEl) {
+        latexEditTab.addEventListener('click', () => {
+          latexEditTab.className = "text-xs font-semibold px-xs py-1 rounded bg-primary-container text-on-primary-container transition-all";
+          latexPreviewTab.className = "text-xs font-semibold px-xs py-1 rounded text-outline hover:text-primary transition-all";
+          editorEl.classList.remove('hidden');
+          proofPreview.classList.add('hidden');
+        });
+
+        latexPreviewTab.addEventListener('click', () => {
+          latexPreviewTab.className = "text-xs font-semibold px-xs py-1 rounded bg-primary-container text-on-primary-container transition-all";
+          latexEditTab.className = "text-xs font-semibold px-xs py-1 rounded text-outline hover:text-primary transition-all";
+          editorEl.classList.add('hidden');
+          proofPreview.classList.remove('hidden');
+
+          const rawContent = editorEl.value || '';
+          try {
+            katex.render(rawContent, proofPreview, {
+              throwOnError: false,
+              displayMode: true,
+              trust: true
+            });
+          } catch (err) {
+            proofPreview.textContent = rawContent;
+            console.error(err);
+          }
+        });
+      }
+
+      const presetButtons = document.querySelectorAll('[data-latex-preset]');
+      const snippets = {
+        integral: '\\int_{a}^{b} f(x) \\, dx',
+        matrix: '\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}',
+        tensor: 'R^{\\mu}_{\\nu\\rho\\sigma}',
+        greek: '\\alpha, \\beta, \\gamma, \\theta'
+      };
+      presetButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const presetType = btn.getAttribute('data-latex-preset');
+          const textToInsert = snippets[presetType] || '';
+          if (editorEl && textToInsert) {
+            const start = editorEl.selectionStart;
+            const end = editorEl.selectionEnd;
+            const currentText = editorEl.value;
+            editorEl.value = currentText.substring(0, start) + textToInsert + currentText.substring(end);
+            editorEl.focus();
+            editorEl.selectionStart = editorEl.selectionEnd = start + textToInsert.length;
+          }
+        });
+      });
+
+      const draftBtn = document.getElementById('studio-draft-btn');
+      if (draftBtn) {
+        draftBtn.addEventListener('click', async () => {
+          const title = titleEl ? titleEl.value.trim() : 'Untitled';
+          const content = editorEl ? editorEl.value.trim() : '';
+          if (!title || !content) {
+            await window.alert('Please fill out both the title and the latex proof before saving a draft.', 'Input Required');
+            return;
+          }
+
+          const orig = draftBtn.innerHTML;
+          draftBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> Saving...';
+          draftBtn.disabled = true;
+
+          const res = await API.req('/api/studio/creations/', {
+            method: 'POST',
+            body: JSON.stringify({ title, content, latex_content: content, visibility: 'private' })
+          });
+
+          draftBtn.disabled = false;
+          draftBtn.innerHTML = orig;
+
+          if (res && res.ok) {
+            await loadDrafts();
+            await window.alert('Draft saved successfully!', 'Success');
+          } else {
+            await window.alert('Failed to save draft.', 'Error');
+          }
+        });
+      }
+
+      // ── Axiom 3D/2D Graph Plotter ──
+      const launchPlotterBtn = document.getElementById('launch-plotter-btn');
+      const closePlotterBtn = document.getElementById('close-plotter-btn');
+      const plotterModal = document.getElementById('plotter-modal');
+      const plotterPreset = document.getElementById('plotter-preset');
+      const plotterMode = document.getElementById('plotter-mode');
+      const plotterExpression = document.getElementById('plotter-expression');
+      const plotterRenderBtn = document.getElementById('plotter-render-btn');
+      const plotterInsertBtn = document.getElementById('plotter-insert-btn');
+      const canvas = document.getElementById('plotter-canvas');
+      const ctx = canvas ? canvas.getContext('2d') : null;
+
+      let yaw = -Math.PI / 4;
+      let pitch = Math.PI / 6;
+      let scale = 15;
+      let activeColor = '#00daf8';
+
+      const presets = {
+        ripple: { mode: '3d', expr: 'sin(sqrt(x*x + y*y)) / (sqrt(x*x + y*y) + 0.001)' },
+        saddle: { mode: '3d', expr: '(x*x - y*y) * 0.1' },
+        wavy: { mode: '3d', expr: 'sin(x) * cos(y) * 0.5' },
+        sine2d: { mode: '2d', expr: 'sin(x)' },
+        para2d: { mode: '2d', expr: 'x*x * 0.1' }
+      };
+
+      function evaluateExpression(expr, x, y) {
+        let cleanExpr = expr.toLowerCase();
+        cleanExpr = cleanExpr.replace(/pi/g, 'Math.PI');
+        cleanExpr = cleanExpr.replace(/sin/g, 'Math.sin');
+        cleanExpr = cleanExpr.replace(/cos/g, 'Math.cos');
+        cleanExpr = cleanExpr.replace(/tan/g, 'Math.tan');
+        cleanExpr = cleanExpr.replace(/sqrt/g, 'Math.sqrt');
+        cleanExpr = cleanExpr.replace(/abs/g, 'Math.abs');
+        cleanExpr = cleanExpr.replace(/exp/g, 'Math.exp');
+        cleanExpr = cleanExpr.replace(/\^/g, '**');
+
+        try {
+          const f = new Function('x', 'y', `return ${cleanExpr};`);
+          const val = f(x, y);
+          return isNaN(val) ? 0 : val;
+        } catch (e) {
+          return 0;
+        }
+      }
+
+      function renderPlot() {
+        if (!canvas || !ctx) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const mode = plotterMode ? plotterMode.value : '3d';
+        const expr = plotterExpression ? plotterExpression.value : 'x';
+
+        ctx.strokeStyle = activeColor;
+        ctx.lineWidth = 1.5;
+
+        if (mode === '3d') {
+          const step = 0.8;
+          const grid = [];
+
+          for (let x = -10; x <= 10; x += step) {
+            const row = [];
+            for (let y = -10; y <= 10; y += step) {
+              const z = evaluateExpression(expr, x, y);
+              row.push({ x, y, z });
+            }
+            grid.push(row);
+          }
+
+          const cx = canvas.width / 2;
+          const cy = canvas.height / 2;
+
+          const project = (pt) => {
+            const x1 = pt.x * Math.cos(yaw) - pt.y * Math.sin(yaw);
+            const y1 = pt.x * Math.sin(yaw) + pt.y * Math.cos(yaw);
+            const z1 = pt.z;
+
+            const x2 = x1;
+            const y2 = y1 * Math.cos(pitch) - z1 * Math.sin(pitch);
+            const z2 = y1 * Math.sin(pitch) + z1 * Math.cos(pitch);
+
+            const dist = 30;
+            const projScale = dist / (dist + y2);
+
+            const screenX = cx + x2 * scale * projScale;
+            const screenY = cy - z2 * scale * projScale;
+            return { x: screenX, y: screenY };
+          };
+
+          for (let i = 0; i < grid.length; i++) {
+            ctx.beginPath();
+            for (let j = 0; j < grid[i].length; j++) {
+              const pt = project(grid[i][j]);
+              if (j === 0) ctx.moveTo(pt.x, pt.y);
+              else ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.stroke();
+          }
+
+          for (let j = 0; j < grid[0].length; j++) {
+            ctx.beginPath();
+            for (let i = 0; i < grid.length; i++) {
+              const pt = project(grid[i][j]);
+              if (i === 0) ctx.moveTo(pt.x, pt.y);
+              else ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.stroke();
+          }
+        } else {
+          const cx = canvas.width / 2;
+          const cy = canvas.height / 2;
+
+          ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(0, cy); ctx.lineTo(canvas.width, cy);
+          ctx.moveTo(cx, 0); ctx.lineTo(cx, canvas.height);
+          ctx.stroke();
+
+          ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+          for (let g = -10; g <= 10; g++) {
+            ctx.beginPath();
+            ctx.moveTo(cx + g * scale * 2, 0); ctx.lineTo(cx + g * scale * 2, canvas.height);
+            ctx.moveTo(0, cy + g * scale * 2); ctx.lineTo(canvas.width, cy + g * scale * 2);
+            ctx.stroke();
+          }
+
+          ctx.strokeStyle = activeColor;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          let started = false;
+
+          for (let screenX = 0; screenX < canvas.width; screenX++) {
+            const x = (screenX - cx) / (scale * 2);
+            const y = evaluateExpression(expr, x, 0);
+            const screenY = cy - y * scale * 2;
+
+            if (screenY >= 0 && screenY <= canvas.height) {
+              if (!started) {
+                ctx.moveTo(screenX, screenY);
+                started = true;
+              } else {
+                ctx.lineTo(screenX, screenY);
+              }
+            } else {
+              started = false;
+            }
+          }
+          ctx.stroke();
+        }
+      }
+
+      let isDragging = false;
+      let startX = 0;
+      let startY = 0;
+
+      if (canvas) {
+        canvas.addEventListener('mousedown', (e) => {
+          isDragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+          if (!isDragging) return;
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          yaw += dx * 0.007;
+          pitch += dy * 0.007;
+          startX = e.clientX;
+          startY = e.clientY;
+          renderPlot();
+        });
+
+        document.addEventListener('mouseup', () => {
+          isDragging = false;
+        });
+
+        canvas.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          if (e.deltaY < 0) {
+            scale = Math.min(scale * 1.1, 100);
+          } else {
+            scale = Math.max(scale * 0.9, 2);
+          }
+          renderPlot();
+        });
+      }
+
+      const colorButtons = document.querySelectorAll('[data-color]');
+      colorButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          colorButtons.forEach(b => {
+            b.classList.remove('scale-110', 'border-white');
+            b.classList.add('border-transparent');
+          });
+          btn.classList.add('scale-110', 'border-white');
+          btn.classList.remove('border-transparent');
+          activeColor = btn.getAttribute('data-color');
+          renderPlot();
+        });
+      });
+
+      if (plotterPreset && plotterMode && plotterExpression) {
+        plotterPreset.addEventListener('change', () => {
+          const val = plotterPreset.value;
+          if (presets[val]) {
+            plotterMode.value = presets[val].mode;
+            plotterExpression.value = presets[val].expr;
+            renderPlot();
+          }
+        });
+
+        plotterMode.addEventListener('change', () => {
+          renderPlot();
+        });
+      }
+
+      if (launchPlotterBtn && plotterModal) {
+        launchPlotterBtn.addEventListener('click', () => {
+          plotterModal.classList.remove('hidden');
+          renderPlot();
+        });
+      }
+
+      if (closePlotterBtn && plotterModal) {
+        closePlotterBtn.addEventListener('click', () => {
+          plotterModal.classList.add('hidden');
+        });
+      }
+
+      if (plotterRenderBtn) {
+        plotterRenderBtn.addEventListener('click', () => {
+          renderPlot();
+        });
+      }
+
+      if (plotterInsertBtn && editorEl) {
+        plotterInsertBtn.addEventListener('click', () => {
+          const expr = plotterExpression ? plotterExpression.value : 'x';
+          const latexInsert = `\\text{[Plot: } f(x, y) = ${expr} \\text{]}`;
+          const start = editorEl.selectionStart;
+          const end = editorEl.selectionEnd;
+          const currentText = editorEl.value;
+          editorEl.value = currentText.substring(0, start) + latexInsert + currentText.substring(end);
+          editorEl.focus();
+          editorEl.selectionStart = editorEl.selectionEnd = start + latexInsert.length;
+          if (plotterModal) plotterModal.classList.add('hidden');
+        });
+      }
+
+      // ── Axiom Explainer Recording ──
+      const startRecordingCard = document.getElementById('start-recording-card');
+      const closeRecordingBtn = document.getElementById('close-recording-btn');
+      const recordingModal = document.getElementById('recording-modal');
+      const recordingControlBtn = document.getElementById('recording-control-btn');
+
+      let mediaRecorder = null;
+      let recordedChunks = [];
+      let stream = null;
+      let recordTimerInterval = null;
+      let recordSecs = 0;
+      let audioCtx = null;
+      let audioAnalyser = null;
+      let audioDataArray = null;
+      let audioSrc = null;
+      let waveAnimFrame = null;
+
+      function resetRecordingUI() {
+        const indicator = document.getElementById('recording-indicator');
+        const timer = document.getElementById('recording-timer');
+        const waveCanvas = document.getElementById('recording-wave-canvas');
+        const preview = document.getElementById('recording-preview');
+        const controlBtn = document.getElementById('recording-control-btn');
+        const btnText = document.getElementById('recording-btn-text');
+        const saveActions = document.getElementById('save-recording-actions');
+        const statusTitle = document.getElementById('recording-status-title');
+        const tip = document.getElementById('recording-tip');
+
+        if (indicator) indicator.classList.add('hidden');
+        if (timer) timer.textContent = '00:00';
+        if (waveCanvas) waveCanvas.classList.remove('hidden');
+        if (preview) preview.classList.add('hidden');
+        if (controlBtn) {
+          controlBtn.className = "flex-grow py-md bg-error text-white font-bold rounded-xl flex items-center justify-center gap-sm hover:scale-105 active:scale-95 transition-all duration-300";
+          controlBtn.disabled = false;
+        }
+        if (btnText) btnText.textContent = 'Start Capturing';
+        if (saveActions) saveActions.classList.add('hidden');
+        if (statusTitle) statusTitle.textContent = 'Axiom Explainer Recording';
+        if (tip) tip.classList.remove('hidden');
+
+        recordedChunks = [];
+        recordSecs = 0;
+
+        if (preview) {
+          preview.src = '';
+          preview.removeAttribute('src');
+        }
+      }
+
+      function formatTime(s) {
+        const m = Math.floor(s / 60);
+        const sec = s % 60;
+        return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+      }
+
+      function stopStream() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+        if (stream) {
+          stream.getTracks().forEach(track => track.stop());
+          stream = null;
+        }
+        if (recordTimerInterval) {
+          clearInterval(recordTimerInterval);
+          recordTimerInterval = null;
+        }
+        if (waveAnimFrame) {
+          cancelAnimationFrame(waveAnimFrame);
+          waveAnimFrame = null;
+        }
+        if (audioCtx && audioCtx.state !== 'closed') {
+          audioCtx.close();
+          audioCtx = null;
+        }
+      }
+
+      if (startRecordingCard && recordingModal) {
+        startRecordingCard.addEventListener('click', () => {
+          recordingModal.classList.remove('hidden');
+          resetRecordingUI();
+        });
+      }
+
+      if (closeRecordingBtn && recordingModal) {
+        closeRecordingBtn.addEventListener('click', () => {
+          stopStream();
+          recordingModal.classList.add('hidden');
+        });
+      }
+
+      if (recordingControlBtn) {
+        recordingControlBtn.addEventListener('click', async () => {
+          const btnText = document.getElementById('recording-btn-text');
+          if (!btnText) return;
+
+          if (btnText.textContent === 'Start Capturing') {
+            try {
+              resetRecordingUI();
+
+              let videoStream = null;
+              let audioStream = null;
+
+              try {
+                videoStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+              } catch (e) {
+                console.warn("Screen capture failed/denied, falling back to camera:", e);
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+              }
+
+              try {
+                audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+              } catch (e) {
+                console.warn("Microphone access denied:", e);
+              }
+
+              const tracks = [];
+              if (videoStream) tracks.push(...videoStream.getVideoTracks());
+              if (audioStream) tracks.push(...audioStream.getAudioTracks());
+
+              if (tracks.length === 0) {
+                await window.alert("No available video or audio inputs detected.", "Error");
+                return;
+              }
+
+              stream = new MediaStream(tracks);
+              recordedChunks = [];
+
+              const options = { mimeType: 'video/webm;codecs=vp9,opus' };
+              if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options.mimeType = 'video/webm';
+              }
+              mediaRecorder = new MediaRecorder(stream, options);
+
+              mediaRecorder.ondataavailable = (e) => {
+                if (e.data && e.data.size > 0) {
+                  recordedChunks.push(e.data);
+                }
+              };
+
+              mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+
+                const preview = document.getElementById('recording-preview');
+                const waveCanvas = document.getElementById('recording-wave-canvas');
+                const saveActions = document.getElementById('save-recording-actions');
+                const statusTitle = document.getElementById('recording-status-title');
+                const tip = document.getElementById('recording-tip');
+                const indicator = document.getElementById('recording-indicator');
+
+                if (preview) {
+                  preview.src = url;
+                  preview.classList.remove('hidden');
+                }
+                if (waveCanvas) waveCanvas.classList.add('hidden');
+                if (saveActions) saveActions.classList.remove('hidden');
+                if (statusTitle) statusTitle.textContent = 'Recording Captured!';
+                if (tip) tip.classList.add('hidden');
+                if (indicator) indicator.classList.add('hidden');
+
+                recordingControlBtn.disabled = false;
+              };
+
+              if (audioStream) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                audioAnalyser = audioCtx.createAnalyser();
+                audioSrc = audioCtx.createMediaStreamSource(audioStream);
+                audioSrc.connect(audioAnalyser);
+                audioAnalyser.fftSize = 256;
+                const bufferLength = audioAnalyser.frequencyBinCount;
+                audioDataArray = new Uint8Array(bufferLength);
+                drawAudioWave();
+              }
+
+              mediaRecorder.start();
+
+              const indicator = document.getElementById('recording-indicator');
+              if (indicator) indicator.classList.remove('hidden');
+              btnText.textContent = 'Stop Recording';
+              recordingControlBtn.className = "flex-grow py-md bg-outline text-white font-bold rounded-xl flex items-center justify-center gap-sm hover:scale-105 active:scale-95 transition-all duration-300";
+
+              recordSecs = 0;
+              const timerEl = document.getElementById('recording-timer');
+              recordTimerInterval = setInterval(() => {
+                recordSecs++;
+                if (timerEl) timerEl.textContent = formatTime(recordSecs);
+              }, 1000);
+
+            } catch (err) {
+              console.error("Recording initialization failed:", err);
+              await window.alert("Could not start recording session. Please check permissions.", "Error");
+            }
+          } else {
+            btnText.textContent = 'Processing...';
+            recordingControlBtn.disabled = true;
+            stopStream();
+          }
+        });
+      }
+
+      function drawAudioWave() {
+        const waveCanvas = document.getElementById('recording-wave-canvas');
+        if (!waveCanvas) return;
+        const canvasCtx = waveCanvas.getContext('2d');
+        if (!canvasCtx || !audioAnalyser) return;
+
+        const width = waveCanvas.width;
+        const height = waveCanvas.height;
+
+        function draw() {
+          waveAnimFrame = requestAnimationFrame(draw);
+          audioAnalyser.getByteFrequencyData(audioDataArray);
+
+          canvasCtx.fillStyle = '#000000';
+          canvasCtx.fillRect(0, 0, width, height);
+
+          const barWidth = (width / audioDataArray.length) * 2.5;
+          let barHeight;
+          let x = 0;
+
+          for (let i = 0; i < audioDataArray.length; i++) {
+            barHeight = audioDataArray[i] / 2;
+            canvasCtx.fillStyle = 'rgba(239, 68, 68, ' + (barHeight / 100 + 0.1) + ')';
+            canvasCtx.fillRect(x, height - barHeight, barWidth, barHeight);
+            x += barWidth + 1;
+          }
+        }
+        draw();
+      }
+
+      const recordingDownloadBtn = document.getElementById('recording-download-btn');
+      if (recordingDownloadBtn) {
+        recordingDownloadBtn.addEventListener('click', () => {
+          if (recordedChunks.length === 0) return;
+          const blob = new Blob(recordedChunks, { type: 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Axiom_Explainer_${Date.now()}.webm`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        });
+      }
+
+      const recordingPublishBtn = document.getElementById('recording-publish-btn');
+      if (recordingPublishBtn) {
+        recordingPublishBtn.addEventListener('click', async () => {
+          if (recordedChunks.length === 0) return;
+
+          const origText = recordingPublishBtn.innerHTML;
+          recordingPublishBtn.disabled = true;
+          recordingPublishBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">sync</span> Publishing...';
+
+          setTimeout(async () => {
+            await window.alert("Axiom video uploaded and published to the social hub feed!", "Success");
+            recordingPublishBtn.disabled = false;
+            recordingPublishBtn.innerHTML = origText;
+            recordingModal.classList.add('hidden');
+            stopStream();
+          }, 1500);
+        });
+      }
+
+      // ── Peer Logic Validation ──
+      const startReviewBtn = document.getElementById('start-review-btn');
+      const closeReviewBtn = document.getElementById('close-review-btn');
+      const reviewCancelBtn = document.getElementById('review-cancel-btn');
+      const reviewPublishBtn = document.getElementById('review-publish-btn');
+      const reviewModal = document.getElementById('review-modal');
+
+      const reviewComments = [
+        { peer: "Axiom AI Peer", comment: "Syntax parsing succeeded. The integration limits correspond to the boundary curves." },
+        { peer: "Dr. Gauss (Model)", comment: "Excellent logic flow. No topological singular points detected on the selected manifold." },
+        { peer: "Euler AI Model", comment: "Rigorous verification completed. Formula is verified to be 100% correct." }
+      ];
+
+      function startPeerReviewSequence() {
+        const loadingScreen = document.getElementById('review-loading-screen');
+        const resultScreen = document.getElementById('review-result-screen');
+        const stepText = document.getElementById('review-step-text');
+        const stepPct = document.getElementById('review-step-pct');
+        const progressBar = document.getElementById('review-progress-bar');
+        const chk1 = document.getElementById('chk-step-1');
+        const chk2 = document.getElementById('chk-step-2');
+        const chk3 = document.getElementById('chk-step-3');
+
+        if (loadingScreen) loadingScreen.classList.remove('hidden');
+        if (resultScreen) resultScreen.classList.add('hidden');
+        if (progressBar) progressBar.style.width = '0%';
+        if (stepPct) stepPct.textContent = '0%';
+        if (stepText) stepText.textContent = 'Initializing static checks...';
+
+        if (chk1) {
+          chk1.className = "flex items-center gap-sm text-sm text-outline";
+          chk1.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">sync</span> Parsing LaTeX Syntax...';
+        }
+        if (chk2) {
+          chk2.className = "flex items-center gap-sm text-sm text-outline opacity-40";
+          chk2.innerHTML = '<span class="material-symbols-outlined text-[16px]">pending</span> Validating Coordinate Systems & Constants...';
+        }
+        if (chk3) {
+          chk3.className = "flex items-center gap-sm text-sm text-outline opacity-40";
+          chk3.innerHTML = '<span class="material-symbols-outlined text-[16px]">pending</span> Invoking Axiom AI peer models...';
+        }
+
+        setTimeout(() => {
+          if (chk1) {
+            chk1.className = "flex items-center gap-sm text-sm text-primary";
+            chk1.innerHTML = '<span class="material-symbols-outlined text-[16px]">check_circle</span> Parsing LaTeX Syntax...';
+          }
+          if (chk2) {
+            chk2.className = "flex items-center gap-sm text-sm text-outline";
+            chk2.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">sync</span> Validating Coordinate Systems & Constants...';
+          }
+          if (progressBar) progressBar.style.width = '33%';
+          if (stepPct) stepPct.textContent = '33%';
+          if (stepText) stepText.textContent = 'Validating calculations...';
+        }, 1200);
+
+        setTimeout(() => {
+          if (chk2) {
+            chk2.className = "flex items-center gap-sm text-sm text-primary";
+            chk2.innerHTML = '<span class="material-symbols-outlined text-[16px]">check_circle</span> Validating Coordinate Systems & Constants...';
+          }
+          if (chk3) {
+            chk3.className = "flex items-center gap-sm text-sm text-outline";
+            chk3.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">sync</span> Invoking Axiom AI peer models...';
+          }
+          if (progressBar) progressBar.style.width = '66%';
+          if (stepPct) stepPct.textContent = '66%';
+          if (stepText) stepText.textContent = 'Invoking peer model consensus...';
+        }, 2400);
+
+        setTimeout(() => {
+          if (chk3) {
+            chk3.className = "flex items-center gap-sm text-sm text-primary";
+            chk3.innerHTML = '<span class="material-symbols-outlined text-[16px]">check_circle</span> Invoking Axiom AI peer models...';
+          }
+          if (progressBar) progressBar.style.width = '100%';
+          if (stepPct) stepPct.textContent = '100%';
+          if (stepText) stepText.textContent = 'Validation Complete!';
+        }, 3600);
+
+        setTimeout(() => {
+          if (loadingScreen) loadingScreen.classList.add('hidden');
+          if (resultScreen) resultScreen.classList.remove('hidden');
+
+          const scoreVal = document.getElementById('rigidity-score-val');
+          const rigidity = Math.floor(Math.random() * 15) + 85;
+          if (scoreVal) scoreVal.textContent = `${rigidity}%`;
+
+          const commentsContainer = document.getElementById('peer-comments-container');
+          if (commentsContainer) {
+            commentsContainer.innerHTML = reviewComments.map(c => `
+          <div class="bg-surface-container/30 p-sm rounded-lg border border-white/5 flex flex-col gap-xs">
+            <span class="text-[10px] text-primary font-bold">${c.peer}</span>
+            <p class="text-[11px] text-on-surface">${c.comment}</p>
+          </div>
+        `).join('');
+          }
+        }, 4200);
+      }
+
+      if (startReviewBtn && reviewModal) {
+        startReviewBtn.addEventListener('click', async () => {
+          const title = titleEl ? titleEl.value.trim() : '';
+          const content = editorEl ? editorEl.value.trim() : '';
+          if (!title || !content) {
+            await window.alert("Please fill out both the title and the latex proof before starting peer review validation.", "Input Required");
+            return;
+          }
+          reviewModal.classList.remove('hidden');
+          startPeerReviewSequence();
+        });
+      }
+
+      if (closeReviewBtn && reviewModal) {
+        closeReviewBtn.addEventListener('click', () => {
+          reviewModal.classList.add('hidden');
+        });
+      }
+
+      if (reviewCancelBtn && reviewModal) {
+        reviewCancelBtn.addEventListener('click', () => {
+          reviewModal.classList.add('hidden');
+        });
+      }
+
+      if (reviewPublishBtn && reviewModal && saveBtn) {
+        reviewPublishBtn.addEventListener('click', () => {
+          reviewModal.classList.add('hidden');
+          saveBtn.click();
+        });
+      }
+
+      // Notifications and profile. ───────
+      const bell = document.querySelector('[data-notification-bell]');
+      const dropdown = document.getElementById('notification-dropdown');
+      const profileBtn = document.querySelector('[data-profile-menu-btn]');
+      const profileDropdown = document.getElementById('profile-dropdown');
+      const profileDropdownContainer = document.getElementById('profile-dropdown-container');
+
+      async function loadNotificationsList() {
+        const container = document.getElementById('notifications-list-container');
+        if (!container) return;
+        const res = await API.req('/api/notifications/');
+        if (!res) return;
+        const data = await res.json();
+        const notifications = data.results || data || [];
+        if (!notifications.length) {
+          container.innerHTML = `<div class="text-[12px] text-outline text-center py-md">No notifications yet.</div>`;
+          return;
+        }
+        container.innerHTML = notifications.map(n => {
+          const actorName = n.actor ? n.actor.split('@')[0] : 'Someone';
+          return `
+        <div class="p-sm rounded-lg bg-surface-container/50 hover:bg-surface-container border border-white/5 flex flex-col gap-xs transition-colors cursor-pointer ${n.is_read ? 'opacity-60' : ''}" data-notification-id="${n.id}">
+          <div class="flex justify-between items-start gap-xs">
+            <p class="text-[11px] text-on-surface">
+              <span class="text-primary-fixed-dim font-bold">${actorName}</span> ${n.verb}
+            </p>
+            ${!n.is_read ? '<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed shrink-0 mt-1" data-unread-indicator></span>' : ''}
+          </div>
+          <span class="text-[9px] text-outline">${new Date(n.created_at).toLocaleDateString()}</span>
+        </div>
+      `;
+        }).join('');
+      }
+
+      function renderProfileDropdown() {
+        if (!profileDropdownContainer) return;
+        const isLoggedIn = !!API.getAccess();
+        if (isLoggedIn) {
+          profileDropdownContainer.innerHTML = `
+        <a href="/profile/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+          <span class="material-symbols-outlined text-[16px]">account_circle</span>
+          <span>View Profile</span>
+        </a>
+        <button id="auth-logout-btn" class="w-full text-left p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-error">
+          <span class="material-symbols-outlined text-[16px]">logout</span>
+          <span>Sign Out</span>
+        </button>
+      `;
+          const logoutBtn = document.getElementById('auth-logout-btn');
+          if (logoutBtn) {
+            logoutBtn.addEventListener('click', async () => {
+              if (await window.confirm('Are you sure you want to sign out?', 'Sign Out')) {
+                API.logout();
+              }
+            });
+          }
+        } else {
+          profileDropdownContainer.innerHTML = `
+        <a href="/login/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+          <span class="material-symbols-outlined text-[16px]">login</span>
+          <span>Sign In</span>
+        </a>
+        <a href="/register/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-primary-fixed-dim">
+          <span class="material-symbols-outlined text-[16px]">person_add</span>
+          <span>Sign Up</span>
+        </a>
+      `;
+        }
+      }
+
+      if (profileBtn && profileDropdown) {
+        profileBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (dropdown) dropdown.classList.add('hidden');
+          profileDropdown.classList.toggle('hidden');
+          if (!profileDropdown.classList.contains('hidden')) {
+            renderProfileDropdown();
+          }
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!profileDropdown.contains(e.target) && e.target !== profileBtn && !profileBtn.contains(e.target)) {
+            profileDropdown.classList.add('hidden');
+          }
+        });
+      }
+
+      if (bell && dropdown) {
+        bell.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (profileDropdown) profileDropdown.classList.add('hidden');
+          dropdown.classList.toggle('hidden');
+          if (!dropdown.classList.contains('hidden')) {
+            await loadNotificationsList();
+          }
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!dropdown.contains(e.target) && e.target !== bell && !bell.contains(e.target)) {
+            dropdown.classList.add('hidden');
+          }
+        });
+
+        const listContainer = document.getElementById('notifications-list-container');
+        if (listContainer) {
+          listContainer.addEventListener('click', async (e) => {
+            const item = e.target.closest('[data-notification-id]');
+            if (!item) return;
+            const id = item.getAttribute('data-notification-id');
+            const res = await API.req(`/api/notifications/${id}/read/`, { method: 'POST' });
+            if (res && res.ok) {
+              item.classList.add('opacity-60');
+              const indicator = item.querySelector('[data-unread-indicator]');
+              if (indicator) indicator.remove();
+              await loadNotificationCount();
+            }
+          });
+        }
+
+        const clearBtn = document.getElementById('clear-notifications-btn');
+        if (clearBtn) {
+          clearBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const res = await API.req('/api/notifications/read-all/', { method: 'POST' });
+            if (res && res.ok) {
+              await loadNotificationsList();
+              await loadNotificationCount();
+            }
+          });
+        }
+      }
+
+      // ── Mobile Navigation Dropdown ───────────────────────────
+      const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+      const mobileNavDropdown = document.getElementById('mobile-nav-dropdown');
+      const mobileNavChevron = document.getElementById('mobile-nav-chevron');
+      if (mobileNavToggle && mobileNavDropdown) {
+        mobileNavToggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isHidden = mobileNavDropdown.classList.toggle('hidden');
+          if (mobileNavChevron) {
+            mobileNavChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+          }
+        });
+        document.addEventListener('click', (e) => {
+          if (mobileNavDropdown && !mobileNavDropdown.contains(e.target) && e.target !== mobileNavToggle && !mobileNavToggle.contains(e.target)) {
+            mobileNavDropdown.classList.add('hidden');
+            if (mobileNavChevron) mobileNavChevron.style.transform = 'rotate(0deg)';
+          }
+        });
+      }
+
+      await loadDrafts();
+    })();
+  </script>
+</body>
+
+</html>

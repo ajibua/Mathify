@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist:wght@100;300;400;500;700;900&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Mathify | Groups &amp; Chats</title>
+  <style>
+    body {
+      background-color: #000000;
+      color: #e5e2e1;
+      font-family: 'Geist', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .glass-surface {
+      background: rgba(18, 18, 18, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .glass-panel {
+      backdrop-filter: blur(20px);
+      background: rgba(19, 19, 19, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .neon-glow {
+      box-shadow: 0 0 15px rgba(0, 218, 248, 0.2);
+    }
+
+    .math-inset {
+      background: rgba(14, 14, 14, 1);
+      border-left: 2px solid #a9f900;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #131313;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #3b494c;
+      border-radius: 10px;
+    }
+  </style>
+  <style>
+    body {
+      min-height: 100dvh;
+    }
+  </style>
+</head>
+
+<body class="bg-background overflow-hidden flex flex-col h-screen">
+  <!-- TopAppBar -->
+  <header
+    class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-margin-mobile h-16">
+    <div class="flex items-center gap-md">
+      <div
+        class="w-10 h-10 rounded-full overflow-hidden border border-primary/20 cursor-pointer active:scale-95 duration-150">
+        <img alt="user_profile_avatar" class="w-full h-auto"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNR6_bbp4LGM-l3X_VFqQX61HdJmx8nlSec62cyunD8Pywhtro8nXR36wJFs_b4NtVZvhAQXINWvpxgTaA9hivWo0aVSYsRrRB6W4lJkBQB4Mwe5wAM_cxF_hLRWG63cCe-0bPYkU9zaSUPYrgctciWQZRrNZc7sUqG1ERnb18j4AEAvRNLyKrbD_S5aEnC1zYhXZZrq_Qq4pP88iIREZpSLhy6j868wUBIhEzf7thaj5qEcE-5LxuTd8BqpPpst_A47n9Gx0pw2k" />
+      </div>
+      <span
+        class="font-headline-md text-headline-md font-bold tracking-tighter text-primary dark:text-primary-fixed-dim">Mathify</span>
+    </div>
+    <div class="flex items-center gap-md relative">
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150"
+        data-search-btn>search</button>
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
+        data-notification-bell>
+        notifications
+        <span
+          class="hidden absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold items-center justify-center"
+          data-notification-count></span>
+      </button>
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
+        data-profile-menu-btn>
+        account_circle
+      </button>
+      <div id="notification-dropdown"
+        class="hidden absolute right-0 w-80 glass-panel rounded-xl shadow-xl p-md flex flex-col gap-sm max-h-[400px] border border-white/10 text-on-surface z-50"
+        style="top: 52px;">
+        <div class="flex items-center justify-between border-b border-white/10 pb-xs">
+          <span class="font-bold text-body-sm text-primary">Notifications</span>
+          <button class="text-[10px] text-outline hover:text-primary transition-colors"
+            id="clear-notifications-btn">Mark all read</button>
+        </div>
+        <div class="overflow-y-auto flex flex-col gap-sm flex-1 pr-xs" id="notifications-list-container"
+          style="max-height: 300px;">
+          <div class="text-[12px] text-outline text-center py-md">Loading notifications...</div>
+        </div>
+      </div>
+      <div id="profile-dropdown"
+        class="hidden absolute right-0 w-48 glass-panel rounded-xl shadow-xl p-sm flex flex-col gap-sm border border-white/10 text-on-surface z-50"
+        style="top: 52px;">
+        <div class="flex flex-col gap-xs" id="profile-dropdown-container">
+          <!-- Dynamic dropdown menu options will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- Main Content Canvas -->
+  <main class="flex-1 mt-16 mb-16 overflow-y-auto custom-scrollbar flex flex-col md:flex-row bg-background">
+    <!-- Sidebar Navigation (Desktop) -->
+    <nav class="hidden md:flex flex-col gap-sm p-md w-72 bg-surface-container border-r border-white/5 h-full">
+      <div class="flex flex-col gap-xs flex-1">
+        <button data-filter-type=""
+          class="px-md py-sm rounded-lg flex items-center gap-md text-left transition-colors duration-150 cursor-pointer w-full bg-primary-container text-on-primary-container font-bold">
+          <span class="material-symbols-outlined">forum</span>
+          <span class="font-body-md text-body-md">All Chats</span>
+        </button>
+        <button data-filter-type="study"
+          class="px-md py-sm rounded-lg flex items-center gap-md text-left transition-colors duration-150 cursor-pointer w-full bg-surface-variant text-on-surface-variant hover:bg-surface-bright">
+          <span class="material-symbols-outlined">school</span>
+          <span class="font-body-md text-body-md">Study Groups</span>
+        </button>
+        <button data-filter-type="department"
+          class="px-md py-sm rounded-lg flex items-center gap-md text-left transition-colors duration-150 cursor-pointer w-full bg-surface-variant text-on-surface-variant hover:bg-surface-bright">
+          <span class="material-symbols-outlined">domain</span>
+          <span class="font-body-md text-body-md">Departments</span>
+        </button>
+        <button data-filter-type="competition"
+          class="px-md py-sm rounded-lg flex items-center gap-md text-left transition-colors duration-150 cursor-pointer w-full bg-surface-variant text-on-surface-variant hover:bg-surface-bright">
+          <span class="material-symbols-outlined">trophy</span>
+          <span class="font-body-md text-body-md">Competitions</span>
+        </button>
+      </div>
+    </nav>
+    <!-- Chat/Groups List -->
+    <section class="flex-1 w-full flex flex-col bg-background relative">
+      <!-- Search Bar (Toggleable) -->
+      <div class="p-md border-b border-white/5 bg-surface/30 backdrop-blur-sm hidden" id="search-section">
+        <div
+          class="relative flex items-center bg-surface-container-high rounded-xl border border-white/5 px-md py-sm group focus-within:border-primary/50 transition-all">
+          <span class="material-symbols-outlined text-outline mr-sm">search</span>
+          <input id="groups-search-input"
+            class="bg-transparent border-none focus:ring-0 text-body-md w-full placeholder:text-outline/50 focus:outline-none"
+            placeholder="Search groups or chats..." type="text" />
+          <div class="flex gap-xs">
+            <span
+              class="px-xs py-1 rounded bg-surface-container-lowest text-[10px] text-outline border border-white/5">⌘K</span>
+          </div>
+        </div>
+      </div>
+      <!-- Quick Filters -->
+      <div
+        class="md:hidden flex gap-sm p-md overflow-x-auto no-scrollbar border-b border-white/5 bg-surface/30 backdrop-blur-sm sticky top-0 z-40">
+        <button data-filter-type=""
+          class="px-md py-xs rounded-full bg-primary-container text-on-primary-container font-bold text-sm whitespace-nowrap">All
+          Chats</button>
+        <button data-filter-type="study"
+          class="px-md py-xs rounded-full bg-surface-variant text-on-surface-variant text-sm whitespace-nowrap hover:bg-surface-bright transition-colors">Study
+          Groups</button>
+        <button data-filter-type="department"
+          class="px-md py-xs rounded-full bg-surface-variant text-on-surface-variant text-sm whitespace-nowrap hover:bg-surface-bright transition-colors">Departments</button>
+        <button data-filter-type="competition"
+          class="px-md py-xs rounded-full bg-surface-variant text-on-surface-variant text-sm whitespace-nowrap hover:bg-surface-bright transition-colors">Competitions</button>
+      </div>
+      <!-- List Items -->
+      <div id="groups-list" class="flex flex-col">
+        <div class="p-lg text-center text-outline text-sm animate-pulse">Loading groups and chats...</div>
+      </div>
+
+      <!-- Active Chat Panel Markup -->
+      <div id="active-chat-panel" class="absolute inset-0 bg-background z-[80] flex-col hidden h-full w-full">
+        <!-- Chat Header -->
+        <div class="p-md border-b border-white/10 flex items-center justify-between bg-surface-container-high">
+          <div class="flex items-center gap-sm">
+            <button onclick="closeChatPanel()"
+              class="text-outline hover:text-on-surface flex items-center justify-center p-1 rounded-full hover:bg-white/5 mr-xs">
+              <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <div class="w-10 h-10 rounded-2xl bg-primary-container flex items-center justify-center">
+              <span class="material-symbols-outlined text-on-primary-container">groups</span>
+            </div>
+            <div>
+              <h3 id="chat-title" class="font-headline-sm text-headline-sm text-on-surface">Group Chat</h3>
+              <p id="chat-members-count" class="text-xs text-outline">Active Chat</p>
+            </div>
+          </div>
+          <!-- Chat Header Actions (Leave button) -->
+          <div id="chat-header-actions" class="flex items-center gap-sm">
+          </div>
+        </div>
+        <!-- Chat Messages -->
+        <div id="chat-messages-container"
+          class="flex-grow overflow-y-auto p-md space-y-md custom-scrollbar min-h-[300px] flex flex-col gap-sm">
+          <!-- messages loaded here -->
+        </div>
+        <!-- Chat Input -->
+        <form id="chat-input-form" class="p-md border-t border-white/10 flex gap-sm bg-surface-container-high">
+          <input type="text" id="chat-message-input"
+            class="flex-grow bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-sm text-on-surface focus:outline-none focus:border-primary"
+            placeholder="Type a message..." />
+          <button type="submit"
+            class="px-md py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity">Send</button>
+        </form>
+        <!-- Join Group Panel -->
+        <div id="join-group-panel"
+          class="p-md border-t border-white/10 flex flex-col items-center gap-sm bg-surface-container-high hidden">
+          <p class="text-sm text-outline text-center mb-xs">Join this group to participate in the conversation</p>
+          <button id="join-group-btn" onclick="joinGroup(currentGroupId)"
+            class="px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150">Join
+            Group</button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+  <!-- FAB -->
+  <button onclick="openCreateGroupModal()"
+    class="fixed bottom-24 right-gutter md:bottom-24 md:right-10 w-14 h-14 bg-secondary-container text-on-secondary-container rounded-2xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-90 transition-all z-50 neon-glow">
+    <span class="material-symbols-outlined text-3xl">add_comment</span>
+  </button>
+
+  <!-- Create Group Modal -->
+  <div id="create-group-modal"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/70 backdrop-blur-md hidden">
+    <div
+      class="w-full max-w-md glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl relative">
+      <div class="flex justify-between items-center">
+        <h3 class="font-headline-sm text-headline-sm text-primary font-bold">Create New Group</h3>
+        <button onclick="closeCreateGroupModal()"
+          class="text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <form id="create-group-form" class="flex flex-col gap-md">
+        <div class="flex flex-col gap-xs">
+          <label class="text-xs text-outline font-semibold uppercase">Group Name</label>
+          <input type="text" name="name" required
+            class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-sm text-on-surface focus:outline-none focus:border-primary text-body-md"
+            placeholder="Enter group name..." />
+        </div>
+        <div class="flex flex-col gap-xs">
+          <label class="text-xs text-outline font-semibold uppercase">Description</label>
+          <textarea name="description" rows="3"
+            class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-sm text-on-surface focus:outline-none focus:border-primary text-body-md"
+            placeholder="Describe the purpose of this group..."></textarea>
+        </div>
+        <div class="flex flex-col gap-xs">
+          <label class="text-xs text-outline font-semibold uppercase">Group Type</label>
+          <select name="group_type"
+            class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-sm text-on-surface focus:outline-none focus:border-primary text-body-md">
+            <option value="study">Study Group</option>
+            <option value="department">Department</option>
+            <option value="competition">Competition</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-sm mt-xs">
+          <input type="checkbox" name="is_private" id="is_private_checkbox"
+            class="w-4 h-4 rounded border-outline-variant/30 bg-surface-container-lowest text-primary focus:ring-0" />
+          <label for="is_private_checkbox" class="text-sm text-on-surface cursor-pointer select-none">Make this group
+            private</label>
+        </div>
+        <button type="submit"
+          class="w-full py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 mt-sm">Create
+          Group</button>
+      </form>
+    </div>
+  </div>
+  <!-- Desktop Bottom Nav -->
+  <nav
+    class="hidden md:flex fixed bottom-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-t border-white/10 justify-around items-center h-16 px-gutter">
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/">
+      <span class="material-symbols-outlined">dynamic_feed</span>
+      <span class="font-label-caps text-[10px]">Feed</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-primary relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-primary after:rounded-full duration-200"
+      href="/groups/">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">groups</span>
+      <span class="font-label-caps text-[10px]">Groups</span>
+    </a>
+    <div class="relative -top-4">
+      <a href="/studio/"
+        class="w-14 h-14 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg neon-glow active:scale-95 transition-transform duration-200">
+        <span class="material-symbols-outlined text-3xl">function</span>
+      </a>
+    </div>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/library/">
+      <span class="material-symbols-outlined">menu_book</span>
+      <span class="font-label-caps text-[10px]">Library</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/tutor/">
+      <span class="material-symbols-outlined">smart_toy</span>
+      <span class="font-label-caps text-[10px]">Mathify AI</span>
+    </a>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/profile/">
+      <span class="material-symbols-outlined">person</span>
+      <span class="font-label-caps text-[10px]">Profile</span>
+    </a>
+  </nav>
+
+  <!-- Mobile Bottom NavBar (dropdown style) -->
+  <div class="md:hidden fixed bottom-0 w-full z-50 flex flex-col items-center">
+    <!-- The upward dropdown menu -->
+    <div id="mobile-nav-dropdown"
+      class="hidden w-[92%] mb-2 glass-panel rounded-xl shadow-xl p-xs flex flex-col gap-xs border border-white/10 text-on-surface backdrop-blur-xl bg-surface/90">
+      <a href="/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">dynamic_feed</span>
+        <span class="text-sm">Feed</span>
+      </a>
+      <a href="/groups/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-primary font-semibold">
+        <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">groups</span>
+        <span class="text-sm">Groups</span>
+      </a>
+      <a href="/studio/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">function</span>
+        <span class="text-sm">Studio</span>
+      </a>
+      <a href="/library/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">menu_book</span>
+        <span class="text-sm">Library</span>
+      </a>
+      <a href="/tutor/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">smart_toy</span>
+        <span class="text-sm">Mathify AI</span>
+      </a>
+      <a href="/profile/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">person</span>
+        <span class="text-sm">Profile</span>
+      </a>
+    </div>
+
+    <!-- The main compact bottom bar -->
+    <button id="mobile-nav-toggle"
+      class="w-full bg-surface/90 backdrop-blur-xl border-t border-white/10 flex justify-between items-center h-12 px-margin-mobile text-on-surface cursor-pointer focus:outline-none">
+      <div class="flex items-center gap-sm text-primary">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">groups</span>
+        <span class="text-xs font-bold uppercase tracking-wider">Groups</span>
+      </div>
+      <div class="flex items-center gap-xs text-outline">
+        <span class="text-[10px] font-semibold">Menu</span>
+        <span class="material-symbols-outlined text-md transition-transform duration-200"
+          id="mobile-nav-chevron">expand_less</span>
+      </div>
+    </button>
+  </div>
+
+  <script>
+    // Simple micro-interaction for list items
+    function setupGroupInteractions() {
+      document.querySelectorAll('.group').forEach(item => {
+        item.addEventListener('mousedown', () => {
+          item.style.transform = 'scale(0.98)';
+        });
+        item.addEventListener('mouseup', () => {
+          item.style.transform = 'scale(1)';
+        });
+        item.addEventListener('mouseleave', () => {
+          item.style.transform = 'scale(1)';
+        });
+      });
+    }
+    setupGroupInteractions();
+  </script>
+
+  <script>
+    // ── Mathify API ────────────────────────────────────────────────────────────────
+    const API = {
+      getAccess: () => localStorage.getItem('mx_access'),
+      getRefresh: () => localStorage.getItem('mx_refresh'),
+      getCurrentUserId() {
+        const token = this.getAccess();
+        if (!token) return null;
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          return payload.user_id;
+        } catch (e) {
+          return null;
+        }
+      },
+      setTokens(a, r) {
+        localStorage.setItem('mx_access', a);
+        if (r) localStorage.setItem('mx_refresh', r);
+      },
+      clearTokens() {
+        localStorage.removeItem('mx_access');
+        localStorage.removeItem('mx_refresh');
+      },
+      async refresh() {
+        const r = this.getRefresh();
+        if (!r) return false;
+        const res = await fetch('/api/auth/token/refresh/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh: r })
+        });
+        if (res.ok) { const d = await res.json(); this.setTokens(d.access); return true; }
+        return false;
+      },
+      async req(url, opts = {}) {
+        const headers = {
+          'Content-Type': 'application/json',
+          ...(this.getAccess() ? { 'Authorization': `Bearer ${this.getAccess()}` } : {}),
+          ...(opts.headers || {})
+        };
+        let res = await fetch(url, { ...opts, headers });
+        if (res.status === 401) {
+          const ok = await this.refresh();
+          if (ok) {
+            headers['Authorization'] = `Bearer ${this.getAccess()}`;
+            res = await fetch(url, { ...opts, headers });
+          } else { this.clearTokens(); window.location.href = '/login/'; return null; }
+        }
+        return res;
+      },
+      requireAuth() { if (!this.getAccess()) window.location.href = '/login/'; },
+      logout() { this.clearTokens(); window.location.href = '/login/'; }
+    };
+
+    // ── Custom Modal Dialog System ───────────────────────────
+    function showCustomAlert(message, title = 'Notification') {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.innerHTML = `
+      <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+          <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+          <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+            <span class="material-symbols-outlined text-md">close</span>
+          </button>
+        </div>
+        <div class="text-body-md text-on-surface-variant leading-relaxed">${message}</div>
+        <div class="flex justify-end mt-sm">
+          <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm">OK</button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(overlay);
+        const card = overlay.querySelector('.glass-panel');
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+        });
+
+        const close = () => {
+          overlay.classList.add('opacity-0');
+          card.classList.add('scale-95');
+          setTimeout(() => {
+            overlay.remove();
+            resolve();
+          }, 300);
+        };
+
+        overlay.querySelector('.close-modal-btn').onclick = close;
+        overlay.querySelector('.confirm-modal-btn').onclick = close;
+      });
+    }
+
+    // Override global alert/confirm/prompt
+    function showCustomConfirm(message, title = 'Confirmation') {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.innerHTML = `
+      <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+          <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+          <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+            <span class="material-symbols-outlined text-md">close</span>
+          </button>
+        </div>
+        <div class="text-body-md text-on-surface-variant leading-relaxed">${message}</div>
+        <div class="flex gap-sm justify-end mt-sm">
+          <button class="cancel-modal-btn px-md py-sm border border-outline-variant/30 text-on-surface font-semibold rounded-lg text-sm transition-colors hover:bg-white/5 active:scale-95 duration-150">Cancel</button>
+          <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm">Confirm</button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(overlay);
+        const card = overlay.querySelector('.glass-panel');
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+        });
+
+        const dismiss = (value) => {
+          overlay.classList.add('opacity-0');
+          card.classList.add('scale-95');
+          setTimeout(() => {
+            overlay.remove();
+            resolve(value);
+          }, 300);
+        };
+
+        overlay.querySelector('.close-modal-btn').onclick = () => dismiss(false);
+        overlay.querySelector('.cancel-modal-btn').onclick = () => dismiss(false);
+        overlay.querySelector('.confirm-modal-btn').onclick = () => dismiss(true);
+      });
+    }
+
+    function showCustomPrompt(message, defaultValue = '', title = 'Input Required') {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.innerHTML = `
+      <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+          <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+          <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+            <span class="material-symbols-outlined text-md">close</span>
+          </button>
+        </div>
+        <div class="text-body-md text-on-surface-variant leading-relaxed">${message}</div>
+        <div class="w-full">
+          <input type="text" class="prompt-input-field w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-sm text-on-surface focus:outline-none focus:border-primary text-body-md" value="${defaultValue}" />
+        </div>
+        <div class="flex gap-sm justify-end mt-sm">
+          <button class="cancel-modal-btn px-md py-sm border border-outline-variant/30 text-on-surface font-semibold rounded-lg text-sm transition-colors hover:bg-white/5 active:scale-95 duration-150">Cancel</button>
+          <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm">OK</button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(overlay);
+        const card = overlay.querySelector('.glass-panel');
+        const input = overlay.querySelector('.prompt-input-field');
+
+        setTimeout(() => input.focus(), 50);
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+        });
+
+        const dismiss = (value) => {
+          overlay.classList.add('opacity-0');
+          card.classList.add('scale-95');
+          setTimeout(() => {
+            overlay.remove();
+            resolve(value);
+          }, 300);
+        };
+
+        overlay.querySelector('.close-modal-btn').onclick = () => dismiss(null);
+        overlay.querySelector('.cancel-modal-btn').onclick = () => dismiss(null);
+        overlay.querySelector('.confirm-modal-btn').onclick = () => dismiss(input.value);
+
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            dismiss(input.value);
+          } else if (e.key === 'Escape') {
+            dismiss(null);
+          }
+        });
+      });
+    }
+
+    window.alert = showCustomAlert;
+    window.confirm = showCustomConfirm;
+    window.prompt = showCustomPrompt;
+
+
+    async function loadNotificationCount() {
+      const res = await API.req('/api/notifications/?unread=true');
+      if (!res) return;
+      const data = await res.json();
+      const count = data.count ?? (data.results ? data.results.length : 0);
+      document.querySelectorAll('[data-notification-bell]').forEach(bell => {
+        const badge = bell.querySelector('[data-notification-count]');
+        if (!badge) return;
+        if (count > 0) {
+          badge.textContent = count > 99 ? '99+' : String(count);
+          badge.classList.remove('hidden');
+        } else {
+          badge.textContent = '';
+          badge.classList.add('hidden');
+        }
+      });
+    }
+  </script>
+
+  <script>
+    // ── Notifications & Profile Menu Dropdowns ────────
+    async function loadNotificationsList() {
+      const container = document.getElementById('notifications-list-container');
+      if (!container) return;
+      const res = await API.req('/api/notifications/');
+      if (!res) return;
+      const data = await res.json();
+      const notifications = data.results || data || [];
+      if (!notifications.length) {
+        container.innerHTML = `<div class="text-[12px] text-outline text-center py-md">No notifications yet.</div>`;
+        return;
+      }
+      container.innerHTML = notifications.map(n => {
+        const actorName = n.actor ? n.actor.split('@')[0] : 'Someone';
+        return `
+      <div class="p-sm rounded-lg bg-surface-container/50 hover:bg-surface-container border border-white/5 flex flex-col gap-xs transition-colors cursor-pointer ${n.is_read ? 'opacity-60' : ''}" data-notification-id="${n.id}">
+        <div class="flex justify-between items-start gap-xs">
+          <p class="text-[11px] text-on-surface">
+            <span class="text-primary-fixed-dim font-bold">${actorName}</span> ${n.verb}
+          </p>
+          ${!n.is_read ? '<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed shrink-0 mt-1" data-unread-indicator></span>' : ''}
+        </div>
+        <span class="text-[9px] text-outline">${new Date(n.created_at).toLocaleDateString()}</span>
+      </div>
+    `;
+      }).join('');
+    }
+
+    function renderProfileDropdown() {
+      const container = document.getElementById('profile-dropdown-container');
+      if (!container) return;
+      const isLoggedIn = !!API.getAccess();
+      if (isLoggedIn) {
+        container.innerHTML = `
+      <a href="/profile/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+        <span class="material-symbols-outlined text-[16px]">account_circle</span>
+        <span>View Profile</span>
+      </a>
+      <button id="auth-logout-btn" class="w-full text-left p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-error">
+        <span class="material-symbols-outlined text-[16px]">logout</span>
+        <span>Sign Out</span>
+      </button>
+    `;
+        const logoutBtn = document.getElementById('auth-logout-btn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', async () => {
+            if (await window.confirm('Are you sure you want to sign out?', 'Sign Out')) {
+              API.logout();
+            }
+          });
+        }
+      } else {
+        container.innerHTML = `
+      <a href="/login/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+        <span class="material-symbols-outlined text-[16px]">login</span>
+        <span>Sign In</span>
+      </a>
+      <a href="/register/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-primary-fixed-dim">
+        <span class="material-symbols-outlined text-[16px]">person_add</span>
+        <span>Sign Up</span>
+      </a>
+    `;
+      }
+    }
+
+    // Setup header toggles
+    (function setupHeaderControls() {
+      const bell = document.querySelector('[data-notification-bell]');
+      const dropdown = document.getElementById('notification-dropdown');
+      const profileBtn = document.querySelector('[data-profile-menu-btn]');
+      const profileDropdown = document.getElementById('profile-dropdown');
+      const searchBtn = document.querySelector('[data-search-btn]');
+      const searchSection = document.getElementById('search-section');
+      const searchInput = document.getElementById('groups-search-input');
+
+      if (profileBtn && profileDropdown) {
+        profileBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (dropdown) dropdown.classList.add('hidden');
+          profileDropdown.classList.toggle('hidden');
+          if (!profileDropdown.classList.contains('hidden')) {
+            renderProfileDropdown();
+          }
+        });
+        document.addEventListener('click', (e) => {
+          if (!profileDropdown.contains(e.target) && e.target !== profileBtn && !profileBtn.contains(e.target)) {
+            profileDropdown.classList.add('hidden');
+          }
+        });
+      }
+
+      if (bell && dropdown) {
+        bell.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (profileDropdown) profileDropdown.classList.add('hidden');
+          dropdown.classList.toggle('hidden');
+          if (!dropdown.classList.contains('hidden')) {
+            await loadNotificationsList();
+          }
+        });
+        document.addEventListener('click', (e) => {
+          if (!dropdown.contains(e.target) && e.target !== bell && !bell.contains(e.target)) {
+            dropdown.classList.add('hidden');
+          }
+        });
+
+        const listContainer = document.getElementById('notifications-list-container');
+        if (listContainer) {
+          listContainer.addEventListener('click', async (e) => {
+            const item = e.target.closest('[data-notification-id]');
+            if (!item) return;
+            const id = item.getAttribute('data-notification-id');
+            const res = await API.req(`/api/notifications/${id}/read/`, { method: 'POST' });
+            if (res && res.ok) {
+              item.classList.add('opacity-60');
+              const indicator = item.querySelector('[data-unread-indicator]');
+              if (indicator) indicator.remove();
+              await loadNotificationCount();
+            }
+          });
+        }
+
+        const clearBtn = document.getElementById('clear-notifications-btn');
+        if (clearBtn) {
+          clearBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const res = await API.req('/api/notifications/read-all/', { method: 'POST' });
+            if (res && res.ok) {
+              await loadNotificationsList();
+              await loadNotificationCount();
+            }
+          });
+        }
+      }
+
+      if (searchBtn && searchSection && searchInput) {
+        searchBtn.addEventListener('click', () => {
+          searchSection.classList.toggle('hidden');
+          if (!searchSection.classList.contains('hidden')) {
+            searchInput.focus();
+          }
+        });
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          if (searchSection && searchInput) {
+            searchSection.classList.remove('hidden');
+            searchInput.focus();
+          }
+        }
+      });
+    })();
+  </script>
+
+  <script>
+    // ── Chats and Groups Page Execution Logic ────────────────────────────────────────
+    let currentGroupId = null;
+    let chatPollInterval = null;
+    let currentFilterType = '';
+
+    function closeChatPanel() {
+      const panel = document.getElementById('active-chat-panel');
+      if (panel) {
+        panel.classList.add('hidden');
+        panel.classList.remove('flex');
+      }
+      currentGroupId = null;
+      clearInterval(chatPollInterval);
+    }
+
+    function updateMembershipUI(group) {
+      const inputForm = document.getElementById('chat-input-form');
+      const joinPanel = document.getElementById('join-group-panel');
+      const headerActions = document.getElementById('chat-header-actions');
+
+      if (!inputForm || !joinPanel) return;
+
+      if (group.is_member) {
+        inputForm.classList.remove('hidden');
+        inputForm.classList.add('flex');
+        joinPanel.classList.add('hidden');
+
+        if (headerActions) {
+          headerActions.innerHTML = `
+        <button onclick="leaveGroup(${group.id})" class="px-sm py-xs border border-error/30 text-error hover:bg-error/10 font-semibold rounded-lg text-xs transition-colors flex items-center gap-1 active:scale-95 duration-150">
+          <span class="material-symbols-outlined text-[14px]">logout</span>
+          <span>Leave Group</span>
+        </button>
+      `;
+        }
+      } else {
+        inputForm.classList.add('hidden');
+        joinPanel.classList.remove('hidden');
+        joinPanel.classList.add('flex');
+
+        if (headerActions) {
+          headerActions.innerHTML = '';
+        }
+      }
+    }
+
+    async function joinGroup(groupId) {
+      const res = await API.req(`/api/social/groups/${groupId}/join/`, { method: 'POST' });
+      if (res && res.ok) {
+        const groupRes = await API.req(`/api/social/groups/${groupId}/`);
+        if (groupRes && groupRes.ok) {
+          const groupData = await groupRes.json();
+          updateMembershipUI(groupData);
+          await loadMessages();
+          const sInput = document.getElementById('groups-search-input');
+          await loadGroupsList(sInput ? sInput.value.trim() : '', currentFilterType);
+        }
+      }
+    }
+
+    async function leaveGroup(groupId) {
+      if (!(await window.confirm('Are you sure you want to leave this group?', 'Leave Group'))) return;
+      const res = await API.req(`/api/social/groups/${groupId}/leave/`, { method: 'POST' });
+      if (res && res.ok) {
+        const groupRes = await API.req(`/api/social/groups/${groupId}/`);
+        if (groupRes && groupRes.ok) {
+          const groupData = await groupRes.json();
+          updateMembershipUI(groupData);
+          await loadMessages();
+          const sInput = document.getElementById('groups-search-input');
+          await loadGroupsList(sInput ? sInput.value.trim() : '', currentFilterType);
+        }
+      }
+    }
+
+    async function openChat(groupId, groupName) {
+      currentGroupId = groupId;
+      const panel = document.getElementById('active-chat-panel');
+      if (!panel) return;
+
+      panel.classList.remove('hidden');
+      panel.classList.add('flex');
+      document.getElementById('chat-title').textContent = groupName;
+
+      const headerActions = document.getElementById('chat-header-actions');
+      if (headerActions) headerActions.innerHTML = '';
+      document.getElementById('chat-input-form').classList.add('hidden');
+      document.getElementById('join-group-panel').classList.add('hidden');
+
+      const container = document.getElementById('chat-messages-container');
+      if (container) container.innerHTML = '<div class="text-center text-outline text-xs mt-md">Loading messages...</div>';
+
+      const groupRes = await API.req(`/api/social/groups/${groupId}/`);
+      if (groupRes && groupRes.ok) {
+        const groupData = await groupRes.json();
+        document.getElementById('chat-members-count').textContent = `${groupData.member_count} members`;
+        updateMembershipUI(groupData);
+        await loadMessages();
+      }
+
+      clearInterval(chatPollInterval);
+      chatPollInterval = setInterval(loadMessages, 3000);
+    }
+
+    async function loadMessages() {
+      if (!currentGroupId) return;
+      const res = await API.req(`/api/social/groups/${currentGroupId}/messages/`);
+      if (res && res.ok) {
+        const messages = await res.json();
+        const container = document.getElementById('chat-messages-container');
+        if (!container) return;
+        if (!messages.length) {
+          container.innerHTML = '<div class="text-center text-outline text-xs mt-md">No messages yet. Say hello!</div>';
+          return;
+        }
+        const currentUserId = API.getCurrentUserId();
+        const currentUsername = localStorage.getItem('mx_username');
+
+        container.innerHTML = messages.map(m => {
+          const isMe = String(m.sender_id || m.sender) === String(currentUserId) || (m.sender && m.sender.includes('@') && m.sender.split('@')[0] === currentUsername);
+          const senderName = m.sender ? m.sender.split('@')[0] : 'user';
+          return `
+        <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[85%] ${isMe ? 'self-end' : 'self-start'} gap-1">
+          <span class="text-[10px] text-outline px-xs font-bold uppercase">${senderName}</span>
+          <div class="rounded-xl p-sm text-body-md ${isMe ? 'bg-primary-container text-on-primary-container rounded-tr-none' : 'bg-surface-container border border-white/5 rounded-tl-none'}">
+            ${m.content}
+          </div>
+        </div>`;
+        }).join('');
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+
+    document.getElementById('chat-input-form').onsubmit = async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('chat-message-input');
+      const content = input.value.trim();
+      if (!content || !currentGroupId) return;
+      input.value = '';
+
+      const res = await API.req('/api/social/messages/', {
+        method: 'POST',
+        body: JSON.stringify({
+          group: currentGroupId,
+          content: content
+        })
+      });
+      if (res && res.ok) {
+        await loadMessages();
+      }
+    };
+
+    async function loadGroupsList(searchQuery = '', groupType = '') {
+      const params = new URLSearchParams();
+      if (searchQuery) params.set('q', searchQuery);
+      if (groupType) params.set('group_type', groupType);
+
+      const url = `/api/social/groups/${params.toString() ? `?${params}` : ''}`;
+      const res = await API.req(url);
+      if (!res) return;
+      const data = await res.json();
+      const groups = data.results || data || [];
+
+      const list = document.getElementById('groups-list');
+      if (!list) return;
+
+      if (!groups.length) {
+        list.innerHTML = `<div class="p-lg text-center text-outline text-sm">No groups found.</div>`;
+        return;
+      }
+
+      list.innerHTML = groups.map(g => `
+    <div onclick="openChat(${g.id}, '${g.name.replace(/'/g, "\\'")}')" class="group flex items-center gap-md p-md hover:bg-surface-container-low transition-colors cursor-pointer border-b border-white/5">
+      <div class="relative">
+        <div class="w-14 h-14 rounded-xl bg-surface-container-highest flex items-center justify-center border border-white/10 group-hover:border-primary/50 transition-all overflow-hidden">
+          <span class="material-symbols-outlined text-primary text-3xl">groups</span>
+        </div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex justify-between items-center mb-1">
+          <h3 class="font-headline-sm text-headline-sm text-primary truncate">${g.name}</h3>
+          <span class="text-[10px] font-label-caps text-outline uppercase tracking-wider">${new Date(g.created_at).toLocaleDateString()}</span>
+        </div>
+        <p class="text-body-sm text-on-surface-variant truncate">${g.description || 'No description.'}</p>
+        <p class="text-[11px] text-primary-fixed-dim mt-1">${g.member_count} members ${g.is_member ? '<span class="text-secondary-fixed ml-sm font-bold">(Joined)</span>' : ''}</p>
+      </div>
+    </div>`).join('');
+
+      setupGroupInteractions();
+    }
+
+    // Setup Search Listener
+    const sInput = document.getElementById('groups-search-input');
+    if (sInput) {
+      let timer;
+      sInput.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          const query = sInput.value.trim();
+          loadGroupsList(query, currentFilterType);
+        }, 300);
+      });
+    }
+
+    // Setup Filter Buttons
+    const fButtons = document.querySelectorAll('[data-filter-type]');
+    fButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentFilterType = btn.getAttribute('data-filter-type');
+
+        fButtons.forEach(b => {
+          if (b.getAttribute('data-filter-type') === currentFilterType) {
+            b.classList.add('bg-primary-container', 'text-on-primary-container', 'font-bold');
+            b.classList.remove('bg-surface-variant', 'text-on-surface-variant', 'hover:bg-surface-bright');
+          } else {
+            b.classList.remove('bg-primary-container', 'text-on-primary-container', 'font-bold');
+            b.classList.add('bg-surface-variant', 'text-on-surface-variant', 'hover:bg-surface-bright');
+          }
+        });
+
+        const query = sInput ? sInput.value.trim() : '';
+        loadGroupsList(query, currentFilterType);
+      });
+    });
+
+    // Setup Modal Logic
+    function openCreateGroupModal() {
+      const modal = document.getElementById('create-group-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeCreateGroupModal() {
+      const modal = document.getElementById('create-group-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+      const form = document.getElementById('create-group-form');
+      if (form) form.reset();
+    }
+
+    const cForm = document.getElementById('create-group-form');
+    if (cForm) {
+      cForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = cForm.elements.name.value.trim();
+        const description = cForm.elements.description.value.trim();
+        const group_type = cForm.elements.group_type.value;
+        const is_private = cForm.elements.is_private.checked;
+
+        if (!name) return;
+
+        const res = await API.req('/api/social/groups/', {
+          method: 'POST',
+          body: JSON.stringify({ name, description, group_type, is_private })
+        });
+
+        if (res && res.ok) {
+          closeCreateGroupModal();
+          await loadGroupsList(sInput ? sInput.value.trim() : '', currentFilterType);
+        } else {
+          await window.alert('Failed to create group. Please check your inputs.', 'Error');
+        }
+      });
+    }
+
+    // Initial Load
+    (async () => {
+      API.requireAuth();
+      loadNotificationCount();
+      await loadGroupsList();
+
+      // ── Mobile Navigation Dropdown ───────────────────────────
+      const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+      const mobileNavDropdown = document.getElementById('mobile-nav-dropdown');
+      const mobileNavChevron = document.getElementById('mobile-nav-chevron');
+      if (mobileNavToggle && mobileNavDropdown) {
+        mobileNavToggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isHidden = mobileNavDropdown.classList.toggle('hidden');
+          if (mobileNavChevron) {
+            mobileNavChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+          }
+        });
+        document.addEventListener('click', (e) => {
+          if (mobileNavDropdown && !mobileNavDropdown.contains(e.target) && e.target !== mobileNavToggle && !mobileNavToggle.contains(e.target)) {
+            mobileNavDropdown.classList.add('hidden');
+            if (mobileNavChevron) mobileNavChevron.style.transform = 'rotate(0deg)';
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+
+</html>

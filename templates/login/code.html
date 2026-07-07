@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist:wght@100;300;400;500;700;900&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Mathify | Login</title>
+  <style>
+    body {
+      background-color: #000000;
+      margin: 0;
+      overflow-x: hidden;
+      font-family: 'Geist', sans-serif;
+    }
+
+    .glass-card {
+      background: rgba(18, 18, 18, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .neon-glow-lime {
+      box-shadow: 0 0 15px rgba(169, 249, 0, 0.2);
+    }
+
+    .neon-glow-blue {
+      box-shadow: 0 0 15px rgba(0, 218, 248, 0.2);
+    }
+
+    .math-particle {
+      position: absolute;
+      pointer-events: none;
+      color: rgba(169, 249, 0, 0.15);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      user-select: none;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #00daf8 !important;
+      box-shadow: 0 0 10px rgba(0, 218, 248, 0.3);
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+  <style>
+    body {
+      min-height: 100dvh;
+    }
+  </style>
+</head>
+
+<body
+  class="bg-surface-container-lowest min-h-screen flex items-center justify-center p-gutter relative overflow-y-auto overflow-x-hidden">
+  <!-- Mathematical Particle Background -->
+  <div class="absolute inset-0 z-0 overflow-hidden opacity-30" id="particle-container"></div>
+  <!-- Main Login Canvas -->
+  <div class="relative z-10 w-full max-w-[440px] flex flex-col items-center">
+    <!-- Logo Section -->
+    <header class="mb-xl text-center group cursor-default">
+      <div class="relative inline-block">
+        <h1
+          class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary-fixed-dim tracking-tighter drop-shadow-[0_0_15px_rgba(0,218,248,0.4)]">
+          Mathify
+        </h1>
+        <div class="absolute -top-4 -right-8 opacity-40 group-hover:opacity-100 transition-opacity">
+          <span class="font-math-display text-secondary-fixed text-body-sm">∀x ∈ ℝ</span>
+        </div>
+      </div>
+      <p class="font-body-sm text-body-sm text-on-surface-variant mt-sm tracking-widest uppercase">Social Engineering by
+        Logic</p>
+    </header>
+    <!-- Login Card -->
+    <div class="glass-card w-full p-lg md:p-xl rounded-xl flex flex-col gap-md">
+      <div class="flex flex-col gap-xs mb-sm">
+        <h2 class="font-headline-sm text-headline-sm text-on-surface">Welcome back, Professor.</h2>
+        <p class="font-body-sm text-body-sm text-outline">Authenticate your identity to access the grid.</p>
+      </div>
+      <!-- Login Form -->
+      <form class="flex flex-col gap-md" onsubmit="event.preventDefault()">
+        <div class="flex flex-col gap-sm">
+          <label class="font-label-caps text-label-caps text-on-surface-variant px-xs">IDENTIFIER</label>
+          <div class="relative">
+            <span
+              class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline text-[20px]">alternate_email</span>
+            <input
+              class="w-full bg-surface-container-high border border-outline-variant rounded-lg py-md pl-[48px] pr-md text-on-surface font-body-md placeholder:text-outline/50 transition-all focus:bg-surface-bright"
+              placeholder="Email or Username" type="text" />
+          </div>
+        </div>
+        <div class="flex flex-col gap-sm">
+          <div class="flex justify-between items-center px-xs">
+            <label class="font-label-caps text-label-caps text-on-surface-variant">PASSCODE</label>
+            <a class="font-label-caps text-label-caps text-primary-fixed-dim hover:underline transition-all"
+              href="#">Forgot?</a>
+          </div>
+          <div class="relative">
+            <span
+              class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline text-[20px]">lock</span>
+            <input
+              class="w-full bg-surface-container-high border border-outline-variant rounded-lg py-md pl-[48px] pr-md text-on-surface font-body-md placeholder:text-outline/50 transition-all focus:bg-surface-bright"
+              placeholder="••••••••" type="password" />
+          </div>
+        </div>
+        <button
+          class="w-full bg-secondary-fixed text-on-secondary-fixed font-headline-sm text-headline-sm py-md rounded-lg mt-md hover:opacity-90 active:scale-95 transition-all neon-glow-lime flex items-center justify-center gap-sm">
+          Sign In
+          <span class="material-symbols-outlined">login</span>
+        </button>
+      </form>
+      <!-- Divider -->
+      <div class="flex items-center gap-md my-sm">
+        <div class="h-[1px] flex-1 bg-outline-variant/30"></div>
+        <span class="font-label-caps text-label-caps text-outline/50">OR SECURE VIA</span>
+        <div class="h-[1px] flex-1 bg-outline-variant/30"></div>
+      </div>
+      <!-- Social Logins -->
+      <div class="grid grid-cols-3 gap-sm">
+        <button
+          class="flex items-center justify-center py-md rounded-lg border border-outline-variant bg-surface-container-high hover:bg-surface-bright transition-all active:scale-95 group">
+          <img alt="Google" class="w-5 h-5 opacity-80 group-hover:opacity-100 transition-opacity"
+            data-alt="The iconic Google multi-colored G logo rendered with high contrast against a dark charcoal background. The style is minimalist and clean, with soft ambient light reflections suggesting a glass-like texture that aligns with a premium dark-mode interface."
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIVld1QUG9blOlPB5JZOh6ITF1zWO-aSa3LsVNfLID37Tv0EDDqKI42tez5BHIk7FwRsnFhwWqRr4fwfmPnFZZpQOf1B_-OsJspIzJ6Gm-08MGKeRpXIxvnfqHETgGFSJAgvRmgEF6DBFCBhI3vYvdz58auTX_NRmhJi4plNyfFrVFwD-1PSjoaxMcffGLgiBiUuvsZO52QklEq8fmZDxVSzQDChKteAv9sU5P2xDqhGP6Sgh64RWKGnKrS0XATWzTmUwvVrWRWRw" />
+        </button>
+        <button
+          class="flex items-center justify-center py-md rounded-lg border border-outline-variant bg-surface-container-high hover:bg-surface-bright transition-all active:scale-95 group">
+          <span class="material-symbols-outlined text-on-surface opacity-80 group-hover:opacity-100 transition-opacity"
+            style="font-variation-settings: 'FILL' 1;">terminal</span>
+        </button>
+        <button
+          class="flex items-center justify-center py-md rounded-lg border border-outline-variant bg-surface-container-high hover:bg-surface-bright transition-all active:scale-95 group">
+          <span class="material-symbols-outlined text-on-surface opacity-80 group-hover:opacity-100 transition-opacity"
+            style="font-variation-settings: 'FILL' 1;">ios</span>
+        </button>
+      </div>
+    </div>
+    <!-- Footer Link -->
+    <div class="mt-xl text-center">
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        Don't have an account?
+        <a class="text-primary-fixed-dim font-bold hover:text-primary transition-colors" href="#">Sign Up</a>
+      </p>
+    </div>
+  </div>
+  <!-- Background Decoration -->
+  <div
+    class="absolute bottom-[-100px] left-[-100px] w-[400px] h-[400px] bg-primary-fixed-dim/5 blur-[120px] rounded-full pointer-events-none">
+  </div>
+  <div
+    class="absolute top-[-100px] right-[-100px] w-[400px] h-[400px] bg-secondary-fixed/5 blur-[120px] rounded-full pointer-events-none">
+  </div>
+  <script>
+    // Particle Background Logic
+    const container = document.getElementById('particle-container');
+    const symbols = ['∫', '∑', 'π', '∞', '∆', 'θ', '√', 'λ', 'φ', '∂', '≈', '≠', '∈', '∀', '∃'];
+    const particleCount = 24;
+
+    function createParticle() {
+      const particle = document.createElement('div');
+      particle.className = 'math-particle';
+      particle.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+
+      const x = Math.random() * 100;
+      const y = Math.random() * 100;
+      const duration = 15 + Math.random() * 25;
+      const delay = Math.random() * -20;
+      const size = 12 + Math.random() * 20;
+
+      particle.style.left = `${x}%`;
+      particle.style.top = `${y}%`;
+      particle.style.fontSize = `${size}px`;
+      particle.style.animation = `floatParticle ${duration}s linear infinite`;
+      particle.style.animationDelay = `${delay}s`;
+
+      container.appendChild(particle);
+    }
+
+    // Add CSS Animation Keyframes dynamically
+    const style = document.createElement('style');
+    style.innerHTML = `
+            @keyframes floatParticle {
+                0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+                10% { opacity: 0.15; }
+                90% { opacity: 0.15; }
+                100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+            }
+        `;
+    document.head.appendChild(style);
+
+    for (let i = 0; i < particleCount; i++) {
+      createParticle();
+    }
+
+    // Mouse Parallax for high-impact feel
+    document.addEventListener('mousemove', (e) => {
+      const x = (e.clientX - window.innerWidth / 2) / 50;
+      const y = (e.clientY - window.innerHeight / 2) / 50;
+      container.style.transform = `translate(${x}px, ${y}px)`;
+    });
+  </script>
+
+  <script>
+    // ── Mathify API ────
+    const API = {
+      getAccess: () => localStorage.getItem('mx_access'),
+      getRefresh: () => localStorage.getItem('mx_refresh'),
+      setTokens(a, r) {
+        localStorage.setItem('mx_access', a);
+        if (r) localStorage.setItem('mx_refresh', r);
+      },
+      clearTokens() {
+        localStorage.removeItem('mx_access');
+        localStorage.removeItem('mx_refresh');
+      },
+      async refresh() {
+        const r = this.getRefresh();
+        if (!r) return false;
+        const res = await fetch('/api/auth/token/refresh/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh: r })
+        });
+        if (res.ok) { const d = await res.json(); this.setTokens(d.access); return true; }
+        return false;
+      },
+      async req(url, opts = {}) {
+        const headers = {
+          'Content-Type': 'application/json',
+          ...(this.getAccess() ? { 'Authorization': `Bearer ${this.getAccess()}` } : {}),
+          ...(opts.headers || {})
+        };
+        let res = await fetch(url, { ...opts, headers });
+        if (res.status === 401) {
+          const ok = await this.refresh();
+          if (ok) {
+            headers['Authorization'] = `Bearer ${this.getAccess()}`;
+            res = await fetch(url, { ...opts, headers });
+          } else { this.clearTokens(); window.location.href = '/login/'; return null; }
+        }
+        return res;
+      },
+      requireAuth() { if (!this.getAccess()) window.location.href = '/login/'; },
+      logout() { this.clearTokens(); window.location.href = '/login/'; }
+    };
+  </script>
+
+  <script>
+    document.querySelector('form').onsubmit = async (e) => {
+      e.preventDefault();
+      const inputs = e.target.querySelectorAll('input');
+      const email = inputs[0].value.trim();
+      const password = inputs[1].value;
+      const btn = e.target.querySelector('button[type=submit], button:not([type])');
+      const orig = btn.innerHTML;
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> Authenticating...';
+
+      const res = await fetch('/api/auth/token/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (res.ok) {
+        const d = await res.json();
+        API.setTokens(d.access, d.refresh);
+        window.location.href = '/';
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = orig;
+        const err = document.getElementById('login-error') || (() => {
+          const el = document.createElement('p');
+          el.id = 'login-error';
+          el.className = 'text-error text-body-sm text-center mt-sm';
+          e.target.appendChild(el);
+          return el;
+        })();
+        err.textContent = 'Invalid credentials. Please try again.';
+      }
+    };
+
+    // Fix Sign Up link
+    document.querySelectorAll('a[href="#"]').forEach(a => {
+      if (a.textContent.trim().toLowerCase().includes('sign up')) a.href = '/register/';
+    });
+  </script>
+
+</body>
+
+</html>

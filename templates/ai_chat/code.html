@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/main.css' %}"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist:wght@100;300;400;500;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<!-- Markdown & LaTeX Support -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mathify | AI Chat</title>
+<style>
+        body {
+            background-color: #000000;
+            color: #e5e2e1;
+            font-family: 'Geist', sans-serif;
+            overflow-x: hidden; 
+        }
+        .glass-nav {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .neon-glow {
+            box-shadow: 0 0 15px rgba(0, 218, 248, 0.2);
+        }
+        .math-block {
+            border-left: 3px solid #a9f900;
+            background: rgba(20, 20, 20, 0.8);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #121212;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3b494c;
+            border-radius: 10px;
+        }
+        .active-dot::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            width: 4px;
+            height: 4px;
+            background-color: #baf2ff;
+            border-radius: 50%;
+        }
+        
+        /* Rendered Markdown Styling */
+        .message-bubble ul {
+            list-style-type: disc;
+            margin-left: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .message-bubble ol {
+            list-style-type: decimal;
+            margin-left: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .message-bubble li {
+            margin-bottom: 0.25rem;
+        }
+        .message-bubble pre {
+            background-color: #0e0e0e;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .message-bubble code {
+            font-family: monospace;
+            background-color: rgba(255,255,255,0.1);
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+        }
+        .message-bubble p {
+            margin-bottom: 0.5rem;
+        }
+        .message-bubble h1, .message-bubble h2, .message-bubble h3 {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 0.75rem;
+            margin-bottom: 0.25rem;
+            color: #00daf8;
+        }
+    </style>
+<style>
+    body {
+      height: 100dvh;
+      min-height: 100dvh;
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background overflow-hidden flex flex-col h-screen">
+  <!-- TopAppBar -->
+  <header
+    class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-margin-mobile h-16">
+    <div class="flex items-center gap-md">
+      <div
+        class="w-10 h-10 rounded-full overflow-hidden border border-primary/20 cursor-pointer active:scale-95 duration-150">
+        <img alt="user_profile_avatar" class="w-full h-auto"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNR6_bbp4LGM-l3X_VFqQX61HdJmx8nlSec62cyunD8Pywhtro8nXR36wJFs_b4NtVZvhAQXINWvpxgTaA9hivWo0aVSYsRrRB6W4lJkBQB4Mwe5wAM_cxF_hLRWG63cCe-0bPYkU9zaSUPYrgctciWQZRrNZc7sUqG1ERnb18j4AEAvRNLyKrbD_S5aEnC1zYhXZZrq_Qq4pP88iIREZpSLhy6j868wUBIhEzf7thaj5qEcE-5LxuTd8BqpPpst_A47n9Gx0pw2k" />
+      </div>
+      <span
+        class="font-headline-md text-headline-md font-bold tracking-tighter text-primary dark:text-primary-fixed-dim">Mathify</span>
+    </div>
+    <div class="flex items-center gap-md relative">
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150"
+        data-search-btn>search</button>
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
+        data-notification-bell>
+        notifications
+        <span
+          class="hidden absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold items-center justify-center"
+          data-notification-count></span>
+      </button>
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
+        data-profile-menu-btn>
+        account_circle
+      </button>
+      <div id="notification-dropdown"
+        class="hidden absolute right-0 w-80 glass-panel rounded-xl shadow-xl p-md flex flex-col gap-sm max-h-[400px] border border-white/10 text-on-surface z-50"
+        style="top: 52px;">
+        <div class="flex items-center justify-between border-b border-white/10 pb-xs">
+          <span class="font-bold text-body-sm text-primary">Notifications</span>
+          <button class="text-[10px] text-outline hover:text-primary transition-colors"
+            id="clear-notifications-btn">Mark all read</button>
+        </div>
+        <div class="overflow-y-auto flex flex-col gap-sm flex-1 pr-xs" id="notifications-list-container"
+          style="max-height: 300px;">
+          <div class="text-[12px] text-outline text-center py-md">Loading notifications...</div>
+        </div>
+      </div>
+      <div id="profile-dropdown"
+        class="hidden absolute right-0 w-48 glass-panel rounded-xl shadow-xl p-sm flex flex-col gap-sm border border-white/10 text-on-surface z-50"
+        style="top: 52px;">
+        <div class="flex flex-col gap-xs" id="profile-dropdown-container">
+          <!-- Dynamic dropdown menu options will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- Main Content Canvas -->
+  <main class="h-[calc(100vh-64px)] mt-16 pb-16 md:pb-0 overflow-hidden flex flex-col md:flex-row bg-background">
+    <!-- Sidebar Navigation (Desktop) -->
+    <nav class="hidden md:flex flex-col gap-sm p-md w-72 bg-surface-container border-r border-white/5 h-full">
+      <div class="flex flex-col gap-xs mb-md">
+        <button id="new-chat-btn"
+          class="bg-primary text-on-primary font-bold rounded-lg flex items-center justify-center gap-md py-sm px-md cursor-pointer hover:opacity-90 transition-opacity active:scale-98 w-full">
+          <span class="material-symbols-outlined">add</span>
+          <span class="font-body-md text-body-md">New Chat</span>
+        </button>
+      </div>
+
+      <div class="flex-1 flex flex-col gap-xs overflow-y-auto custom-scrollbar" id="sessions-list-container">
+        <span class="font-label-caps text-[10px] text-outline px-md uppercase tracking-wider mb-xs">Recent Chats</span>
+        <!-- Dynamic list of recent chat sessions will load here -->
+      </div>
+
+      <div class="mt-auto pt-sm border-t border-white/5 relative flex flex-col w-full z-10">
+        <!-- Navigation Menu -->
+        <div id="nav-dropdown-menu"
+          class="hidden flex-col gap-xs mb-xs bg-surface-container-lowest border border-white/5 rounded-xl p-xs">
+          <a href="/"
+            class="text-on-surface-variant hover:bg-surface-variant transition-all flex items-center gap-md p-sm rounded-lg cursor-pointer">
+            <span class="material-symbols-outlined text-lg">dynamic_feed</span>
+            <span class="text-sm">Feed</span>
+          </a>
+          <a href="/groups/"
+            class="text-on-surface-variant hover:bg-surface-variant transition-all flex items-center gap-md p-sm rounded-lg cursor-pointer">
+            <span class="material-symbols-outlined text-lg">groups</span>
+            <span class="text-sm">Groups</span>
+          </a>
+          <a href="/studio/"
+            class="text-on-surface-variant hover:bg-surface-variant transition-all flex items-center gap-md p-sm rounded-lg cursor-pointer">
+            <span class="material-symbols-outlined text-lg">function</span>
+            <span class="text-sm">Studio</span>
+          </a>
+          <a href="/library/"
+            class="text-on-surface-variant hover:bg-surface-variant transition-all flex items-center gap-md p-sm rounded-lg cursor-pointer">
+            <span class="material-symbols-outlined text-lg">menu_book</span>
+            <span class="text-sm">Library</span>
+          </a>
+          <a href="/tutor/"
+            class="text-primary hover:bg-surface-variant transition-all flex items-center gap-md p-sm rounded-lg cursor-pointer">
+            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+            <span class="text-sm font-semibold">Mathify AI</span>
+          </a>
+          <a href="/profile/"
+            class="text-primary hover:bg-surface-variant transition-all flex items-center gap-md p-sm rounded-lg cursor-pointer">
+            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">person</span>
+            <span class="text-sm font-semibold">Profile</span>
+          </a>
+        </div>
+        <!-- Dropdown Toggle Button -->
+        <button id="nav-dropdown-toggle"
+          class="text-on-surface-variant hover:bg-surface-variant transition-all flex items-center justify-between gap-md p-sm rounded-lg cursor-pointer w-full text-left">
+          <div class="flex items-center gap-md">
+            <span class="material-symbols-outlined text-lg">menu</span>
+            <span class="text-sm font-semibold">Navigation</span>
+          </div>
+          <span class="material-symbols-outlined text-md transition-transform duration-200"
+            id="nav-dropdown-chevron">expand_less</span>
+        </button>
+      </div>
+
+    </nav>
+
+    <!-- Chat View Container -->
+    <section class="flex-grow flex flex-col h-full bg-background relative overflow-hidden">
+      <!-- Chat Header (Subheader) -->
+      <div
+        class="p-md border-b border-white/10 flex items-center justify-between bg-surface-container-high/40 backdrop-blur-md sticky top-0 z-30">
+        <div class="flex items-center gap-sm">
+          <div class="w-10 h-10 rounded-full overflow-hidden border border-primary/20">
+            <img id="tutor-avatar" alt="Tutor Avatar" class="w-full h-full object-cover"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKT96iCg4_e-9UbyRGCku8MqNKNU3bfSZL1XViyRcsvtPD_QzdWXrZpeUyeFUFA0e9C_IRXQnVqPpumgWnrkm6ukSFxaA7pQ5E2ROU-iu77nB1b_7HbCH0YxD79GV4lGGmdR5BMhLhZNzQUddpdBfYrDxEo_VouUyVFyVIjoH0o5ZTy_-KkX9AyDLN-95Y6lTv8RlKWYzHLH1GO6jQDMYD1UWuFI80eoPY0ZU60z8hsBe1MRXV2McHKurYO2ltHF-Fk3mPCaU_BJs" />
+          </div>
+          <div class="flex flex-col">
+            <span id="tutor-name" class="text-sm font-bold text-on-surface">Mathify AI</span>
+            <span class="text-[10px] text-secondary-fixed uppercase tracking-wider flex items-center gap-xs">
+              <span class="w-1.5 h-1.5 bg-secondary-fixed rounded-full animate-pulse"></span> Online
+            </span>
+          </div>
+        </div>
+        <div>
+          <button
+            class="material-symbols-outlined text-outline hover:text-primary transition-colors active:scale-95 duration-150">more_vert</button>
+        </div>
+      </div>
+
+      <!-- Chat Messages -->
+      <div id="chat-area" class="flex-grow overflow-y-auto p-md space-y-md custom-scrollbar flex flex-col gap-sm">
+        <!-- Dynamic messages loaded here -->
+      </div>
+
+      <!-- Input Panel (Stays fixed at the bottom of the section) -->
+      <div class="w-full bg-background/80 backdrop-blur-xl border-t border-white/10 z-40 flex flex-col">
+        <!-- Math Shortcut Bar -->
+        <div
+          class="bg-surface-container-low/95 backdrop-blur-lg border-b border-white/5 px-gutter py-1.5 flex items-center gap-sm overflow-x-auto no-scrollbar">
+          <span class="text-[9px] font-bold text-outline uppercase whitespace-nowrap mr-2">Quick Math:</span>
+          <button
+            class="h-6 px-3 rounded-full bg-surface-variant text-primary font-serif text-sm hover:bg-primary hover:text-on-primary transition-colors">∫</button>
+          <button
+            class="h-6 px-3 rounded-full bg-surface-variant text-primary font-serif text-sm hover:bg-primary hover:text-on-primary transition-colors">Σ</button>
+          <button
+            class="h-6 px-3 rounded-full bg-surface-variant text-primary font-serif text-sm hover:bg-primary hover:text-on-primary transition-colors">Δ</button>
+          <button
+            class="h-6 px-3 rounded-full bg-surface-variant text-primary font-serif text-sm hover:bg-primary hover:text-on-primary transition-colors">∞</button>
+          <button
+            class="h-6 px-3 rounded-full bg-surface-variant text-primary font-serif text-sm hover:bg-primary hover:text-on-primary transition-colors">π</button>
+          <button
+            class="h-6 px-3 rounded-full bg-surface-variant text-primary font-serif text-sm hover:bg-primary hover:text-on-primary transition-colors">∂</button>
+          <button
+            class="h-6 px-3 rounded-full bg-surface-variant text-primary font-serif text-sm hover:bg-primary hover:text-on-primary transition-colors">√</button>
+        </div>
+
+        <!-- File Preview Container -->
+        <div id="file-preview-container" class="hidden px-sm md:px-md pt-sm flex items-center gap-sm">
+          <div
+            class="glass-panel px-sm py-xs rounded-lg flex items-center gap-xs text-[11px] text-primary bg-primary/10 border border-primary/20">
+            <span class="material-symbols-outlined text-[14px]">attachment</span>
+            <span id="file-preview-name" class="truncate max-w-[180px] font-medium">filename.pdf</span>
+            <button id="file-preview-remove"
+              class="material-symbols-outlined text-[14px] text-outline hover:text-error transition-colors ml-1 cursor-pointer">close</button>
+          </div>
+        </div>
+
+        <!-- Main Chat Input -->
+        <div class="p-sm md:p-md flex items-end gap-sm md:gap-md">
+          <div class="relative flex items-center">
+            <button id="input-action-btn"
+              class="material-symbols-outlined text-on-surface-variant p-sm hover:text-primary transition-colors">add_circle</button>
+            <!-- Floating Action Menu -->
+            <div id="action-menu-dropdown"
+              class="hidden absolute bottom-12 left-0 w-40 glass-panel rounded-xl shadow-xl p-xs flex flex-col gap-xs border border-white/10 text-on-surface z-50 backdrop-blur-xl bg-surface/90">
+              <button id="upload-file-option"
+                class="w-full text-left p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[11px] font-semibold text-on-surface">
+                <span class="material-symbols-outlined text-[15px]">upload_file</span>
+                <span>Upload File</span>
+              </button>
+              <button id="insert-latex-option"
+                class="w-full text-left p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[11px] font-semibold text-on-surface">
+                <span class="material-symbols-outlined text-[15px]">functions</span>
+                <span>Insert LaTeX</span>
+              </button>
+              <button id="clear-chat-option"
+                class="w-full text-left p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[11px] font-semibold text-error">
+                <span class="material-symbols-outlined text-[15px]">delete_sweep</span>
+                <span>Clear Chat</span>
+              </button>
+            </div>
+          </div>
+          <input type="file" id="chat-file-input" class="hidden"
+            accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.py,.js,.html,.css,.md,.csv,.m,.tex,.eps" />
+          <div
+            class="flex-grow bg-surface-container rounded-xl border border-outline-variant focus-within:border-primary/50 transition-all p-0.5">
+            <textarea
+              class="w-full bg-transparent border-none focus:ring-0 text-on-surface py-1.5 px-3.5 resize-none custom-scrollbar font-body-sm focus:outline-none"
+              placeholder="Type a formula or question..." rows="1"></textarea>
+          </div>
+          <button id="send-msg-btn"
+            class="w-9 h-9 shrink-0 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-[0_0_15px_rgba(0,224,255,0.4)] active:scale-90 transition-all">
+            <span class="material-symbols-outlined text-md">send</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <!-- BottomNavBar (Mobile only dropdown style) -->
+  <div class="md:hidden fixed bottom-0 w-full z-50 flex flex-col items-center">
+    <!-- The upward dropdown menu -->
+    <div id="mobile-nav-dropdown"
+      class="hidden w-[92%] mb-2 glass-panel rounded-xl shadow-xl p-xs flex flex-col gap-xs border border-white/10 text-on-surface backdrop-blur-xl bg-surface/90">
+      <a href="/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">dynamic_feed</span>
+        <span class="text-sm">Feed</span>
+      </a>
+      <a href="/groups/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">groups</span>
+        <span class="text-sm">Groups</span>
+      </a>
+      <a href="/studio/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">function</span>
+        <span class="text-sm">Studio</span>
+      </a>
+      <a href="/library/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">menu_book</span>
+        <span class="text-sm">Library</span>
+      </a>
+      <a href="/tutor/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-primary font-semibold">
+        <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+        <span class="text-sm">Mathify AI</span>
+      </a>
+      <a href="/profile/"
+        class="flex items-center gap-md p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline">
+        <span class="material-symbols-outlined text-lg">person</span>
+        <span class="text-sm">Profile</span>
+      </a>
+    </div>
+
+    <!-- The main compact bottom bar -->
+    <button id="mobile-nav-toggle"
+      class="w-full bg-surface/90 backdrop-blur-xl border-t border-white/10 flex justify-between items-center h-12 px-margin-mobile text-on-surface cursor-pointer focus:outline-none">
+      <div class="flex items-center gap-sm text-primary">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+        <span class="text-xs font-bold uppercase tracking-wider">Mathify AI</span>
+      </div>
+      <div class="flex items-center gap-xs text-outline">
+        <span class="text-[10px] font-semibold">Menu</span>
+        <span class="material-symbols-outlined text-md transition-transform duration-200"
+          id="mobile-nav-chevron">expand_less</span>
+      </div>
+    </button>
+  </div>
+  <!-- Background Subtle Effect -->
+  <div class="fixed inset-0 pointer-events-none z-[-1] opacity-30">
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px]"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary-fixed/5 rounded-full blur-[120px]"></div>
+  </div>
+<script>
+        // Simple auto-resize for textarea
+        const tx = document.getElementsByTagName('textarea');
+        for (let i = 0; i < tx.length; i++) {
+            tx[i].setAttribute('style', 'height:' + (tx[i].scrollHeight) + 'px;overflow-y:hidden;');
+            tx[i].addEventListener("input", OnInput, false);
+        }
+
+        function OnInput() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        }
+
+        // Handle quick math insertions
+        const mathButtons = document.querySelectorAll('.bg-surface-variant');
+        const textArea = document.querySelector('textarea');
+        mathButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const char = btn.textContent;
+                textArea.value += char;
+                textArea.focus();
+            });
+        });
+    </script>
+
+<script>
+// ── Mathify API ────────────────────────────────────────────────────────────────
+const API = {
+  getAccess:  () => localStorage.getItem('mx_access'),
+  getRefresh: () => localStorage.getItem('mx_refresh'),
+  setTokens(a, r) {
+    localStorage.setItem('mx_access', a);
+    if (r) localStorage.setItem('mx_refresh', r);
+  },
+  clearTokens() {
+    localStorage.removeItem('mx_access');
+    localStorage.removeItem('mx_refresh');
+  },
+  async refresh() {
+    const r = this.getRefresh();
+    if (!r) return false;
+    const res = await fetch('/api/auth/token/refresh/', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({refresh: r})
+    });
+    if (res.ok) { const d = await res.json(); this.setTokens(d.access); return true; }
+    return false;
+  },
+  async req(url, opts = {}) {
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(this.getAccess() ? {'Authorization': `Bearer ${this.getAccess()}`} : {}),
+      ...(opts.headers || {})
+    };
+    let res = await fetch(url, {...opts, headers});
+    if (res.status === 401) {
+      const ok = await this.refresh();
+      if (ok) {
+        headers['Authorization'] = `Bearer ${this.getAccess()}`;
+        res = await fetch(url, {...opts, headers});
+      } else { this.clearTokens(); window.location.href = '/login/'; return null; }
+    }
+    return res;
+  },
+  requireAuth() { if (!this.getAccess()) window.location.href = '/login/'; },
+  logout() { this.clearTokens(); window.location.href = '/login/'; }
+};
+
+// ── Custom Modal Dialog System ───────────────────────────
+function showCustomAlert(message, title = 'Notification') {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+    overlay.innerHTML = `
+      <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+          <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+          <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+            <span class="material-symbols-outlined text-md">close</span>
+          </button>
+        </div>
+        <div class="text-body-md text-on-surface-variant leading-relaxed">${message}</div>
+        <div class="flex justify-end mt-sm">
+          <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm">OK</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    const card = overlay.querySelector('.glass-panel');
+    
+    requestAnimationFrame(() => {
+      overlay.classList.remove('opacity-0');
+      card.classList.remove('scale-95');
+    });
+
+    const close = () => {
+      overlay.classList.add('opacity-0');
+      card.classList.add('scale-95');
+      setTimeout(() => {
+        overlay.remove();
+        resolve();
+      }, 300);
+    };
+
+    overlay.querySelector('.close-modal-btn').onclick = close;
+    overlay.querySelector('.confirm-modal-btn').onclick = close;
+  });
+}
+
+function showCustomConfirm(message, title = 'Confirmation') {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+    overlay.innerHTML = `
+      <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+          <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+          <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+            <span class="material-symbols-outlined text-md">close</span>
+          </button>
+        </div>
+        <div class="text-body-md text-on-surface-variant leading-relaxed">${message}</div>
+        <div class="flex gap-sm justify-end mt-sm">
+          <button class="cancel-modal-btn px-md py-sm border border-outline-variant/30 text-on-surface font-semibold rounded-lg text-sm transition-colors hover:bg-white/5 active:scale-95 duration-150">Cancel</button>
+          <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm">Confirm</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    const card = overlay.querySelector('.glass-panel');
+    
+    requestAnimationFrame(() => {
+      overlay.classList.remove('opacity-0');
+      card.classList.remove('scale-95');
+    });
+
+    const dismiss = (value) => {
+      overlay.classList.add('opacity-0');
+      card.classList.add('scale-95');
+      setTimeout(() => {
+        overlay.remove();
+        resolve(value);
+      }, 300);
+    };
+
+    overlay.querySelector('.close-modal-btn').onclick = () => dismiss(false);
+    overlay.querySelector('.cancel-modal-btn').onclick = () => dismiss(false);
+    overlay.querySelector('.confirm-modal-btn').onclick = () => dismiss(true);
+  });
+}
+
+function showCustomPrompt(message, defaultValue = '', title = 'Input Required') {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+    overlay.innerHTML = `
+      <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+          <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+          <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+            <span class="material-symbols-outlined text-md">close</span>
+          </button>
+        </div>
+        <div class="text-body-md text-on-surface-variant leading-relaxed mb-xs">${message}</div>
+        <input type="text" class="prompt-input-field w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-sm text-on-surface focus:outline-none focus:border-primary text-body-md" value="${defaultValue}" />
+        <div class="flex gap-sm justify-end mt-sm">
+          <button class="cancel-modal-btn px-md py-sm border border-outline-variant/30 text-on-surface font-semibold rounded-lg text-sm transition-colors hover:bg-white/5 active:scale-95 duration-150">Cancel</button>
+          <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm">OK</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    const card = overlay.querySelector('.glass-panel');
+    const input = overlay.querySelector('.prompt-input-field');
+    
+    setTimeout(() => { input.focus(); }, 100);
+
+    requestAnimationFrame(() => {
+      overlay.classList.remove('opacity-0');
+      card.classList.remove('scale-95');
+    });
+
+    const dismiss = (value) => {
+      overlay.classList.add('opacity-0');
+      card.classList.add('scale-95');
+      setTimeout(() => {
+        overlay.remove();
+        resolve(value);
+      }, 300);
+    };
+
+    overlay.querySelector('.close-modal-btn').onclick = () => dismiss(null);
+    overlay.querySelector('.cancel-modal-btn').onclick = () => dismiss(null);
+    overlay.querySelector('.confirm-modal-btn').onclick = () => dismiss(input.value);
+    
+    input.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        dismiss(input.value);
+      }
+    };
+  });
+}
+
+// Override global alert/confirm/prompt
+window.alert = showCustomAlert;
+window.confirm = showCustomConfirm;
+window.prompt = showCustomPrompt;
+
+async function loadNotificationCount() {
+  const res = await API.req('/api/notifications/?unread=true');
+  if (!res) return;
+  const data = await res.json();
+  const count = data.count ?? (data.results ? data.results.length : 0);
+  document.querySelectorAll('[data-notification-bell]').forEach(bell => {
+    const badge = bell.querySelector('[data-notification-count]');
+    if (!badge) return;
+    if (count > 0) {
+      badge.textContent = count > 99 ? '99+' : String(count);
+      badge.classList.remove('hidden');
+    } else {
+      badge.textContent = '';
+      badge.classList.add('hidden');
+    }
+  });
+}
+</script>
+
+<script>
+API.requireAuth();
+loadNotificationCount();
+</script>
+
+<script>
+(async () => {
+  API.requireAuth();
+
+  let sessionId = localStorage.getItem('mx_chat_session');
+  const tutorId = localStorage.getItem('mx_tutor_id');
+  const textarea  = document.querySelector('textarea');
+  const chatArea  = document.getElementById('chat-area');
+
+  function formatMathAndMarkdown(text) {
+    if (!text) return "";
+    
+    const placeholders = [];
+    let placeholderCounter = 0;
+
+    // 1. Protect display block formulas: $$ ... $$
+    text = text.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
+      const ph = `%%MATH_BLOCK_${placeholderCounter++}%%`;
+      placeholders.push({ ph, formula, display: true });
+      return ph;
+    });
+
+    // 2. Protect display block formulas: \[ ... \]
+    text = text.replace(/\\\[([\s\S]*?)\\\]/g, (match, formula) => {
+      const ph = `%%MATH_BLOCK_${placeholderCounter++}%%`;
+      placeholders.push({ ph, formula, display: true });
+      return ph;
+    });
+
+    // 3. Protect math environments: \begin{...} ... \end{...}
+    text = text.replace(/\\begin\{([a-zA-Z*]+)\}([\s\S]*?)\\end\{\1\}/g, (match, env, formula) => {
+      const ph = `%%MATH_BLOCK_${placeholderCounter++}%%`;
+      placeholders.push({ ph, formula: match, display: true });
+      return ph;
+    });
+
+    // 4. Protect inline formulas: \( ... \)
+    text = text.replace(/\\\(([\s\S]*?)\\\)/g, (match, formula) => {
+      const ph = `%%MATH_INLINE_${placeholderCounter++}%%`;
+      placeholders.push({ ph, formula, display: false });
+      return ph;
+    });
+
+    // 5. Protect inline formulas: $ ... $ (avoiding plain currency like $100)
+    text = text.replace(/\$([^$\n]+?)\$/g, (match, formula) => {
+      // If it looks like a number (e.g. $100), don't treat it as LaTeX
+      if (/^\s*\d+([\.,]\d+)?\s*$/.test(formula)) {
+        return match;
+      }
+      const ph = `%%MATH_INLINE_${placeholderCounter++}%%`;
+      placeholders.push({ ph, formula, display: false });
+      return ph;
+    });
+
+    // 6. Parse Markdown
+    let html = typeof marked !== 'undefined' ? marked.parse(text) : text;
+
+    // 7. Restore and render KaTeX
+    placeholders.forEach(({ ph, formula, display }) => {
+      try {
+        if (typeof katex !== 'undefined') {
+          // Decode HTML entities that marked might have escaped
+          const decodedFormula = formula
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'");
+          
+          const mathHtml = katex.renderToString(decodedFormula, {
+            displayMode: display,
+            throwOnError: false
+          });
+          html = html.replace(ph, mathHtml);
+        } else {
+          html = html.replace(ph, display ? `$$${formula}$$` : `$${formula}$`);
+        }
+      } catch (err) {
+        html = html.replace(ph, display ? `$$${formula}$$` : `$${formula}$`);
+      }
+    });
+
+    return html;
+  }
+
+  function renderMsg(role, content, file_data, file_mime, file_name) {
+    if (!chatArea) return;
+    const isUser = role === 'user';
+    const el = document.createElement('div');
+    el.className = `flex ${isUser ? 'justify-end' : 'justify-start'} mb-md`;
+    let formatted = formatMathAndMarkdown(content);
+    if (file_data && file_mime) {
+      if (file_mime.startsWith('image/')) {
+        formatted += `
+          <div class="mt-sm max-w-full rounded-lg overflow-hidden border border-white/10">
+            <img src="data:${file_mime};base64,${file_data}" alt="${file_name || 'Attachment'}" class="max-h-60 w-auto object-contain" />
+          </div>
+        `;
+      } else if (file_mime === 'application/pdf') {
+        formatted += `
+          <div class="mt-sm p-xs rounded bg-background/50 border border-white/5 flex items-center gap-xs text-[11px] text-outline">
+            <span class="material-symbols-outlined text-[16px] text-primary">picture_as_pdf</span>
+            <span class="truncate max-w-[150px]">${file_name || 'attachment.pdf'}</span>
+          </div>
+        `;
+      }
+    } else if (file_name) {
+      formatted += `
+        <div class="mt-sm p-xs rounded bg-background/50 border border-white/5 flex items-center gap-xs text-[11px] text-outline">
+          <span class="material-symbols-outlined text-[16px] text-primary">attachment</span>
+          <span class="truncate max-w-[150px]">${file_name}</span>
+        </div>
+      `;
+    }
+    el.innerHTML = `
+      <div class="max-w-[75%] px-md py-sm rounded-2xl ${isUser
+        ? 'bg-primary-container text-on-primary-container'
+        : 'bg-surface-container-high text-on-surface'} font-body-md message-bubble">
+        ${formatted}
+      </div>`;
+    chatArea.appendChild(el);
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
+
+  function renderEmptyMsg(role) {
+    if (!chatArea) return null;
+    const isUser = role === 'user';
+    const el = document.createElement('div');
+    el.className = `flex ${isUser ? 'justify-end' : 'justify-start'} mb-md`;
+    el.innerHTML = `
+      <div class="max-w-[75%] px-md py-sm rounded-2xl ${isUser
+        ? 'bg-primary-container text-on-primary-container'
+        : 'bg-surface-container-high text-on-surface'} font-body-md message-bubble">
+        <span class="typing-indicator flex items-center gap-xs py-1">
+          <span class="w-1.5 h-1.5 bg-outline rounded-full animate-bounce"></span>
+          <span class="w-1.5 h-1.5 bg-outline rounded-full animate-bounce [animation-delay:0.2s]"></span>
+          <span class="w-1.5 h-1.5 bg-outline rounded-full animate-bounce [animation-delay:0.4s]"></span>
+        </span>
+      </div>`;
+    chatArea.appendChild(el);
+    chatArea.scrollTop = chatArea.scrollHeight;
+    return el.querySelector('.message-bubble');
+  }
+
+  function updateTutorHeader(tutor) {
+    const nameEl = document.getElementById('tutor-name');
+    const avatarEl = document.getElementById('tutor-avatar');
+    if (nameEl) nameEl.textContent = tutor?.name || 'Mathify AI';
+    if (avatarEl) {
+      avatarEl.src = tutor?.avatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDKT96iCg4_e-9UbyRGCku8MqNKNU3bfSZL1XViyRcsvtPD_QzdWXrZpeUyeFUFA0e9C_IRXQnVqPpumgWnrkm6ukSFxaA7pQ5E2ROU-iu77nB1b_7HbCH0YxD79GV4lGGmdR5BMhLhZNzQUddpdBfYrDxEo_VouUyVFyVIjoH0o5ZTy_-KkX9AyDLN-95Y6lTv8RlKWYzHLH1GO6jQDMYD1UWuFI80eoPY0ZU60z8hsBe1MRXV2McHKurYO2ltHF-Fk3mPCaU_BJs';
+    }
+  }
+
+  window.switchSession = (sId, tId) => {
+    localStorage.setItem('mx_chat_session', String(sId));
+    if (tId) localStorage.setItem('mx_tutor_id', String(tId));
+    window.location.reload();
+  };
+
+  async function loadSessions() {
+    const res = await API.req('/api/ai-tutor/sessions/');
+    if (!res) return;
+    const data = await res.json();
+    const sessions = data.results || data || [];
+    
+    const container = document.getElementById('sessions-list-container');
+    if (!container) return;
+    
+    const currentSessionId = localStorage.getItem('mx_chat_session');
+    
+    const itemsHtml = sessions.map(s => {
+      const isActive = String(s.id) === String(currentSessionId);
+      const tutorName = s.tutor ? s.tutor.name : 'Math Tutor';
+      const lastText = s.last_message ? s.last_message.content : 'No messages yet';
+      const activeClass = isActive ? 'bg-primary-container text-on-primary-container font-semibold' : 'bg-surface-variant/40 text-on-surface-variant hover:bg-surface-bright';
+      
+      return `
+        <div onclick="switchSession(${s.id}, ${s.tutor?.id})" class="py-xs px-sm rounded-lg flex flex-col gap-[2px] text-left cursor-pointer transition-all duration-150 active:scale-98 ${activeClass} mb-xs">
+          <div class="flex justify-between items-center w-full">
+            <span class="text-xs font-bold truncate max-w-[70%]">${tutorName}</span>
+            <span class="text-[9px] text-outline">${new Date(s.updated_at).toLocaleDateString()}</span>
+          </div>
+          <span class="text-[10px] truncate w-full opacity-80">${lastText}</span>
+        </div>
+      `;
+    }).join('');
+    
+    container.innerHTML = `
+      <span class="font-label-caps text-[10px] text-outline px-md uppercase tracking-wider mb-xs block">Recent Chats</span>
+      ${itemsHtml || '<span class="text-[10px] text-outline px-md italic block">No recent chats</span>'}
+    `;
+  }
+
+  // Load session or handle switching
+  if (sessionId) {
+    const res = await API.req(`/api/ai-tutor/sessions/${sessionId}/`);
+    if (res && res.ok) {
+      const session = await res.json();
+      if (String(session.tutor?.id || '') !== String(tutorId || '')) {
+        sessionId = null;
+        localStorage.removeItem('mx_chat_session');
+      } else {
+        updateTutorHeader(session.tutor);
+        if (session.messages && chatArea) {
+          chatArea.innerHTML = '';
+          session.messages.forEach(m => renderMsg(m.role, m.content, m.file_data, m.file_mime, m.file_name));
+        }
+      }
+    } else {
+      sessionId = null;
+      localStorage.removeItem('mx_chat_session');
+    }
+  }
+
+  async function ensureSession() {
+    if (sessionId) return;
+    const body = { title: 'Tutor Session' };
+    if (tutorId) body.tutor_id = parseInt(tutorId);
+
+    const res = await API.req('/api/ai-tutor/sessions/', {
+      method: 'POST',
+      body: JSON.stringify(body)
+    });
+    if (res && res.ok) {
+      const d = await res.json();
+      sessionId = d.id;
+      localStorage.setItem('mx_chat_session', sessionId);
+      updateTutorHeader(d.tutor);
+      if (chatArea) chatArea.innerHTML = '';
+      renderMsg('assistant', `Hello! I am ${d.tutor ? d.tutor.name : 'Mathify AI'}. How can I assist you today?`);
+    }
+  }
+
+  let attachedFile = null;
+
+  async function send() {
+    let content = textarea ? textarea.value.trim() : '';
+    if (!content && !attachedFile) return;
+
+    if (textarea) {
+      textarea.value = '';
+      textarea.style.height = 'auto'; // Reset heights
+    }
+
+    await ensureSession();
+
+    // Prepare payload
+    const payload = {};
+    
+    // For text attachment, format it into the message content itself
+    if (attachedFile && attachedFile.type === 'text') {
+      content = `${content}\n\n[Attached File: ${attachedFile.name}]\n\`\`\`${attachedFile.ext}\n${attachedFile.content}\n\`\`\``;
+    }
+
+    payload.content = content || 'Sent an attachment';
+
+    let mime = null, data = null, name = null;
+    if (attachedFile && attachedFile.type === 'binary') {
+      payload.file_data = attachedFile.data;
+      payload.file_name = attachedFile.name;
+      payload.file_mime = attachedFile.mime;
+      mime = attachedFile.mime;
+      data = attachedFile.data;
+      name = attachedFile.name;
+    } else if (attachedFile && attachedFile.type === 'text') {
+      name = attachedFile.name;
+    }
+
+    renderMsg('user', content, data, mime, name);
+
+    // Clear attachment state and preview
+    attachedFile = null;
+    const fileInput = document.getElementById('chat-file-input');
+    if (fileInput) fileInput.value = '';
+    const previewContainer = document.getElementById('file-preview-container');
+    if (previewContainer) previewContainer.classList.add('hidden');
+
+    const assistantBubble = renderEmptyMsg('assistant');
+    if (!assistantBubble) return;
+
+    try {
+      const res = await fetch(`/api/ai-tutor/sessions/${sessionId}/send-stream/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API.getAccess()}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        assistantBubble.textContent = "Error communicating with the tutor.";
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let accumulatedText = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          if (line.trim().startsWith('data: ')) {
+            try {
+              const jsonStr = line.replace('data: ', '').trim();
+              const parsed = JSON.parse(jsonStr);
+              if (parsed.text) {
+                accumulatedText += parsed.text;
+                assistantBubble.innerHTML = formatMathAndMarkdown(accumulatedText);
+                chatArea.scrollTop = chatArea.scrollHeight;
+              }
+            } catch (e) {}
+          }
+        }
+      }
+      // Refresh session sidebar preview
+      await loadSessions();
+    } catch (err) {
+      assistantBubble.textContent = "Connection error. Please try again.";
+    }
+  }
+
+  // ── Action Menu Dropdown ──────────────────────────────
+  const inputActionBtn = document.getElementById('input-action-btn');
+  const actionMenuDropdown = document.getElementById('action-menu-dropdown');
+  if (inputActionBtn && actionMenuDropdown) {
+    inputActionBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      actionMenuDropdown.classList.toggle('hidden');
+    });
+    document.addEventListener('click', (e) => {
+      if (!actionMenuDropdown.contains(e.target) && e.target !== inputActionBtn) {
+        actionMenuDropdown.classList.add('hidden');
+      }
+    });
+  }
+
+  // ── Mobile Navigation Dropdown ───────────────────────────
+  const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+  const mobileNavDropdown = document.getElementById('mobile-nav-dropdown');
+  const mobileNavChevron = document.getElementById('mobile-nav-chevron');
+  if (mobileNavToggle && mobileNavDropdown) {
+    mobileNavToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = mobileNavDropdown.classList.toggle('hidden');
+      if (mobileNavChevron) {
+        mobileNavChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+      }
+    });
+    document.addEventListener('click', (e) => {
+      if (mobileNavDropdown && !mobileNavDropdown.contains(e.target) && e.target !== mobileNavToggle && !mobileNavToggle.contains(e.target)) {
+        mobileNavDropdown.classList.add('hidden');
+        if (mobileNavChevron) mobileNavChevron.style.transform = 'rotate(0deg)';
+      }
+    });
+  }
+
+  // ── Upload File Handling ──────────────────────────────
+  const fileInput = document.getElementById('chat-file-input');
+  const uploadOption = document.getElementById('upload-file-option');
+  const previewContainer = document.getElementById('file-preview-container');
+  const previewName = document.getElementById('file-preview-name');
+  const previewRemove = document.getElementById('file-preview-remove');
+
+  if (uploadOption && fileInput) {
+    uploadOption.addEventListener('click', () => {
+      actionMenuDropdown.classList.add('hidden');
+      fileInput.click();
+    });
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const name = file.name;
+      const ext = name.split('.').pop().toLowerCase();
+      const isBinary = ['pdf', 'png', 'jpg', 'jpeg', 'webp'].includes(ext);
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        if (isBinary) {
+          const dataUrl = evt.target.result;
+          const base64Data = dataUrl.split(',')[1];
+          const mimes = {
+            'pdf': 'application/pdf',
+            'png': 'image/png',
+            'jpg': 'image/jpeg',
+            'jpeg': 'image/jpeg',
+            'webp': 'image/webp'
+          };
+          const mime = file.type || mimes[ext] || 'application/octet-stream';
+          attachedFile = {
+            name: name,
+            mime: mime,
+            data: base64Data,
+            type: 'binary'
+          };
+        } else {
+          attachedFile = {
+            name: name,
+            content: evt.target.result,
+            type: 'text',
+            ext: ext
+          };
+        }
+
+        // Show preview chip
+        if (previewName && previewContainer) {
+          previewName.textContent = name;
+          previewContainer.classList.remove('hidden');
+        }
+      };
+
+      if (isBinary) {
+        reader.readAsDataURL(file);
+      } else {
+        reader.readAsText(file);
+      }
+    });
+  }
+
+  if (previewRemove) {
+    previewRemove.addEventListener('click', () => {
+      attachedFile = null;
+      if (fileInput) fileInput.value = '';
+      if (previewContainer) previewContainer.classList.add('hidden');
+    });
+  }
+
+  // ── LaTeX Insertion ───────────────────────────────────
+  const insertLatexOption = document.getElementById('insert-latex-option');
+  if (insertLatexOption && textarea) {
+    insertLatexOption.addEventListener('click', () => {
+      actionMenuDropdown.classList.add('hidden');
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const val = textarea.value;
+      textarea.value = val.substring(0, start) + '$$' + val.substring(end);
+      textarea.focus();
+      textarea.selectionStart = textarea.selectionEnd = start + 1; // Put cursor inside $$
+    });
+  }
+
+  // ── Clear Chat Option ──────────────────────────────────
+  const clearChatOption = document.getElementById('clear-chat-option');
+  if (clearChatOption) {
+    clearChatOption.addEventListener('click', async () => {
+      actionMenuDropdown.classList.add('hidden');
+      if (await window.confirm('Are you sure you want to clear this chat history?', 'Clear Chat')) {
+        localStorage.removeItem('mx_chat_session');
+        window.location.reload();
+      }
+    });
+  }
+
+  // Wire new chat button
+  const newChatBtn = document.getElementById('new-chat-btn');
+  if (newChatBtn) {
+    newChatBtn.addEventListener('click', () => {
+      localStorage.removeItem('mx_chat_session');
+      window.location.reload();
+    });
+  }
+
+  // Wire send button
+  const sendBtn = document.getElementById('send-msg-btn');
+  if (sendBtn) {
+    sendBtn.addEventListener('click', send);
+  }
+
+  // Send on Enter (not Shift+Enter)
+  if (textarea) {
+    textarea.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+    });
+  }
+
+  // Notifications list and dropdown handlers
+  async function loadNotificationsList() {
+    const container = document.getElementById('notifications-list-container');
+    if (!container) return;
+    const res = await API.req('/api/notifications/');
+    if (!res) return;
+    const data = await res.json();
+    const notifications = data.results || data || [];
+    if (!notifications.length) {
+      container.innerHTML = `<div class="text-[12px] text-outline text-center py-md">No notifications yet.</div>`;
+      return;
+    }
+    container.innerHTML = notifications.map(n => {
+      const actorName = n.actor ? n.actor.split('@')[0] : 'Someone';
+      return `
+        <div class="p-sm rounded-lg bg-surface-container/50 hover:bg-surface-container border border-white/5 flex flex-col gap-xs transition-colors cursor-pointer ${n.is_read ? 'opacity-60' : ''}" data-notification-id="${n.id}">
+          <div class="flex justify-between items-start gap-xs">
+            <p class="text-[11px] text-on-surface">
+              <span class="text-primary-fixed-dim font-bold">${actorName}</span> ${n.verb}
+            </p>
+            ${!n.is_read ? '<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed shrink-0 mt-1" data-unread-indicator></span>' : ''}
+          </div>
+          <span class="text-[9px] text-outline">${new Date(n.created_at).toLocaleDateString()}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  const bell = document.querySelector('[data-notification-bell]');
+  const dropdown = document.getElementById('notification-dropdown');
+  const profileBtn = document.querySelector('[data-profile-menu-btn]');
+  const profileDropdown = document.getElementById('profile-dropdown');
+  const profileDropdownContainer = document.getElementById('profile-dropdown-container');
+
+  function renderProfileDropdown() {
+    if (!profileDropdownContainer) return;
+    const isLoggedIn = !!API.getAccess();
+    if (isLoggedIn) {
+      profileDropdownContainer.innerHTML = `
+        <a href="/profile/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+          <span class="material-symbols-outlined text-[16px]">account_circle</span>
+          <span>View Profile</span>
+        </a>
+        <button id="auth-logout-btn" class="w-full text-left p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-error">
+          <span class="material-symbols-outlined text-[16px]">logout</span>
+          <span>Sign Out</span>
+        </button>
+      `;
+      const logoutBtn = document.getElementById('auth-logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+          if (await window.confirm('Are you sure you want to sign out?', 'Sign Out')) {
+            API.logout();
+          }
+        });
+      }
+    } else {
+      profileDropdownContainer.innerHTML = `
+        <a href="/login/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+          <span class="material-symbols-outlined text-[16px]">login</span>
+          <span>Sign In</span>
+        </a>
+        <a href="/register/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-primary-fixed-dim">
+          <span class="material-symbols-outlined text-[16px]">person_add</span>
+          <span>Sign Up</span>
+        </a>
+      `;
+    }
+  }
+
+  if (profileBtn && profileDropdown) {
+    profileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (dropdown) dropdown.classList.add('hidden');
+      profileDropdown.classList.toggle('hidden');
+      if (!profileDropdown.classList.contains('hidden')) {
+        renderProfileDropdown();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!profileDropdown.contains(e.target) && e.target !== profileBtn && !profileBtn.contains(e.target)) {
+        profileDropdown.classList.add('hidden');
+      }
+    });
+  }
+
+  if (bell && dropdown) {
+    bell.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (profileDropdown) profileDropdown.classList.add('hidden');
+      dropdown.classList.toggle('hidden');
+      if (!dropdown.classList.contains('hidden')) {
+        await loadNotificationsList();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!dropdown.contains(e.target) && e.target !== bell && !bell.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    const listContainer = document.getElementById('notifications-list-container');
+    if (listContainer) {
+      listContainer.addEventListener('click', async (e) => {
+        const item = e.target.closest('[data-notification-id]');
+        if (!item) return;
+        const id = item.getAttribute('data-notification-id');
+        const res = await API.req(`/api/notifications/${id}/read/`, { method: 'POST' });
+        if (res && res.ok) {
+          item.classList.add('opacity-60');
+          const indicator = item.querySelector('[data-unread-indicator]');
+          if (indicator) indicator.remove();
+          await loadNotificationCount();
+        }
+      });
+    }
+
+    const clearBtn = document.getElementById('clear-notifications-btn');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const res = await API.req('/api/notifications/read-all/', { method: 'POST' });
+        if (res && res.ok) {
+          await loadNotificationsList();
+          await loadNotificationCount();
+        }
+      });
+    }
+  }
+
+  const searchBtn = document.querySelector('[data-search-btn]');
+  if (searchBtn) {
+    searchBtn.addEventListener('click', () => {
+      if (textarea) textarea.focus();
+    });
+  }
+
+  // Navigation Dropdown Toggle
+  const navToggle = document.getElementById('nav-dropdown-toggle');
+  const navMenu = document.getElementById('nav-dropdown-menu');
+  const navChevron = document.getElementById('nav-dropdown-chevron');
+  if (navToggle && navMenu) {
+    navToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = navMenu.classList.toggle('hidden');
+      if (navChevron) {
+        navChevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+      }
+    });
+  }
+
+  await ensureSession();
+  await loadSessions();
+})();
+</script>
+
+</body></html>
