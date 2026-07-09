@@ -62,35 +62,31 @@
 </head>
 
 <body
-  class="bg-surface-container-lowest min-h-screen flex items-center justify-center p-gutter relative overflow-y-auto overflow-x-hidden">
+  class="bg-surface-container-lowest min-h-screen relative overflow-y-auto overflow-x-hidden">
+  <!-- Fixed Header -->
+  <header
+    class="fixed top-0 w-full z-50 flex items-center justify-between px-margin-mobile md:px-margin-desktop h-16 bg-surface/80 backdrop-blur-xl border-b border-white/10">
+    <div class="font-headline-md text-headline-md font-bold tracking-tighter text-primary">
+      Mathify
+    </div>
+  </header>
+
   <!-- Mathematical Particle Background -->
   <div class="absolute inset-0 z-0 overflow-hidden opacity-30" id="particle-container"></div>
+
   <!-- Main Login Canvas -->
-  <div class="relative z-10 w-full max-w-[440px] flex flex-col items-center">
-    <!-- Logo Section -->
-    <header class="mb-xl text-center group cursor-default">
-      <div class="relative inline-block">
-        <h1
-          class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary-fixed-dim tracking-tighter drop-shadow-[0_0_15px_rgba(0,218,248,0.4)]">
-          Mathify
-        </h1>
-        <div class="absolute -top-4 -right-8 opacity-40 group-hover:opacity-100 transition-opacity">
-          <span class="font-math-display text-secondary-fixed text-body-sm">∀x ∈ ℝ</span>
-        </div>
-      </div>
-      <p class="font-body-sm text-body-sm text-on-surface-variant mt-sm tracking-widest uppercase">Social Engineering by
-        Logic</p>
-    </header>
-    <!-- Login Card -->
-    <div class="glass-card w-full p-lg md:p-xl rounded-xl flex flex-col gap-md">
-      <div class="flex flex-col gap-xs mb-sm">
-        <h2 class="font-headline-sm text-headline-sm text-on-surface">Welcome back, Professor.</h2>
+  <main class="relative z-10 pb-xl px-margin-mobile flex flex-col items-center min-h-screen" style="padding-top: 140px;">
+    <div class="w-full max-w-[440px]">
+      <!-- Login Card -->
+      <div class="glass-card w-full p-lg md:p-xl rounded-xl flex flex-col gap-md">
+        <div class="flex flex-col gap-xs mb-sm">
+        <h2 class="font-headline-sm text-headline-sm text-on-surface">Welcome back.</h2>
         <p class="font-body-sm text-body-sm text-outline">Authenticate your identity to access the grid.</p>
       </div>
       <!-- Login Form -->
       <form class="flex flex-col gap-md" onsubmit="event.preventDefault()">
         <div class="flex flex-col gap-sm">
-          <label class="font-label-caps text-label-caps text-on-surface-variant px-xs">IDENTIFIER</label>
+          <label class="font-label-caps text-label-caps text-on-surface-variant px-xs">Name</label>
           <div class="relative">
             <span
               class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline text-[20px]">alternate_email</span>
@@ -101,7 +97,7 @@
         </div>
         <div class="flex flex-col gap-sm">
           <div class="flex justify-between items-center px-xs">
-            <label class="font-label-caps text-label-caps text-on-surface-variant">PASSCODE</label>
+            <label class="font-label-caps text-label-caps text-on-surface-variant">Password</label>
             <a class="font-label-caps text-label-caps text-primary-fixed-dim hover:underline transition-all"
               href="#">Forgot?</a>
           </div>
@@ -112,7 +108,14 @@
               class="w-full bg-surface-container-high border border-outline-variant rounded-lg py-md pl-[48px] pr-md text-on-surface font-body-md placeholder:text-outline/50 transition-all focus:bg-surface-bright"
               placeholder="••••••••" type="password" />
           </div>
+        <!-- Terms Checkbox -->
+        <div class="flex items-start gap-sm px-xs mt-sm">
+          <input type="checkbox" id="accept-terms-login" required class="mt-1 cursor-pointer accent-primary" />
+          <label for="accept-terms-login" class="font-body-sm text-body-sm text-outline cursor-pointer select-none">
+            I agree to the Terms of Service and Privacy Policy.
+          </label>
         </div>
+
         <button
           class="w-full bg-secondary-fixed text-on-secondary-fixed font-headline-sm text-headline-sm py-md rounded-lg mt-md hover:opacity-90 active:scale-95 transition-all neon-glow-lime flex items-center justify-center gap-sm">
           Sign In
@@ -122,34 +125,29 @@
       <!-- Divider -->
       <div class="flex items-center gap-md my-sm">
         <div class="h-[1px] flex-1 bg-outline-variant/30"></div>
-        <span class="font-label-caps text-label-caps text-outline/50">OR SECURE VIA</span>
+        <span class="font-label-caps text-label-caps text-outline/50">or login with</span>
         <div class="h-[1px] flex-1 bg-outline-variant/30"></div>
       </div>
       <!-- Social Logins -->
-      <div class="grid grid-cols-3 gap-sm">
+      <div class="grid grid-cols-2 gap-sm">
         <!-- Google -->
         <a href="/api/accounts/oauth/google/login/"
-          class="flex items-center justify-center py-md rounded-lg border border-outline-variant bg-surface-container-high hover:bg-surface-bright transition-all active:scale-95 group">
-          <img alt="Google" class="w-5 h-5 opacity-80 group-hover:opacity-100 transition-opacity"
-            data-alt="The iconic Google multi-colored G logo rendered with high contrast against a dark charcoal background. The style is minimalist and clean, with soft ambient light reflections suggesting a glass-like texture that aligns with a premium dark-mode interface."
+          class="flex items-center justify-center gap-sm py-md rounded-lg border border-outline-variant bg-surface-container-high hover:bg-surface-bright transition-all active:scale-95 group">
+          <img alt="Google" class="w-5 h-5 opacity-80 group-hover:opacity-100 transition-opacity shrink-0"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIVld1QUG9blOlPB5JZOh6ITF1zWO-aSa3LsVNfLID37Tv0EDDqKI42tez5BHIk7FwRsnFhwWqRr4fwfmPnFZZpQOf1B_-OsJspIzJ6Gm-08MGKeRpXIxvnfqHETgGFSJAgvRmgEF6DBFCBhI3vYvdz58auTX_NRmhJi4plNyfFrVFwD-1PSjoaxMcffGLgiBiUuvsZO52QklEq8fmZDxVSzQDChKteAv9sU5P2xDqhGP6Sgh64RWKGnKrS0XATWzTmUwvVrWRWRw" />
+          <span class="font-bold text-sm text-on-surface opacity-80 group-hover:opacity-100 transition-opacity">Google</span>
         </a>
         <!-- Microsoft -->
         <a href="/api/accounts/oauth/microsoft/login/"
-          class="flex items-center justify-center py-md rounded-lg border border-outline-variant bg-surface-container-high hover:bg-surface-bright transition-all active:scale-95 group">
-          <svg class="w-5 h-5 opacity-80 group-hover:opacity-100 transition-opacity" viewBox="0 0 23 23">
+          class="flex items-center justify-center gap-sm py-md rounded-lg border border-outline-variant bg-surface-container-high hover:bg-surface-bright transition-all active:scale-95 group">
+          <svg class="w-5 h-5 opacity-80 group-hover:opacity-100 transition-opacity shrink-0" viewBox="0 0 23 23">
             <rect x="0" y="0" width="10" height="10" fill="#f25022"/>
             <rect x="11" y="0" width="10" height="10" fill="#7fba00"/>
             <rect x="0" y="11" width="10" height="10" fill="#00a4ef"/>
             <rect x="11" y="11" width="10" height="10" fill="#ffb900"/>
           </svg>
+          <span class="font-bold text-sm text-on-surface opacity-80 group-hover:opacity-100 transition-opacity">Microsoft</span>
         </a>
-        <!-- Apple -->
-        <button onclick="window.alert('Apple Sign-In is not configured for your school district.')"
-          class="flex items-center justify-center py-md rounded-lg border border-outline-variant bg-surface-container-high hover:bg-surface-bright transition-all active:scale-95 group">
-          <span class="material-symbols-outlined text-on-surface opacity-80 group-hover:opacity-100 transition-opacity"
-            style="font-variation-settings: 'FILL' 1;">ios</span>
-        </button>
       </div>
     </div>
     <!-- Footer Link -->
@@ -159,7 +157,7 @@
         <a class="text-primary-fixed-dim font-bold hover:text-primary transition-colors" href="#">Sign Up</a>
       </p>
     </div>
-  </div>
+  </main>
   <!-- Background Decoration -->
   <div
     class="absolute bottom-[-100px] left-[-100px] w-[400px] h-[400px] bg-primary-fixed-dim/5 blur-[120px] rounded-full pointer-events-none">

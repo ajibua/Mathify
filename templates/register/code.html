@@ -76,17 +76,11 @@
     <div class="absolute -bottom-[20%] -right-[10%] w-[50%] h-[50%] bg-secondary-fixed/5 blur-[120px] rounded-full">
     </div>
   </div>
-  <!-- Navigation (Transactional Suppression Applied) -->
-  <!-- Minimal Header for Identity -->
+
   <header
     class="fixed top-0 w-full z-50 flex items-center justify-between px-margin-mobile md:px-margin-desktop h-16 bg-surface/80 backdrop-blur-xl border-b border-white/10">
     <div class="font-headline-md text-headline-md font-bold tracking-tighter text-primary">
       Mathify
-    </div>
-    <div class="flex items-center gap-md">
-      <span class="font-label-caps text-label-caps text-outline uppercase tracking-widest hidden md:block">Identity
-        Verification</span>
-      <span class="material-symbols-outlined text-outline" data-icon="security">security</span>
     </div>
   </header>
   <main class="relative z-10 pt-32 pb-xl px-margin-mobile flex flex-col items-center min-h-screen">
@@ -97,7 +91,7 @@
         <div class="flex justify-between items-end">
           <h1
             class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-secondary">
-            Establish Axiom
+            Join the Community
           </h1>
           <span class="font-label-caps text-label-caps text-primary pb-xs">Step 1 of 2</span>
         </div>
@@ -105,7 +99,7 @@
           <div class="progress-fill"></div>
         </div>
         <p class="font-body-md text-body-md text-on-surface-variant">
-          Begin your descent into the department of computational logic and proof.
+          Begin your journey into the fantasy world of mathematics and its environs.
         </p>
       </div>
       <!-- Form -->
@@ -115,7 +109,7 @@
           <label
             class="font-label-caps text-label-caps text-outline-variant group-focus-within:text-primary transition-colors"
             for="full_name">
-            Candidate Full Name
+            Full Name
           </label>
           <div class="math-input-container neon-glow-primary rounded-lg flex items-center px-md">
             <span class="material-symbols-outlined text-outline text-[20px] mr-sm" data-icon="person">person</span>
@@ -129,7 +123,7 @@
           <label
             class="font-label-caps text-label-caps text-outline-variant group-focus-within:text-primary transition-colors"
             for="email">
-            Institutional Email
+            Email
           </label>
           <div class="math-input-container neon-glow-primary rounded-lg flex items-center px-md">
             <span class="material-symbols-outlined text-outline text-[20px] mr-sm"
@@ -144,7 +138,7 @@
           <label
             class="font-label-caps text-label-caps text-outline-variant group-focus-within:text-primary transition-colors"
             for="password">
-            Access Key (Secure)
+            Password
           </label>
           <div class="math-input-container neon-glow-primary rounded-lg flex items-center px-md">
             <span class="material-symbols-outlined text-outline text-[20px] mr-sm" data-icon="key">key</span>
@@ -158,7 +152,7 @@
           <label
             class="font-label-caps text-label-caps text-outline-variant group-focus-within:text-primary transition-colors"
             for="interest">
-            Primary Field of Inquiry
+            Niche
           </label>
           <div class="math-input-container neon-glow-primary rounded-lg flex items-center px-md">
             <span class="material-symbols-outlined text-outline text-[20px] mr-sm" data-icon="function">function</span>
@@ -175,58 +169,31 @@
             </select>
           </div>
         </div>
+        <!-- Terms Checkbox -->
+        <div class="flex items-start gap-sm px-xs mt-sm">
+          <input type="checkbox" id="accept-terms-reg" required class="mt-1 cursor-pointer accent-primary" />
+          <label for="accept-terms-reg" class="font-body-sm text-body-sm text-outline-variant cursor-pointer select-none">
+            I accept the <a class="text-secondary underline underline-offset-4 hover:text-primary transition-colors" href="">Terms of Service</a> and <a class="text-secondary underline underline-offset-4 hover:text-primary transition-colors" href="">Privacy Policy</a>.
+          </label>
+        </div>
+
         <!-- Primary Action -->
         <div class="pt-md">
           <button
-            class="w-full bg-primary-container text-on-primary-container font-headline-sm text-headline-sm py-md rounded-xl transition-all active:scale-[0.98] hover:bg-primary-fixed-dim hover:shadow-[0_0_20px_rgba(0,218,248,0.4)] flex items-center justify-center gap-sm group"
+            class="w-full bg-secondary-fixed text-on-secondary-fixed font-headline-sm text-headline-sm py-md rounded-lg mt-md hover:opacity-90 active:scale-95 transition-all neon-glow-lime flex items-center justify-center gap-sm"
             type="submit">
             Join the Department
             <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform"
               data-icon="arrow_forward">arrow_forward</span>
           </button>
         </div>
-        <!-- Legal Ties -->
-        <p class="font-body-sm text-body-sm text-center text-outline-variant px-md">
-          By establishing this axiom, you agree to the
-          <a class="text-secondary underline underline-offset-4 hover:text-primary transition-colors" href="#">Terms of
-            Service</a>
-          and
-          <a class="text-secondary underline underline-offset-4 hover:text-primary transition-colors" href="#">Privacy
-            Policy</a>.
-        </p>
       </form>
       <!-- Footer Link -->
       <div class="text-center pt-lg border-t border-white/5">
         <p class="font-body-md text-body-md text-on-surface-variant">
           Already have an account?
-          <a class="text-primary font-bold hover:underline transition-all" href="#">Sign In</a>
+          <a class="text-primary-fixed-dim font-bold hover:text-primary transition-colors" href="#">Sign In</a>
         </p>
-      </div>
-    </div>
-    <!-- Abstract Visual Grid Card -->
-    <div class="mt-xl w-full max-w-[600px] hidden md:block">
-      <div class="glass-panel p-lg rounded-2xl grid grid-cols-3 gap-md relative overflow-hidden">
-        <!-- Mathematical Background Decoration -->
-        <div class="absolute inset-0 opacity-5 pointer-events-none">
-          <div class="w-full h-full"
-            style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
-        </div>
-        <div class="space-y-sm relative z-10">
-          <span class="material-symbols-outlined text-primary text-headline-md" data-icon="grid_view">grid_view</span>
-          <h3 class="font-headline-sm text-headline-sm text-secondary">Multidimensional</h3>
-          <p class="font-body-sm text-body-sm text-outline">Collaborative lattices for algebraic discovery.</p>
-        </div>
-        <div class="space-y-sm relative z-10 border-l border-white/10 pl-md">
-          <span class="material-symbols-outlined text-secondary-fixed text-headline-md" data-icon="waves">waves</span>
-          <h3 class="font-headline-sm text-headline-sm text-secondary">Fluid Logic</h3>
-          <p class="font-body-sm text-body-sm text-outline">Real-time derivation streaming for deep research.</p>
-        </div>
-        <div class="space-y-sm relative z-10 border-l border-white/10 pl-md">
-          <span class="material-symbols-outlined text-tertiary-fixed-dim text-headline-md"
-            data-icon="all_inclusive">all_inclusive</span>
-          <h3 class="font-headline-sm text-headline-sm text-secondary">Immutable</h3>
-          <p class="font-body-sm text-body-sm text-outline">Verified proofs archived within the global mesh.</p>
-        </div>
       </div>
     </div>
   </main>
