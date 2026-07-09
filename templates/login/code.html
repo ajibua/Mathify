@@ -98,8 +98,8 @@
         <div class="flex flex-col gap-sm">
           <div class="flex justify-between items-center px-xs">
             <label class="font-label-caps text-label-caps text-on-surface-variant">Password</label>
-            <a class="font-label-caps text-label-caps text-primary-fixed-dim hover:underline transition-all"
-              href="#">Forgot?</a>
+            <a onclick="openForgotModal()" class="font-label-caps text-label-caps text-primary-fixed-dim hover:underline transition-all cursor-pointer"
+              href="javascript:void(0)">Forgot?</a>
           </div>
           <div class="relative">
             <span
@@ -310,7 +310,263 @@
     document.querySelectorAll('a[href="#"]').forEach(a => {
       if (a.textContent.trim().toLowerCase().includes('sign up')) a.href = '/register/';
     });
+
+    // ── Custom Alert Modal ────────────────────────────────────
+    function showCustomAlert(message, title = 'Notification') {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.innerHTML = `
+          <div class="w-full max-w-sm glass-card rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+            <div class="flex justify-between items-center">
+              <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+              <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+                <span class="material-symbols-outlined text-md">close</span>
+              </button>
+            </div>
+            <div class="text-body-md text-on-surface-variant leading-relaxed">${message}</div>
+            <div class="flex justify-end mt-sm">
+              <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm">OK</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(overlay);
+        const card = overlay.querySelector('.glass-card');
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+        });
+
+        const close = () => {
+          overlay.classList.add('opacity-0');
+          card.classList.add('scale-95');
+          setTimeout(() => {
+            overlay.remove();
+            resolve();
+          }, 300);
+        };
+
+        overlay.querySelector('.close-modal-btn').onclick = close;
+        overlay.querySelector('.confirm-modal-btn').onclick = close;
+      });
+    }
+
+    // ── Forgot Password Modal Handlers ────────────────────────
+    function openForgotModal() {
+      const modal = document.getElementById('forgot-password-modal');
+      const card = modal.querySelector('.glass-card');
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        card.classList.remove('scale-95');
+      });
+    }
+
+    function closeForgotModal() {
+      const modal = document.getElementById('forgot-password-modal');
+      const card = modal.querySelector('.glass-card');
+      card.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    async function handleForgotSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('forgot-email').value.trim();
+      const btn = e.target.querySelector('button[type=submit]');
+      const origText = btn.innerHTML;
+
+      btn.disabled = true;
+      btn.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span> Generating Link...`;
+
+      const res = await fetch('/api/accounts/password-reset/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+
+      if (res.ok) {
+        btn.innerHTML = `<span class="material-symbols-outlined">check_circle</span> Sent!`;
+        setTimeout(() => {
+          closeForgotModal();
+          showCustomAlert(`A password reset link has been dispatched to ${email}. Please check your inbox (and development terminal console output).`, 'Email Dispatched');
+          
+          btn.disabled = false;
+          btn.innerHTML = origText;
+          document.getElementById('forgot-email').value = '';
+        }, 800);
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+        const err = await res.json();
+        showCustomAlert(err.error || 'An error occurred. Please try again.', 'Error');
+      }
+    }
+
+    // ── Confirm Reset Password Modal Handlers ─────────────────
+    function openConfirmResetModal() {
+      const modal = document.getElementById('confirm-reset-modal');
+      const card = modal.querySelector('.glass-card');
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        card.classList.remove('scale-95');
+      });
+    }
+
+    function closeConfirmResetModal() {
+      const modal = document.getElementById('confirm-reset-modal');
+      const card = modal.querySelector('.glass-card');
+      card.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+      }, 300);
+    }
+
+    async function handleConfirmResetSubmit(e) {
+      e.preventDefault();
+      const password = document.getElementById('reset-password').value;
+      const confirmPassword = document.getElementById('reset-password-confirm').value;
+      const btn = e.target.querySelector('button[type=submit]');
+      const origText = btn.innerHTML;
+
+      if (password !== confirmPassword) {
+        showCustomAlert('Passwords do not match. Please re-enter them.', 'Validation Error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<span class="material-symbols-outlined animate-spin">sync</span> Resetting Password...`;
+
+      const params = new URLSearchParams(window.location.search);
+      const uid = params.get('uid');
+      const token = params.get('token');
+
+      const res = await fetch('/api/accounts/password-reset/confirm/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid, token, password })
+      });
+
+      if (res.ok) {
+        btn.innerHTML = `<span class="material-symbols-outlined">check_circle</span> Success!`;
+        setTimeout(() => {
+          closeConfirmResetModal();
+          showCustomAlert('Your password has been successfully updated. You may now login.', 'Password Reset Complete');
+          
+          btn.disabled = false;
+          btn.innerHTML = origText;
+          document.getElementById('reset-password').value = '';
+          document.getElementById('reset-password-confirm').value = '';
+        }, 800);
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+        const err = await res.json();
+        showCustomAlert(err.error || 'The reset link is invalid or has expired.', 'Error');
+      }
+    }
+
+    // Check URL parameters on load for reset password
+    function checkUrlReset() {
+      const params = new URLSearchParams(window.location.search);
+      console.log("Checking URL parameters for password reset:", params.toString());
+      if (params.get('reset') === 'true') {
+        const uid = params.get('uid');
+        const token = params.get('token');
+        if (uid && token) {
+          openConfirmResetModal();
+        } else {
+          showCustomAlert("Reset parameter found, but UID or Token is missing from the URL. Please verify the link.", "Missing Parameters");
+        }
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', checkUrlReset);
+    } else {
+      checkUrlReset();
+    }
   </script>
+
+  <!-- Forgot Password Modal -->
+  <div id="forgot-password-modal"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm hidden">
+    <div
+      class="glass-card w-full max-w-sm rounded-2xl p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+      <div class="flex justify-between items-center">
+        <h3 class="font-headline-sm text-headline-sm text-primary font-bold">Reset Password</h3>
+        <button onclick="closeForgotModal()"
+          class="text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+          <span class="material-symbols-outlined text-md">close</span>
+        </button>
+      </div>
+      <p class="text-body-sm text-on-surface-variant leading-relaxed">
+        Enter the email address associated with your account to receive a password reset link.
+      </p>
+      <form id="forgot-password-form" class="flex flex-col gap-md" onsubmit="handleForgotSubmit(event)">
+        <div class="flex flex-col gap-xs">
+          <label class="font-label-caps text-label-caps text-outline">Email Address</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline text-[20px]">alternate_email</span>
+            <input id="forgot-email" required
+              class="w-full bg-surface-container-high border border-outline-variant rounded-lg py-md pl-[48px] pr-md text-on-surface font-body-md placeholder:text-outline/50 transition-all focus:bg-surface-bright"
+              placeholder="sigma@mathaxiom.edu" type="email" />
+          </div>
+        </div>
+        <button type="submit"
+          class="w-full py-md bg-primary-container text-on-primary-container font-headline-sm rounded-lg hover:opacity-90 active:scale-95 transition-all neon-glow-lime flex items-center justify-center gap-sm">
+          Send Reset Link
+          <span class="material-symbols-outlined">send</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirm Password Reset Modal -->
+  <div id="confirm-reset-modal"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm hidden">
+    <div
+      class="glass-card w-full max-w-sm rounded-2xl p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+      <div class="flex justify-between items-center">
+        <h3 class="font-headline-sm text-headline-sm text-primary font-bold">New Password</h3>
+        <button onclick="closeConfirmResetModal()"
+          class="text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+          <span class="material-symbols-outlined text-md">close</span>
+        </button>
+      </div>
+      <p class="text-body-sm text-on-surface-variant leading-relaxed">
+        Please enter and confirm your new password below.
+      </p>
+      <form id="confirm-reset-form" class="flex flex-col gap-md" onsubmit="handleConfirmResetSubmit(event)">
+        <div class="flex flex-col gap-xs">
+          <label class="font-label-caps text-label-caps text-outline">New Password</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline text-[20px]">lock</span>
+            <input id="reset-password" required minlength="8"
+              class="w-full bg-surface-container-high border border-outline-variant rounded-lg py-md pl-[48px] pr-md text-on-surface font-body-md placeholder:text-outline/50 transition-all focus:bg-surface-bright"
+              placeholder="••••••••" type="password" />
+          </div>
+        </div>
+        <div class="flex flex-col gap-xs">
+          <label class="font-label-caps text-label-caps text-outline">Confirm Password</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline text-[20px]">lock</span>
+            <input id="reset-password-confirm" required minlength="8"
+              class="w-full bg-surface-container-high border border-outline-variant rounded-lg py-md pl-[48px] pr-md text-on-surface font-body-md placeholder:text-outline/50 transition-all focus:bg-surface-bright"
+              placeholder="••••••••" type="password" />
+          </div>
+        </div>
+        <button type="submit"
+          class="w-full py-md bg-primary-container text-on-primary-container font-headline-sm rounded-lg hover:opacity-90 active:scale-95 transition-all neon-glow-lime flex items-center justify-center gap-sm">
+          Reset Password
+          <span class="material-symbols-outlined">lock_reset</span>
+        </button>
+      </form>
+    </div>
+  </div>
 
 </body>
 

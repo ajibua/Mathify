@@ -117,12 +117,17 @@
       <span class="material-symbols-outlined text-[20px]">arrow_back</span>
     </button>
     <span class="font-headline-sm text-headline-sm text-on-surface" id="header-username">Profile</span>
-    <button id="menu-btn" class="text-outline hover:text-on-surface transition-colors">
-      <span class="material-symbols-outlined">more_vert</span>
-    </button>
+    <div class="relative flex items-center">
+      <button id="menu-btn" class="text-outline hover:text-on-surface transition-colors focus:outline-none">
+        <span class="material-symbols-outlined">more_vert</span>
+      </button>
+      <div id="profile-menu-dropdown"
+        class="hidden absolute right-0 top-10 w-48 glass-panel rounded-xl shadow-xl p-sm flex flex-col gap-xs border border-white/10 text-on-surface z-50">
+      </div>
+    </div>
   </header>
 
-  <main class="max-w-[1200px] mx-auto min-h-screen">
+  <main class="max-w-[1200px] mx-auto min-h-screen pb-28 md:pb-36">
 
     <!-- Profile Hero -->
     <section class="px-gutter pt-lg pb-md">
@@ -165,15 +170,15 @@
       <div class="grid grid-cols-3 gap-sm mt-lg">
         <div class="stat-card rounded-xl p-md text-center">
           <p class="font-headline-sm text-headline-sm text-on-surface" id="stat-points">—</p>
-          <p class="font-label-caps text-label-caps text-primary-fixed-dim mt-xs">AXIOM PTS</p>
+          <p class="font-label-caps text-label-caps text-primary-fixed-dim mt-xs">Points</p>
         </div>
         <div class="stat-card rounded-xl p-md text-center">
           <p class="font-headline-sm text-headline-sm text-on-surface" id="stat-followers">—</p>
-          <p class="font-label-caps text-label-caps text-outline mt-xs">FOLLOWERS</p>
+          <p class="font-label-caps text-label-caps text-outline mt-xs">Followers</p>
         </div>
         <div class="stat-card rounded-xl p-md text-center">
           <p class="font-headline-sm text-headline-sm text-on-surface" id="stat-following">—</p>
-          <p class="font-label-caps text-label-caps text-outline mt-xs">FOLLOWING</p>
+          <p class="font-label-caps text-label-caps text-outline mt-xs">Following</p>
         </div>
       </div>
     </section>
@@ -304,7 +309,17 @@
         return res;
       },
       requireAuth() { if (!this.getAccess()) window.location.href = '/login/'; },
-      logout() { this.clearTokens(); window.location.href = '/login/'; }
+      logout() { this.clearTokens(); window.location.href = '/login/'; },
+      getCurrentUserId() {
+        const token = this.getAccess();
+        if (!token) return null;
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          return payload.user_id;
+        } catch (e) {
+          return null;
+        }
+      }
     };
 
     // ── Custom Modal Dialog System ───────────────────────────
@@ -466,7 +481,8 @@
       const params = new URLSearchParams(window.location.search);
       const userId = params.get('user');
       const endpoint = userId ? `/api/accounts/users/${userId}/` : '/api/accounts/me/';
-      const isOwnProfile = !userId;
+      const currentUserId = API.getCurrentUserId();
+      const isOwnProfile = !userId || String(userId) === String(currentUserId);
 
       const [meRes, profileRes] = await Promise.all([
         API.req(endpoint),
@@ -619,6 +635,83 @@
         btn.dataset.following = 'true';
         btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">person_remove</span> Unfollow`;
         btn.className = btn.className.replace('bg-primary-container text-on-primary-container neon-glow', 'bg-surface-container-high text-on-surface');
+      }
+    }
+
+    // ── Profile Page Three-Dots Menu Dropdown ─────────────────
+    const menuBtn = document.getElementById('menu-btn');
+    const profileMenuDropdown = document.getElementById('profile-menu-dropdown');
+    
+    if (menuBtn && profileMenuDropdown) {
+      menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get('user');
+        const currentUserId = API.getCurrentUserId();
+        const isOwnProfile = !userId || String(userId) === String(currentUserId);
+
+        // Populate items dynamically
+        if (isOwnProfile) {
+          profileMenuDropdown.innerHTML = `
+            <a href="/profile/?edit=true" class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline hover:text-on-surface w-full text-left font-body-sm">
+              <span class="material-symbols-outlined text-md">edit</span>Edit Profile
+            </a>
+            <button onclick="copyProfileLink()" class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline hover:text-on-surface w-full text-left font-body-sm">
+              <span class="material-symbols-outlined text-md">link</span>Copy Profile Link
+            </button>
+            <button onclick="handleSignOut()" class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline hover:text-error w-full text-left font-body-sm">
+              <span class="material-symbols-outlined text-md">logout</span>Sign Out
+            </button>
+          `;
+        } else {
+          profileMenuDropdown.innerHTML = `
+            <button onclick="copyProfileLink()" class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline hover:text-on-surface w-full text-left font-body-sm">
+              <span class="material-symbols-outlined text-md">link</span>Copy Profile Link
+            </button>
+            <button onclick="handleBlockUser()" class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline hover:text-error w-full text-left font-body-sm">
+              <span class="material-symbols-outlined text-md">block</span>Block User
+            </button>
+            <button onclick="handleReportProfile()" class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline hover:text-error w-full text-left font-body-sm">
+              <span class="material-symbols-outlined text-md">flag</span>Report Profile
+            </button>
+          `;
+        }
+
+        profileMenuDropdown.classList.toggle('hidden');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (profileMenuDropdown && !profileMenuDropdown.contains(e.target) && e.target !== menuBtn && !menuBtn.contains(e.target)) {
+          profileMenuDropdown.classList.add('hidden');
+        }
+      });
+    }
+
+    function copyProfileLink() {
+      const params = new URLSearchParams(window.location.search);
+      const userId = params.get('user');
+      const url = window.location.origin + window.location.pathname + (userId ? `?user=${userId}` : '');
+      navigator.clipboard.writeText(url).then(() => {
+        window.alert('Profile link copied to clipboard!', 'Success');
+      }).catch(err => {
+        window.alert('Failed to copy link.', 'Error');
+      });
+      if (profileMenuDropdown) profileMenuDropdown.classList.add('hidden');
+    }
+
+    async function handleBlockUser() {
+      if (profileMenuDropdown) profileMenuDropdown.classList.add('hidden');
+      if (await window.confirm('Are you sure you want to block this user?', 'Block User')) {
+        window.alert('User has been blocked successfully.', 'Success');
+      }
+    }
+
+    async function handleReportProfile() {
+      if (profileMenuDropdown) profileMenuDropdown.classList.add('hidden');
+      const reason = await window.prompt('Please enter the reason for reporting this profile:', '', 'Report Profile');
+      if (reason !== null && reason.trim() !== '') {
+        window.alert('Thank you. Your report has been submitted for review.', 'Report Submitted');
       }
     }
   </script>

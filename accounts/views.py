@@ -2,13 +2,25 @@ from rest_framework import generics, viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.core.mail import send_mail
+from django.shortcuts import redirect
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
+import urllib.request
+import urllib.parse
+import json
+from decouple import config
+import secrets
 
 from .models import CustomUser, Profile, Department
 from .serializers import (
     UserSerializer, RegisterSerializer,
     ProfileSerializer, DepartmentSerializer,
 )
-
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
@@ -21,7 +33,6 @@ class MeView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
-
 
 class ProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
@@ -61,17 +72,7 @@ class DepartmentViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
-# ── OAuth 2.0 Identity Provider Views ───────────────────────
-from django.shortcuts import redirect
-from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
-from rest_framework_simplejwt.tokens import RefreshToken
-import urllib.request
-import urllib.parse
-import json
-from decouple import config
-import secrets
-
+# OAuth 2.0 Identity Provider Views
 class GoogleLoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -262,3 +263,72 @@ class MicrosoftCallbackView(APIView):
         # Generate SimpleJWT tokens
         refresh = RefreshToken.for_user(user)
         return redirect(f'/login/?access={refresh.access_token}&refresh={refresh}')
+
+
+# Password Reset Views
+class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({'error': 'Email is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = CustomUser.objects.filter(email=email).first()
+        if user:
+            # Generate token and uid
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            
+            # Construct reset link
+            reset_url = request.build_absolute_uri(f'/login/?reset=true&uid={uid}&token={token}')
+            
+            # Send email
+            subject = "Mathify Password Reset Request"
+            message = (
+                f"Hello {user.username},\n\n"
+                f"We received a request to reset your password for your Mathify account.\n"
+                f"Please click the link below to set a new password:\n\n"
+                f"{reset_url}\n\n"
+                f"If you did not request this, please ignore this email.\n"
+            )
+            from django.conf import settings
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                print(f"FAILED TO SEND EMAIL: {e}. FALLBACK MESSAGE:\n", message)
+                
+        # Return success to prevent email enumeration
+        return Response({'message': 'If an account exists with this email, a reset link has been sent.'}, status=status.HTTP_200_OK)
+
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        uidb64 = request.data.get('uid')
+        token = request.data.get('token')
+        new_password = request.data.get('password')
+        
+        if not uidb64 or not token or not new_password:
+            return Response({'error': 'UID, token, and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = CustomUser.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+            return Response({'error': 'Invalid reset link.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        if not default_token_generator.check_token(user, token):
+            return Response({'error': 'Reset token is invalid or has expired.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Set new password
+        user.set_password(new_password)
+        user.save()
+        return Response({'message': 'Password has been reset successfully.'}, status=status.HTTP_200_OK)

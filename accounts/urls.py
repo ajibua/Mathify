@@ -2,7 +2,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     RegisterView, MeView, ProfileView, UserDetailView, UserListView, DepartmentViewSet,
-    GoogleLoginView, GoogleCallbackView, MicrosoftLoginView, MicrosoftCallbackView
+    GoogleLoginView, GoogleCallbackView, MicrosoftLoginView, MicrosoftCallbackView,
+    PasswordResetRequestView, PasswordResetConfirmView
 )
 
 router = DefaultRouter()
@@ -14,6 +15,10 @@ urlpatterns = [
     path('me/profile/', ProfileView.as_view(), name='my-profile'),
     path('users/', UserListView.as_view(), name='user-list'),
     path('users/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
+    
+    # Password Reset
+    path('password-reset/', PasswordResetRequestView.as_view(), name='password-reset-request'),
+    path('password-reset/confirm/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
     
     # OAuth Endpoints
     path('oauth/google/login/', GoogleLoginView.as_view(), name='google-login'),
