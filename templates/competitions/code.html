@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist:wght@100;300;400;500;700;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>MATH_AXIOM | Study Groups &amp; Competitions</title>
+<title>Mathify | Competitions</title>
 <style>
         body {
             background-color: #000000;
@@ -47,32 +47,55 @@
   </style>
   </head>
 <body class="bg-black">
-  <!-- Top Navigation -->
+  <!-- TopAppBar -->
   <header
-    class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-margin-mobile md:px-margin-desktop h-16">
-    <div class="flex items-center gap-sm">
-      <span class="material-symbols-outlined text-primary-fixed-dim text-headline-md"
-        style="font-variation-settings: 'FILL' 1;">calculate</span>
-      <h1 class="font-headline-md text-headline-md font-bold tracking-tighter text-primary">MATH_AXIOM</h1>
-    </div>
+    class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-margin-mobile h-16">
     <div class="flex items-center gap-md">
-      <div class="hidden md:flex gap-lg mr-lg">
-        <a class="font-label-caps text-label-caps text-primary transition-opacity hover:opacity-80" href="#">Groups</a>
-        <a class="font-label-caps text-label-caps text-on-surface-variant transition-opacity hover:opacity-80"
-          href="#">Battles</a>
-        <a class="font-label-caps text-label-caps text-on-surface-variant transition-opacity hover:opacity-80"
-          href="#">Rankings</a>
+      <div
+        class="w-10 h-10 rounded-full overflow-hidden border border-primary/20 cursor-pointer active:scale-95 duration-150">
+        <img alt="user_profile_avatar" class="w-full h-auto"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNR6_bbp4LGM-l3X_VFqQX61HdJmx8nlSec62cyunD8Pywhtro8nXR36wJFs_b4NtVZvhAQXINWvpxgTaA9hivWo0aVSYsRrRB6W4lJkBQB4Mwe5wAM_cxF_hLRWG63cCe-0bPYkU9zaSUPYrgctciWQZRrNZc7sUqG1ERnb18j4AEAvRNLyKrbD_S5aEnC1zYhXZZrq_Qq4pP88iIREZpSLhy6j868wUBIhEzf7thaj5qEcE-5LxuTd8BqpPpst_A47n9Gx0pw2k" />
       </div>
-      <button class="material-symbols-outlined text-on-surface-variant active:scale-95 duration-150 relative"
-        data-icon="notifications" data-notification-bell>
+      <span
+        class="font-headline-md text-headline-md font-bold tracking-tighter text-primary dark:text-primary-fixed-dim">Mathify</span>
+    </div>
+    <div class="flex items-center gap-md relative">
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150"
+        data-search-btn>search</button>
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
+        data-notification-bell>
         notifications
         <span
           class="hidden absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold items-center justify-center"
           data-notification-count></span>
       </button>
-      <div
-        class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xs">
-        SS</div>
+      <button
+        class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
+        data-profile-menu-btn>
+        account_circle
+      </button>
+      <div id="notification-dropdown"
+        class="hidden absolute right-0 w-80 glass-panel rounded-xl shadow-xl p-md flex flex-col gap-sm max-h-[400px] border border-white/10 text-on-surface z-50"
+        style="top: 52px;">
+        <div class="flex items-center justify-between border-b border-white/10 pb-xs">
+          <span class="font-bold text-body-sm text-primary">Notifications</span>
+          <button class="text-[10px] text-outline hover:text-primary transition-colors"
+            id="clear-notifications-btn">Mark all read</button>
+        </div>
+        <div class="overflow-y-auto flex flex-col gap-sm flex-1 pr-xs" id="notifications-list-container"
+          style="max-height: 300px;">
+          <div class="text-[12px] text-outline text-center py-md">Loading notifications...</div>
+        </div>
+      </div>
+      <div id="profile-dropdown"
+        class="hidden absolute right-0 w-48 glass-panel rounded-xl shadow-xl p-sm flex flex-col gap-sm border border-white/10 text-on-surface z-50"
+        style="top: 52px;">
+        <div class="flex flex-col gap-xs" id="profile-dropdown-container">
+          <!-- Dynamic dropdown menu options will be loaded here -->
+        </div>
+      </div>
     </div>
   </header>
   <!-- Main Content Canvas -->
@@ -85,12 +108,14 @@
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeVkCZWxLCtvC-GO6-PYS2PCFYWE6udqxTmbC-vv0OqphyFamU7vN9LL9OPnr8je7g6V0Z9moyR04BGFbXamuONVun755skUz3lFsrZB5WS0-dMLdmqZMfNC0eoYzzJ6Im260hl_HyB2b3a7RmUEEm-NQ6UkgDvHP0WBL_r2ePXETEeXbxdxwmJPpmUs1ayWWOU3La97rCUjJAo0pxAgcbanV4gUAqbQzFRLc1lt1rLGfYM4nDRXIK1tLDMMuu28aUy40hm5RQXIw" />
         <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
         <div class="absolute bottom-md left-md p-md">
-          <span
-            class="font-label-caps text-label-caps bg-secondary-container text-on-secondary-container px-sm py-1 rounded mb-sm inline-block">SEASON
-            4: THE RIEMANN SECTOR</span>
-          <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-white mb-xs">Axiom Battles</h2>
-          <p class="font-body-md text-body-md text-on-surface-variant max-w-lg">Coordinate with your squad to dominate
-            the weekly theorem-solving circuit. Precision is your only weapon.</p>
+          <span id="competitions-hero-badge"
+            class="font-label-caps text-label-caps bg-surface-variant text-on-surface-variant px-sm py-1 rounded mb-sm inline-block">
+            CHECKING STATUS
+          </span>
+          <h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-white mb-xs">Math Faceoff.</h2>
+          <p id="competitions-hero-desc" class="font-body-md text-body-md text-on-surface-variant max-w-lg">
+            Loading competition data...
+          </p>
         </div>
       </div>
     </section>
@@ -98,149 +123,17 @@
       <!-- Left Column: Join a Squad (Bento Style) -->
       <div class="md:col-span-8 space-y-lg">
         <div class="flex items-center justify-between mb-sm">
-          <h3 class="font-headline-md text-headline-md text-white">Join a Squad</h3>
-          <button class="text-primary font-label-caps text-label-caps hover:underline">VIEW ALL</button>
+          <h3 class="font-headline-md text-headline-md text-white">Join a team.</h3>
+          <a href="/groups/" class="text-primary font-label-caps text-label-caps hover:underline">View all.</a>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-md">
-          <!-- Squad Card 1 -->
-          <div
-            class="bg-surface-container p-md rounded-xl border border-outline-variant/30 hover:border-primary/50 transition-all cursor-pointer group relative overflow-hidden">
-            <div class="flex justify-between items-start mb-md relative z-10">
-              <div class="w-12 h-12 rounded-lg bg-surface-bright flex items-center justify-center text-primary">
-                <span class="material-symbols-outlined" data-icon="functions">functions</span>
-              </div>
-              <span class="text-secondary-fixed text-xs font-bold px-2 py-1 bg-secondary-fixed/10 rounded">TOP 1%</span>
-            </div>
-            <h4 class="font-headline-sm text-headline-sm text-white mb-xs relative z-10">The Calculus Crusaders</h4>
-            <p class="font-body-sm text-body-sm text-on-surface-variant mb-md relative z-10">Optimizing derivatives and
-              conquering integrals since 2021.</p>
-            <div class="flex items-center gap-sm relative z-10">
-              <div class="flex -space-x-2">
-                <div class="w-6 h-6 rounded-full border-2 border-surface bg-surface-variant"></div>
-                <div class="w-6 h-6 rounded-full border-2 border-surface bg-primary-fixed-dim"></div>
-                <div class="w-6 h-6 rounded-full border-2 border-surface bg-secondary-fixed-dim"></div>
-              </div>
-              <span class="text-xs text-on-surface-variant">42 Active Solvers</span>
-            </div>
-          </div>
-          <!-- Squad Card 2 -->
-          <div
-            class="bg-surface-container p-md rounded-xl border border-outline-variant/30 hover:border-primary/50 transition-all cursor-pointer group relative overflow-hidden">
-            <div class="flex justify-between items-start mb-md">
-              <div class="w-12 h-12 rounded-lg bg-surface-bright flex items-center justify-center text-secondary-fixed">
-                <span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
-              </div>
-              <span
-                class="text-on-surface-variant text-xs font-bold px-2 py-1 bg-surface-variant rounded">RECRUITING</span>
-            </div>
-            <h4 class="font-headline-sm text-headline-sm text-white mb-xs">Linear Lords</h4>
-            <p class="font-body-sm text-body-sm text-on-surface-variant mb-md">Mastering vector spaces and eigenvalues
-              in higher dimensions.</p>
-            <div class="flex items-center gap-sm">
-              <div class="flex -space-x-2">
-                <div class="w-6 h-6 rounded-full border-2 border-surface bg-surface-variant"></div>
-                <div class="w-6 h-6 rounded-full border-2 border-surface bg-surface-bright"></div>
-              </div>
-              <span class="text-xs text-on-surface-variant">15 Active Solvers</span>
-            </div>
-          </div>
-          <!-- Squad Card 3 -->
-          <div
-            class="bg-surface-container p-md rounded-xl border border-outline-variant/30 hover:border-primary/50 transition-all cursor-pointer group relative overflow-hidden">
-            <div class="flex justify-between items-start mb-md">
-              <div
-                class="w-12 h-12 rounded-lg bg-surface-bright flex items-center justify-center text-tertiary-fixed-dim">
-                <span class="material-symbols-outlined" data-icon="shape_line">shape_line</span>
-              </div>
-              <span class="text-on-surface-variant text-xs font-bold px-2 py-1 bg-surface-variant rounded">ELITE</span>
-            </div>
-            <h4 class="font-headline-sm text-headline-sm text-white mb-xs">Topology Titans</h4>
-            <p class="font-body-sm text-body-sm text-on-surface-variant mb-md">Deforming manifolds without tearing.
-              Donuts are coffee cups.</p>
-            <div class="flex items-center gap-sm">
-              <span class="text-xs text-on-surface-variant">Invitation Only</span>
-            </div>
-          </div>
-          <!-- Squad Card 4 (Live Competition Preview) -->
-          <div
-            class="bg-surface-container p-md rounded-xl border border-secondary-fixed/20 relative neon-glow-secondary overflow-hidden">
-            <div class="absolute -right-4 -top-4 opacity-10 rotate-12">
-              <span class="material-symbols-outlined text-[100px]" data-icon="bolt">bolt</span>
-            </div>
-            <div class="flex items-center gap-sm mb-md">
-              <div class="w-2 h-2 rounded-full bg-secondary-fixed animate-pulse"></div>
-              <span class="font-label-caps text-label-caps text-secondary-fixed">LIVE BATTLE</span>
-            </div>
-            <h4 class="font-headline-sm text-headline-sm text-white mb-md">Vector Space Siege</h4>
-            <div class="space-y-sm mb-md">
-              <div class="flex justify-between text-xs mb-1">
-                <span class="text-on-surface-variant">Target: Rank 1 Tensor</span>
-                <span class="text-secondary-fixed font-bold">88%</span>
-              </div>
-              <div class="w-full h-1 bg-surface-bright rounded-full">
-                <div class="h-full bg-gradient-to-r from-primary to-secondary-fixed rounded-full" style="width: 88%">
-                </div>
-              </div>
-            </div>
-            <button
-              class="w-full py-2 bg-secondary-fixed text-black font-bold font-label-caps rounded-lg active:scale-95 transition-transform">DEPLOY
-              NOW</button>
-          </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-md" id="squads-container">
+          <div class="text-xs text-outline text-center py-md sm:col-span-2">Loading teams...</div>
         </div>
         <!-- Live Competitions Area -->
         <div class="pt-lg">
           <h3 class="font-headline-md text-headline-md text-white mb-md">Live Competitions</h3>
-          <div class="space-y-md">
-            <!-- Battle Item 1 -->
-            <div
-              class="math-inset p-md flex flex-col md:flex-row md:items-center justify-between gap-md group hover:bg-surface-bright/50 transition-colors">
-              <div>
-                <h5 class="font-headline-sm text-headline-sm text-white">Quantum Flux Relay</h5>
-                <p class="text-xs text-on-surface-variant mt-1 font-math-display">Score Req: <span
-                    class="text-secondary-fixed">φ &gt; 1.618</span></p>
-              </div>
-              <div class="flex flex-col md:items-end gap-sm">
-                <div class="flex items-center gap-md">
-                  <div class="text-right">
-                    <div class="text-xs text-on-surface-variant">Top Score</div>
-                    <div class="text-primary font-bold">99.42 pts</div>
-                  </div>
-                  <div
-                    class="w-10 h-10 rounded bg-surface-container flex items-center justify-center border border-outline-variant">
-                    <span class="material-symbols-outlined text-sm" data-icon="Waves">waves</span>
-                  </div>
-                </div>
-                <div class="w-48 h-1 bg-surface-variant rounded-full overflow-hidden">
-                  <div class="h-full bg-secondary-fixed transition-all duration-1000" id="progress-bar-1"
-                    style="width: 65%"></div>
-                </div>
-              </div>
-            </div>
-            <!-- Battle Item 2 -->
-            <div
-              class="math-inset p-md flex flex-col md:flex-row md:items-center justify-between gap-md group hover:bg-surface-bright/50 transition-colors"
-              style="border-left-color: #00daf8;">
-              <div>
-                <h5 class="font-headline-sm text-headline-sm text-white">Primes Sieve Sprint</h5>
-                <p class="text-xs text-on-surface-variant mt-1 font-math-display">N = 10^12 | Time Left: 02:14:55</p>
-              </div>
-              <div class="flex flex-col md:items-end gap-sm">
-                <div class="flex items-center gap-md">
-                  <div class="text-right">
-                    <div class="text-xs text-on-surface-variant">Top Score</div>
-                    <div class="text-primary font-bold">142.1 pts</div>
-                  </div>
-                  <div
-                    class="w-10 h-10 rounded bg-surface-container flex items-center justify-center border border-outline-variant">
-                    <span class="material-symbols-outlined text-sm" data-icon="grid_4x4">grid_4x4</span>
-                  </div>
-                </div>
-                <div class="w-48 h-1 bg-surface-variant rounded-full overflow-hidden">
-                  <div class="h-full bg-primary-fixed-dim transition-all duration-1000" id="progress-bar-2"
-                    style="width: 42%"></div>
-                </div>
-              </div>
-            </div>
+          <div class="space-y-md" id="live-competitions-list">
+            <div class="text-xs text-outline text-center py-md">Loading available competitions...</div>
           </div>
         </div>
       </div>
@@ -251,70 +144,24 @@
           <div class="p-md border-b border-outline-variant/30 bg-surface-bright/30">
             <h3 class="font-headline-sm text-headline-sm text-white flex items-center gap-sm">
               <span class="material-symbols-outlined text-secondary-fixed" data-icon="trophy">trophy</span>
-              Team Leaderboard
+              Leaderboard.
             </h3>
           </div>
-          <div class="p-sm">
-            <!-- Rank 1 -->
-            <div class="flex items-center gap-md p-md hover:bg-surface-variant/40 rounded-lg transition-all">
-              <span class="text-headline-sm font-bold text-secondary-fixed w-6 italic">1</span>
-              <div class="flex-1">
-                <div class="font-body-md font-bold text-white">Euler's Elite</div>
-                <div class="text-xs text-on-surface-variant uppercase tracking-widest">12,450 AXIOMS</div>
-              </div>
-              <span class="material-symbols-outlined text-secondary-fixed text-sm"
-                data-icon="trending_up">trending_up</span>
-            </div>
-            <!-- Rank 2 -->
-            <div class="flex items-center gap-md p-md hover:bg-surface-variant/40 rounded-lg transition-all">
-              <span class="text-headline-sm font-bold text-on-surface-variant w-6 italic">2</span>
-              <div class="flex-1">
-                <div class="font-body-md font-bold text-white">Calculus Crusaders</div>
-                <div class="text-xs text-on-surface-variant uppercase tracking-widest">11,200 AXIOMS</div>
-              </div>
-              <span class="material-symbols-outlined text-on-surface-variant text-sm"
-                data-icon="horizontal_rule">horizontal_rule</span>
-            </div>
-            <!-- Rank 3 -->
-            <div class="flex items-center gap-md p-md hover:bg-surface-variant/40 rounded-lg transition-all">
-              <span class="text-headline-sm font-bold text-on-surface-variant w-6 italic">3</span>
-              <div class="flex-1">
-                <div class="font-body-md font-bold text-white">The Fourier Set</div>
-                <div class="text-xs text-on-surface-variant uppercase tracking-widest">9,840 AXIOMS</div>
-              </div>
-              <span class="material-symbols-outlined text-error text-sm" data-icon="trending_down">trending_down</span>
-            </div>
-            <!-- User Team Rank -->
-            <div class="mt-md p-md bg-primary-container/10 border border-primary/20 rounded-lg">
-              <div class="flex items-center justify-between mb-xs">
-                <span class="text-xs text-primary font-bold">YOUR SQUAD</span>
-                <span class="text-xs text-on-surface-variant">Rank #142</span>
-              </div>
-              <div class="font-body-md font-bold text-white">Sigma Solvers</div>
-            </div>
+          <div class="p-sm" id="competitions-leaderboard">
+            <div class="text-xs text-outline text-center py-md">Loading live standings...</div>
           </div>
         </div>
         <!-- Seasonal Statistics -->
         <div class="bg-surface-container rounded-xl p-md border border-outline-variant/30">
-          <h4 class="font-label-caps text-label-caps text-on-surface-variant mb-md">SEASONAL GLOBAL OUTPUT</h4>
+          <h4 class="font-label-caps text-label-caps text-on-surface-variant mb-md">Global points.</h4>
           <div class="space-y-lg">
             <div>
               <div class="flex justify-between text-xs mb-sm">
-                <span class="text-white">Theorems Proved</span>
-                <span class="text-primary">1.2M / 2M</span>
+                <span class="text-white">Total points Earned</span>
+                <span class="text-primary" id="global-axioms-count">0 AP</span>
               </div>
               <div class="w-full h-1 bg-surface-bright rounded-full">
-                <div class="h-full bg-primary" style="width: 60%"></div>
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-md">
-              <div class="bg-surface-bright/50 p-sm rounded border border-white/5">
-                <div class="text-[10px] text-on-surface-variant mb-1">MOST ACTIVE BRANCH</div>
-                <div class="text-sm font-bold text-secondary-fixed">TOPOLOGY</div>
-              </div>
-              <div class="bg-surface-bright/50 p-sm rounded border border-white/5">
-                <div class="text-[10px] text-on-surface-variant mb-1">AVG. SOLVE TIME</div>
-                <div class="text-sm font-bold text-primary">0:42 SEC</div>
+                <div class="h-full bg-primary" id="global-axioms-progress" style="width: 0%"></div>
               </div>
             </div>
           </div>
@@ -322,16 +169,58 @@
       </div>
     </div>
   </main>
-  <!-- FAB: Create Group -->
-  <button
-    class="fixed bottom-24 right-margin-mobile md:bottom-12 md:right-margin-desktop w-14 h-14 md:w-16 md:h-16 rounded-full bg-secondary-fixed text-black flex items-center justify-center shadow-2xl z-50 hover:scale-110 active:scale-95 transition-all group neon-glow-secondary">
+  <!-- FAB: Create Competition -->
+  <button onclick="openCreateCompetitionModal()"
+    class="fixed bottom-28 right-margin-mobile md:bottom-24 md:right-margin-desktop w-14 h-14 md:w-16 md:h-16 rounded-full bg-secondary-fixed text-black flex items-center justify-center shadow-2xl z-50 hover:scale-110 active:scale-95 transition-all group neon-glow-secondary">
     <span class="material-symbols-outlined text-headline-sm md:text-headline-md font-bold"
-      data-icon="group_add">group_add</span>
+      data-icon="emoji_events">emoji_events</span>
     <div
       class="absolute right-full mr-4 bg-surface-container px-3 py-1 rounded-lg border border-outline-variant opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none hidden md:block">
-      <span class="font-label-caps text-label-caps text-white">CREATE SQUAD</span>
+      <span class="font-label-caps text-label-caps text-white">CREATE COMPETITION</span>
     </div>
   </button>
+
+  <!-- Create Competition Modal -->
+  <div id="create-competition-modal"
+    class="fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/70 backdrop-blur-md hidden">
+    <div
+      class="w-full max-w-md glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl relative bg-surface/90">
+      <div class="flex justify-between items-center">
+        <h3 class="font-headline-sm text-headline-sm text-primary font-bold">Create New Competition</h3>
+        <button onclick="closeCreateCompetitionModal()"
+          class="text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <form id="create-competition-form" class="flex flex-col gap-md">
+        <div class="flex flex-col gap-xs">
+          <label class="text-xs text-outline font-semibold uppercase">Competition Name</label>
+          <input type="text" name="name" required
+            class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-sm text-on-surface focus:outline-none focus:border-primary text-body-md"
+            placeholder="Enter competition name..." />
+        </div>
+        <div class="flex flex-col gap-xs">
+          <label class="text-xs text-outline font-semibold uppercase">Description</label>
+          <textarea name="description" rows="3"
+            class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-sm text-on-surface focus:outline-none focus:border-primary text-body-md"
+            placeholder="Describe this competition..."></textarea>
+        </div>
+        <div class="flex flex-col gap-xs">
+          <label class="text-xs text-outline font-semibold uppercase">Start Date</label>
+          <input type="datetime-local" name="start_date" required
+            class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-sm text-on-surface focus:outline-none focus:border-primary text-body-md" />
+        </div>
+        <div class="flex flex-col gap-xs">
+          <label class="text-xs text-outline font-semibold uppercase">End Date</label>
+          <input type="datetime-local" name="end_date" required
+            class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-sm text-on-surface focus:outline-none focus:border-primary text-body-md" />
+        </div>
+        <button type="submit"
+          class="w-full py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 mt-sm">Create
+          Competition</button>
+      </form>
+    </div>
+  </div>
   <!-- Desktop Bottom Nav -->
   <nav
     class="hidden md:flex fixed bottom-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-t border-white/10 justify-around items-center h-16 px-gutter">
@@ -345,12 +234,11 @@
       <span class="material-symbols-outlined">groups</span>
       <span class="font-label-caps text-[10px]">Groups</span>
     </a>
-    <div class="relative -top-4">
-      <a href="/studio/"
-        class="w-14 h-14 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg neon-glow active:scale-95 transition-transform duration-200">
-        <span class="material-symbols-outlined text-3xl">function</span>
-      </a>
-    </div>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/studio/">
+      <span class="material-symbols-outlined">function</span>
+      <span class="font-label-caps text-[10px]">Studio</span>
+    </a>
     <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
       href="/library/">
       <span class="material-symbols-outlined">menu_book</span>
@@ -524,6 +412,149 @@ async function loadNotificationCount() {
 </script>
 
 <script>
+  // ── Notifications & Profile Menu Dropdowns ────────
+  async function loadNotificationsList() {
+    const container = document.getElementById('notifications-list-container');
+    if (!container) return;
+    const res = await API.req('/api/notifications/');
+    if (!res) return;
+    const data = await res.json();
+    const notifications = data.results || data || [];
+    if (!notifications.length) {
+      container.innerHTML = `<div class="text-[12px] text-outline text-center py-md">No notifications yet.</div>`;
+      return;
+    }
+    container.innerHTML = notifications.map(n => {
+      const actorName = n.actor ? n.actor.split('@')[0] : 'Someone';
+      return `
+    <div class="p-sm rounded-lg bg-surface-container/50 hover:bg-surface-container border border-white/5 flex flex-col gap-xs transition-colors cursor-pointer ${n.is_read ? 'opacity-60' : ''}" data-notification-id="${n.id}">
+      <div class="flex justify-between items-start gap-xs">
+        <p class="text-[11px] text-on-surface">
+          <span class="text-primary-fixed-dim font-bold">${actorName}</span> ${n.verb}
+        </p>
+        ${!n.is_read ? '<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed shrink-0 mt-1" data-unread-indicator></span>' : ''}
+      </div>
+      <span class="text-[9px] text-outline">${new Date(n.created_at).toLocaleDateString()}</span>
+    </div>
+  `;
+    }).join('');
+  }
+
+  function renderProfileDropdown() {
+    const container = document.getElementById('profile-dropdown-container');
+    if (!container) return;
+    const isLoggedIn = !!API.getAccess();
+    if (isLoggedIn) {
+      container.innerHTML = `
+    <a href="/profile/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+      <span class="material-symbols-outlined text-[16px]">account_circle</span>
+      <span>View Profile</span>
+    </a>
+    <a href="/leaderboard/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+      <span class="material-symbols-outlined text-[16px]">trophy</span>
+      <span>Leaderboard</span>
+    </a>
+    <a href="/competitions/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+      <span class="material-symbols-outlined text-[16px]">emoji_events</span>
+      <span>Competitions</span>
+    </a>
+    <button id="auth-logout-btn" class="w-full text-left p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-error">
+      <span class="material-symbols-outlined text-[16px]">logout</span>
+      <span>Sign Out</span>
+    </button>
+  `;
+      const logoutBtn = document.getElementById('auth-logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+          if (await window.confirm('Are you sure you want to sign out?', 'Sign Out')) {
+            API.logout();
+          }
+        });
+      }
+    } else {
+      container.innerHTML = `
+    <a href="/login/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+      <span class="material-symbols-outlined text-[16px]">login</span>
+      <span>Sign In</span>
+    </a>
+    <a href="/register/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-primary-fixed-dim">
+      <span class="material-symbols-outlined text-[16px]">person_add</span>
+      <span>Sign Up</span>
+    </a>
+  `;
+    }
+  }
+
+  // Setup header toggles
+  (function setupHeaderControls() {
+    const bell = document.querySelector('[data-notification-bell]');
+    const dropdown = document.getElementById('notification-dropdown');
+    const profileBtn = document.querySelector('[data-profile-menu-btn]');
+    const profileDropdown = document.getElementById('profile-dropdown');
+
+    if (profileBtn && profileDropdown) {
+      profileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (dropdown) dropdown.classList.add('hidden');
+        profileDropdown.classList.toggle('hidden');
+        if (!profileDropdown.classList.contains('hidden')) {
+          renderProfileDropdown();
+        }
+      });
+      document.addEventListener('click', (e) => {
+        if (!profileDropdown.contains(e.target) && e.target !== profileBtn && !profileBtn.contains(e.target)) {
+          profileDropdown.classList.add('hidden');
+        }
+      });
+    }
+
+    if (bell && dropdown) {
+      bell.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (profileDropdown) profileDropdown.classList.add('hidden');
+        dropdown.classList.toggle('hidden');
+        if (!dropdown.classList.contains('hidden')) {
+          await loadNotificationsList();
+        }
+      });
+      document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target) && e.target !== bell && !bell.contains(e.target)) {
+          dropdown.classList.add('hidden');
+        }
+      });
+
+      const listContainer = document.getElementById('notifications-list-container');
+      if (listContainer) {
+        listContainer.addEventListener('click', async (e) => {
+          const item = e.target.closest('[data-notification-id]');
+          if (!item) return;
+          const id = item.getAttribute('data-notification-id');
+          const res = await API.req(`/api/notifications/${id}/read/`, { method: 'POST' });
+          if (res && res.ok) {
+            item.classList.add('opacity-60');
+            const indicator = item.querySelector('[data-unread-indicator]');
+            if (indicator) indicator.remove();
+            await loadNotificationCount();
+          }
+        });
+      }
+
+      const clearBtn = document.getElementById('clear-notifications-btn');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const res = await API.req('/api/notifications/read-all/', { method: 'POST' });
+          if (res && res.ok) {
+            await loadNotificationsList();
+            await loadNotificationCount();
+          }
+        });
+      }
+    }
+  })();
+</script>
+
+<script>
 API.requireAuth();
 loadNotificationCount();
 </script>
@@ -532,28 +563,255 @@ loadNotificationCount();
 (async () => {
   API.requireAuth();
 
-  const res = await API.req('/api/rankings/competitions/');
-  if (!res) return;
-  const data = await res.json();
-  const comps = data.results || data;
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('create') === 'true') {
+    setTimeout(() => {
+      if (window.openCreateCompetitionModal) {
+        window.openCreateCompetitionModal();
+      }
+    }, 100);
+  }
 
-  const container = document.querySelector('.space-y-md, .competitions-list');
-  if (!container || !comps.length) return;
+  window.submitSolution = async function(competitionId) {
+    const res = await API.req('/api/rankings/scores/award_points/', {
+      method: 'POST',
+      body: JSON.stringify({ points: 10, competition_id: competitionId })
+    });
+    if (res && res.ok) {
+      await window.alert('Antigravity proof verification successful! +10 Axiom Points awarded.', 'Success');
+      loadCompetitions();
+      loadLeaderboard();
+    } else {
+      await window.alert('Failed to submit solution.', 'Error');
+    }
+  };
 
-  const cards = comps.map(c => `
-    <div class="bg-surface-container-high rounded-2xl p-lg flex flex-col gap-sm border border-outline-variant/20">
-      <div class="flex items-center justify-between">
-        <h3 class="font-headline-sm text-headline-sm text-on-surface">${c.name}</h3>
-        <span class="font-label-caps text-label-caps px-sm py-xs rounded-full ${c.is_active ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-variant text-outline'}">
-          ${c.is_active ? 'ACTIVE' : 'ENDED'}
-        </span>
-      </div>
-      <p class="font-body-sm text-body-sm text-outline">${c.description || ''}</p>
-      <p class="font-label-caps text-label-caps text-primary-fixed-dim">
-        ${new Date(c.start_date).toLocaleDateString()} → ${new Date(c.end_date).toLocaleDateString()}
-      </p>
-    </div>`).join('');
-  container.insertAdjacentHTML('afterbegin', cards);
+  async function loadLeaderboard() {
+    const res = await API.req('/api/rankings/leaderboard/');
+    if (!res) return;
+    const entries = await res.json();
+    const container = document.getElementById('competitions-leaderboard');
+    if (!container) return;
+
+    const data = entries.slice(0, 5);
+    container.innerHTML = data.map((e, idx) => {
+      let isFirst = idx === 0;
+      let rankColor = isFirst ? 'text-secondary-fixed' : 'text-on-surface-variant';
+      let rankText = String(idx + 1);
+
+      return `
+        <div class="flex items-center gap-md p-md hover:bg-surface-variant/40 rounded-lg transition-all">
+          <span class="text-headline-sm font-bold ${rankColor} w-6 italic">${rankText}</span>
+          <div class="flex-1">
+            <div class="font-body-md font-bold text-white">@${e.user.split('@')[0]}</div>
+            <div class="text-xs text-on-surface-variant uppercase tracking-widest">${e.points.toLocaleString()} AXIOMS</div>
+          </div>
+          <span class="material-symbols-outlined text-secondary-fixed text-sm">trending_up</span>
+        </div>
+      `;
+    }).join('');
+
+    // Update global sum
+    const totalPoints = entries.reduce((sum, e) => sum + e.points, 0);
+    const countEl = document.getElementById('global-axioms-count');
+    const progEl = document.getElementById('global-axioms-progress');
+    if (countEl) {
+      countEl.innerText = `${totalPoints.toLocaleString()} AP`;
+    }
+    if (progEl) {
+      const percent = Math.min((totalPoints / 10000) * 100, 100);
+      progEl.style.width = `${percent}%`;
+    }
+  }
+
+  async function loadCompetitions() {
+    const res = await API.req('/api/rankings/competitions/');
+    if (!res) return;
+    const data = await res.json();
+    const comps = data.results || data || [];
+
+    const activeCount = comps.filter(c => c.is_active).length;
+    const badgeEl = document.getElementById('competitions-hero-badge');
+    const descEl = document.getElementById('competitions-hero-desc');
+
+    if (badgeEl) {
+      if (activeCount > 0) {
+        badgeEl.innerText = `${activeCount} ACTIVE COMPETITION${activeCount > 1 ? 'S' : ''}`;
+        badgeEl.className = "font-label-caps text-label-caps bg-primary text-on-primary px-sm py-1 rounded mb-sm inline-block animate-pulse";
+      } else {
+        badgeEl.innerText = "NO ACTIVE COMPETITIONS";
+        badgeEl.className = "font-label-caps text-label-caps bg-surface-variant text-on-surface-variant px-sm py-1 rounded mb-sm inline-block";
+      }
+    }
+
+    if (descEl) {
+      if (activeCount > 0) {
+        descEl.innerText = "Active competitions are live. Join a study team or submit solutions to verify proofs and claim your standing.";
+      } else {
+        descEl.innerText = "Collaborate with your team or create a new competition to challenge other mathematicians in real-time.";
+      }
+    }
+
+    const container = document.getElementById('live-competitions-list');
+    if (!container) return;
+
+    if (!comps.length) {
+      container.innerHTML = `
+        <div class="rounded-xl border border-outline-variant/20 p-xl text-center">
+          <span class="material-symbols-outlined text-4xl text-outline mb-md block">emoji_events</span>
+          <p class="font-body-md text-outline">No active competitions right now.</p>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = comps.map(c => `
+      <div class="bg-surface-container-high rounded-2xl p-lg flex flex-col gap-sm border border-outline-variant/20 transition-all duration-300">
+        <div class="flex items-center justify-between">
+          <h3 class="font-headline-sm text-headline-sm text-on-surface">${c.name}</h3>
+          <span class="font-label-caps text-label-caps px-sm py-xs rounded-full ${c.is_active ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-variant text-outline'}">
+            ${c.is_active ? 'ACTIVE' : 'ENDED'}
+          </span>
+        </div>
+        <p class="font-body-sm text-body-sm text-outline">${c.description || ''}</p>
+        <div class="flex justify-between items-center mt-md">
+          <p class="font-label-caps text-label-caps text-primary-fixed-dim">
+            ${new Date(c.start_date).toLocaleDateString()} → ${new Date(c.end_date).toLocaleDateString()}
+          </p>
+          ${c.is_active ? `
+          <button onclick="submitSolution(${c.id})" class="px-md py-sm bg-secondary-fixed text-black font-bold font-label-caps text-xs rounded-lg active:scale-95 transition-transform hover:opacity-90">
+            SUBMIT SOLUTION
+          </button>` : ''}
+        </div>
+      </div>`).join('');
+  }
+
+  async function loadTeamsAndCompetitions() {
+    const squadsRes = await API.req('/api/social/groups/?group_type=study');
+    const compsRes = await API.req('/api/rankings/competitions/');
+    if (!squadsRes || !compsRes) return;
+
+    const squadsData = await squadsRes.json();
+    const compsData = await compsRes.json();
+
+    const squads = squadsData.results || squadsData || [];
+    const comps = compsData.results || compsData || [];
+
+    const container = document.getElementById('squads-container');
+    if (!container) return;
+
+    let html = "";
+    
+    if (squads.length === 0) {
+      html += `
+        <div class="bg-surface-container p-md rounded-xl border border-outline-variant/20 text-center sm:col-span-2 py-lg text-outline">
+          <span class="material-symbols-outlined text-[32px] block mb-sm">groups</span>
+          <p class="font-body-md">No teams created yet.</p>
+          <p class="text-xs text-outline mt-xs">Use the Groups page to create one!</p>
+        </div>`;
+    } else {
+      const topSquads = squads.slice(0, 3);
+      topSquads.forEach((s, idx) => {
+        let label = idx === 0 ? "TOP TEAM" : "ACTIVE";
+        let labelClass = idx === 0 ? "bg-secondary-fixed/10 text-secondary-fixed" : "bg-surface-variant text-on-surface-variant";
+        let isMember = s.is_member;
+
+        html += `
+          <div class="bg-surface-container p-md rounded-xl border border-outline-variant/30 hover:border-primary/50 transition-all group relative overflow-hidden flex flex-col justify-between min-h-[160px]">
+            <div>
+              <div class="flex justify-between items-start mb-sm">
+                <div class="w-10 h-10 rounded-lg bg-surface-bright flex items-center justify-center text-primary">
+                  <span class="material-symbols-outlined">groups</span>
+                </div>
+                <span class="text-xs font-bold px-2 py-0.5 rounded ${labelClass}">${label}</span>
+              </div>
+              <h4 class="font-headline-sm text-headline-sm text-white mb-xs">@${s.name}</h4>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mb-md">${s.description || 'Collaborative theorem solving and math discussions.'}</p>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-on-surface-variant">${s.member_count} active solvers</span>
+              ${isMember ? `
+                <span class="text-xs text-secondary-fixed font-bold flex items-center gap-xs">
+                  <span class="material-symbols-outlined text-sm">done</span> Joined
+                </span>` : `
+                <button onclick="joinTeam(${s.id})" class="px-sm py-1 bg-primary text-on-primary text-[11px] font-bold rounded hover:opacity-90 active:scale-95 transition-all">
+                  JOIN TEAM
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    const activeComp = comps.find(c => c.is_active);
+    if (activeComp) {
+      html += `
+        <div class="bg-surface-container p-md rounded-xl border border-secondary-fixed/20 relative neon-glow-secondary overflow-hidden flex flex-col justify-between min-h-[160px]">
+          <div class="absolute -right-4 -top-4 opacity-10 rotate-12">
+            <span class="material-symbols-outlined text-[100px]">bolt</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-sm mb-sm">
+              <div class="w-2 h-2 rounded-full bg-secondary-fixed animate-pulse"></div>
+              <span class="font-label-caps text-label-caps text-secondary-fixed">LIVE COMPETITION</span>
+            </div>
+            <h4 class="font-headline-sm text-headline-sm text-white mb-sm">${activeComp.name}</h4>
+            <p class="text-xs text-on-surface-variant mb-md font-math-display">${activeComp.description || 'Active live competition'}</p>
+          </div>
+          <button onclick="scrollToLiveCompetitions()" class="w-full py-2 bg-secondary-fixed text-black font-bold font-label-caps rounded-lg active:scale-95 transition-transform text-xs">
+            SOLVE NOW
+          </button>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="bg-surface-container p-md rounded-xl border border-outline-variant/20 relative overflow-hidden flex flex-col justify-between min-h-[160px]">
+          <div class="flex items-center gap-sm mb-sm">
+            <span class="material-symbols-outlined text-outline text-md">emoji_events</span>
+            <span class="font-label-caps text-label-caps text-outline">NO LIVE COMPETITION</span>
+          </div>
+          <div>
+            <h4 class="font-headline-sm text-headline-sm text-white mb-xs">Host a Competition</h4>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mb-md">Launch a new mathematical competition for the community.</p>
+          </div>
+          <button onclick="openCreateCompetitionModal()" class="w-full py-2 bg-outline text-background font-bold font-label-caps rounded-lg active:scale-95 transition-transform text-xs">
+            CREATE COMPETITION
+          </button>
+        </div>
+      `;
+    }
+
+    container.innerHTML = html;
+  }
+
+  window.joinTeam = async function(squadId) {
+    const res = await API.req(`/api/social/groups/${squadId}/join/`, {
+      method: 'POST'
+    });
+    if (res && res.ok) {
+      await window.alert('Successfully joined the squad!', 'Success');
+      loadSquadsAndBattles();
+    } else {
+      await window.alert('Failed to join squad.', 'Error');
+    }
+  };
+
+  window.scrollToLiveCompetitions = function() {
+    const section = document.getElementById('live-competitions-list');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Load initial states
+  await loadCompetitions();
+  await loadLeaderboard();
+  await loadTeamsAndCompetitions();
+
+  // Run intervals
+  setInterval(loadCompetitions, 3000);
+  setInterval(loadLeaderboard, 3000);
+  setInterval(loadTeamsAndCompetitions, 5000);
 
   // ── Mobile Navigation Dropdown ───────────────────────────
   const mobileNavToggle = document.getElementById('mobile-nav-toggle');
@@ -571,6 +829,50 @@ loadNotificationCount();
       if (mobileNavDropdown && !mobileNavDropdown.contains(e.target) && e.target !== mobileNavToggle && !mobileNavToggle.contains(e.target)) {
         mobileNavDropdown.classList.add('hidden');
         if (mobileNavChevron) mobileNavChevron.style.transform = 'rotate(0deg)';
+      }
+    });
+  }
+
+  // ── Create Competition Modal Functions ───────────────────
+  window.openCreateCompetitionModal = function() {
+    const modal = document.getElementById('create-competition-modal');
+    if (modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+  };
+
+  window.closeCreateCompetitionModal = function() {
+    const modal = document.getElementById('create-competition-modal');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+    const form = document.getElementById('create-competition-form');
+    if (form) form.reset();
+  };
+
+  const cCompForm = document.getElementById('create-competition-form');
+  if (cCompForm) {
+    cCompForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = cCompForm.elements.name.value.trim();
+      const description = cCompForm.elements.description.value.trim();
+      const start_date = new Date(cCompForm.elements.start_date.value).toISOString();
+      const end_date = new Date(cCompForm.elements.end_date.value).toISOString();
+
+      if (!name || !start_date || !end_date) return;
+
+      const res = await API.req('/api/rankings/competitions/', {
+        method: 'POST',
+        body: JSON.stringify({ name, description, start_date, end_date })
+      });
+
+      if (res && res.ok) {
+        closeCreateCompetitionModal();
+        loadCompetitions();
+      } else {
+        await window.alert('Failed to create competition. Please check your inputs.', 'Error');
       }
     });
   }

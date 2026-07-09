@@ -49,7 +49,7 @@ class LeaderboardView(generics.ListAPIView):
         period = request.query_params.get('period', Score.PERIOD_ALL_TIME)
         scores = (
             Score.objects
-            .filter(period=period)
+            .filter(period=period, competition__isnull=True)
             .select_related('user')
             .order_by('-points')
         )
@@ -63,3 +63,45 @@ class LeaderboardView(generics.ListAPIView):
             })
         serializer = LeaderboardEntrySerializer(data, many=True)
         return Response(serializer.data)
+
+
+class ScoreViewSet(viewsets.ModelViewSet):
+    serializer_class = ScoreSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Score.objects.all()
+
+    @action(detail=False, methods=['post'])
+    def award_points(self, request):
+        points = int(request.data.get('points', 10))
+        competition_id = request.data.get('competition_id')
+        user = request.user
+        
+        # Increment user Profile points
+        profile = user.profile
+        profile.axiom_points += points
+        profile.save()
+
+        # Increment global standings score
+        score_global, _ = Score.objects.get_or_create(
+            user=user, period=Score.PERIOD_ALL_TIME, competition=None
+        )
+        score_global.points += points
+        score_global.save()
+
+        # Increment competition standings score (if competition_id is provided)
+        score_comp = None
+        if competition_id:
+            from .models import Competition
+            comp = Competition.objects.filter(id=competition_id, is_active=True).first()
+            if comp:
+                score_comp, _ = Score.objects.get_or_create(
+                    user=user, period=Score.PERIOD_ALL_TIME, competition=comp
+                )
+                score_comp.points += points
+                score_comp.save()
+
+        return Response({
+            'axiom_points': profile.axiom_points,
+            'global_points': score_global.points,
+            'competition_points': score_comp.points if score_comp else None
+        })

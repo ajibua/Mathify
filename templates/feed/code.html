@@ -114,11 +114,18 @@
       <div
         class="relative flex items-center bg-surface-container-high rounded-xl border border-white/5 px-md py-sm group focus-within:border-primary/50 transition-all">
         <span class="material-symbols-outlined text-outline mr-sm">search</span>
-        <input class="bg-transparent border-none focus:ring-0 text-body-md w-full placeholder:text-outline/50"
+        <input id="feed-search-input" class="bg-transparent border-none focus:ring-0 text-body-md w-full placeholder:text-outline/50"
           placeholder="Search Calculus, Group Theory, or Proofs..." type="text" />
         <div class="flex gap-xs">
           <span
             class="px-xs py-1 rounded bg-surface-container-lowest text-[10px] text-outline border border-white/5">⌘K</span>
+        </div>
+      </div>
+      <!-- User Search Results -->
+      <div id="user-search-results" class="hidden mt-md p-md bg-surface-container-high rounded-xl border border-white/5 flex flex-col gap-sm">
+        <h3 class="font-label-caps text-label-caps text-primary">Matching Users</h3>
+        <div id="user-search-list" class="flex flex-col gap-sm">
+          <!-- matching users load here -->
         </div>
       </div>
     </section>
@@ -184,12 +191,11 @@
       <span class="material-symbols-outlined">groups</span>
       <span class="font-label-caps text-[10px]">Groups</span>
     </a>
-    <div class="relative -top-4">
-      <a href="/studio/"
-        class="w-14 h-14 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg neon-glow active:scale-95 transition-transform duration-200">
-        <span class="material-symbols-outlined text-3xl">function</span>
-      </a>
-    </div>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/studio/">
+      <span class="material-symbols-outlined">function</span>
+      <span class="font-label-caps text-[10px]">Studio</span>
+    </a>
     <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
       href="/library/">
       <span class="material-symbols-outlined">menu_book</span>
@@ -522,7 +528,7 @@
       API.requireAuth();
 
       const feedContainer = document.getElementById('general-posts-feed');
-      const searchInput = document.querySelector('input[placeholder^="Search"]');
+      const searchInput = document.getElementById('feed-search-input');
       const composer = document.getElementById('feed-composer');
 
       function renderPosts(posts) {
@@ -542,7 +548,7 @@
           return `
       <div class="rounded-2xl border border-outline-variant/30 bg-surface-container-high p-md flex flex-col gap-sm hover:border-primary/40 transition-colors" data-post-id="${p.id}">
         <div class="flex items-center justify-between">
-          <p class="font-label-caps text-label-caps text-primary-fixed-dim font-bold">${p.author.split('@')[0]}</p>
+          <a href="/profile/?user=${p.author_id}" class="font-label-caps text-label-caps text-primary-fixed-dim font-bold hover:underline">${p.author.split('@')[0]}</a>
           <span class="text-[10px] text-outline">${new Date(p.created_at).toLocaleDateString()}</span>
         </div>
         <p class="font-body-md text-on-surface">${p.content || ''}</p>
@@ -674,11 +680,100 @@
         });
       }
 
+      async function searchUsers(query) {
+        const userSearchList = document.getElementById('user-search-list');
+        const userSearchResults = document.getElementById('user-search-results');
+        if (!userSearchList || !userSearchResults) return;
+
+        if (!query) {
+          userSearchResults.classList.add('hidden');
+          userSearchList.innerHTML = '';
+          return;
+        }
+
+        const [usersRes, followsRes] = await Promise.all([
+          API.req(`/api/accounts/users/?q=${encodeURIComponent(query)}`),
+          API.req('/api/feed/follows/')
+        ]);
+
+        if (!usersRes || !followsRes) return;
+
+        const usersData = await usersRes.json();
+        const followsData = await followsRes.json();
+
+        const users = usersData.results || usersData || [];
+        const follows = followsData.results || followsData || [];
+
+        const followedIds = new Set(follows.map(f => String(f.following_user_id || f.following)));
+
+        if (!users.length) {
+          userSearchResults.classList.remove('hidden');
+          userSearchList.innerHTML = `<div class="text-xs text-outline p-xs">No matching users found.</div>`;
+          return;
+        }
+
+        userSearchResults.classList.remove('hidden');
+        userSearchList.innerHTML = users.map(u => {
+          const profile = u.profile || {};
+          const isFollowing = followedIds.has(String(u.id));
+          const avatarUrl = profile.avatar || '';
+          const displayName = `${u.first_name} ${u.last_name}`.trim() || u.username;
+          return `
+            <div class="flex items-center justify-between p-sm hover:bg-surface-container/30 rounded-xl border border-white/5 transition-colors">
+              <a href="/profile/?user=${u.id}" class="flex items-center gap-sm flex-1 min-w-0">
+                <div class="w-10 h-10 rounded-2xl overflow-hidden bg-surface-container-high flex items-center justify-center border border-white/10 shrink-0">
+                  ${avatarUrl ? `<img src="${avatarUrl}" class="w-full h-full object-cover"/>` : `<span class="material-symbols-outlined text-outline">account_circle</span>`}
+                </div>
+                <div class="min-w-0">
+                  <p class="font-headline-sm text-headline-sm text-on-surface truncate">${displayName}</p>
+                  <p class="text-[11px] text-primary-fixed-dim truncate">@${u.username}</p>
+                </div>
+              </a>
+              <button onclick="toggleFollowInSearch(${u.id}, this)" data-following="${isFollowing}"
+                class="px-md py-xs rounded-lg font-label-caps text-label-caps transition-all text-xs ${isFollowing ? 'bg-surface-bright text-outline' : 'bg-primary-container text-on-primary-container neon-glow'}">
+                ${isFollowing ? 'Unfollow' : 'Follow'}
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
+
+      window.toggleFollowInSearch = async function(userId, btn) {
+        const isFollowing = btn.getAttribute('data-following') === 'true';
+
+        if (isFollowing) {
+          const res = await API.req('/api/feed/follows/');
+          if (res) {
+            const data = await res.json();
+            const follows = data.results || data;
+            const match = follows.find(f => String(f.following_user_id || f.following) === String(userId));
+            if (match) {
+              await API.req(`/api/feed/follows/${match.id}/`, { method: 'DELETE' });
+            }
+          }
+          btn.setAttribute('data-following', 'false');
+          btn.textContent = 'Follow';
+          btn.className = 'px-md py-xs rounded-lg font-label-caps text-label-caps transition-all text-xs bg-primary-container text-on-primary-container neon-glow';
+        } else {
+          await API.req('/api/feed/follows/', {
+            method: 'POST',
+            body: JSON.stringify({ following_id: userId })
+          });
+          btn.setAttribute('data-following', 'true');
+          btn.textContent = 'Unfollow';
+          btn.className = 'px-md py-xs rounded-lg font-label-caps text-label-caps transition-all text-xs bg-surface-bright text-outline';
+        }
+      };
+
       if (searchInput) {
         let timer;
         searchInput.addEventListener('input', () => {
           clearTimeout(timer);
-          timer = setTimeout(loadPosts, 300);
+          const val = searchInput.value.trim();
+          timer = setTimeout(() => {
+            loadPosts();
+            searchUsers(val);
+          }, 300);
         });
       }
 
@@ -737,6 +832,14 @@
         <a href="/profile/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
           <span class="material-symbols-outlined text-[16px]">account_circle</span>
           <span>View Profile</span>
+        </a>
+        <a href="/leaderboard/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+          <span class="material-symbols-outlined text-[16px]">trophy</span>
+          <span>Leaderboard</span>
+        </a>
+        <a href="/competitions/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+          <span class="material-symbols-outlined text-[16px]">emoji_events</span>
+          <span>Competitions</span>
         </a>
         <button id="auth-logout-btn" class="w-full text-left p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-error">
           <span class="material-symbols-outlined text-[16px]">logout</span>

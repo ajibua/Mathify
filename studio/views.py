@@ -31,4 +31,24 @@ class CreationViewSet(viewsets.ModelViewSet):
         return qs
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        creation = serializer.save(author=self.request.user)
+        if creation.visibility == Creation.VISIBILITY_PUBLIC:
+            self.award_proof_points(self.request.user)
+
+    def perform_update(self, serializer):
+        old_visibility = self.get_object().visibility
+        creation = serializer.save()
+        if old_visibility != Creation.VISIBILITY_PUBLIC and creation.visibility == Creation.VISIBILITY_PUBLIC:
+            self.award_proof_points(self.request.user)
+
+    def award_proof_points(self, user):
+        from rankings.models import Score
+        profile = user.profile
+        profile.axiom_points += 50
+        profile.save()
+
+        score, _ = Score.objects.get_or_create(
+            user=user, period=Score.PERIOD_ALL_TIME, competition=None
+        )
+        score.points += 50
+        score.save()

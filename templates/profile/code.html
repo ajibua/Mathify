@@ -161,6 +161,40 @@
       </div>
     </section>
 
+    <!-- Standings & Events -->
+    <section class="px-gutter mt-lg">
+      <h2 class="font-headline-sm text-headline-sm text-on-surface mb-md">Standings & Events</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+        <!-- Leaderboard Card -->
+        <a href="/leaderboard/" class="stat-card rounded-2xl p-md flex items-center justify-between group hover:border-primary/50 transition-all cursor-pointer">
+          <div class="flex items-center gap-md">
+            <div class="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-primary-container group-hover:text-on-primary-container transition-all">
+              <span class="material-symbols-outlined text-2xl">trophy</span>
+            </div>
+            <div>
+              <h3 class="font-headline-sm text-headline-sm text-white group-hover:text-primary transition-colors">Axiom Leaderboard</h3>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Check global computational standings and rankings.</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-outline group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
+        </a>
+
+        <!-- Competitions Card -->
+        <a href="/competitions/" class="stat-card rounded-2xl p-md flex items-center justify-between group hover:border-secondary-fixed/50 transition-all cursor-pointer">
+          <div class="flex items-center gap-md">
+            <div class="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center text-secondary-fixed group-hover:bg-secondary-container group-hover:text-on-secondary-container transition-all">
+              <span class="material-symbols-outlined text-2xl">emoji_events</span>
+            </div>
+            <div>
+              <h3 class="font-headline-sm text-headline-sm text-white group-hover:text-secondary-fixed transition-colors">Axiom Battles</h3>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Join live math competitions and prove theorems.</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-outline group-hover:text-secondary-fixed group-hover:translate-x-1 transition-all">chevron_right</span>
+        </a>
+      </div>
+    </section>
+
     <!-- Posts Tab -->
     <section class="px-gutter mt-lg">
       <div class="flex items-center justify-between mb-md">
@@ -192,12 +226,11 @@
       <span class="material-symbols-outlined">groups</span>
       <span class="font-label-caps text-[10px]">Groups</span>
     </a>
-    <div class="relative -top-4">
-      <a href="/studio/"
-        class="w-14 h-14 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg neon-glow active:scale-95 transition-transform duration-200">
-        <span class="material-symbols-outlined text-3xl">function</span>
-      </a>
-    </div>
+    <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
+      href="/studio/">
+      <span class="material-symbols-outlined">function</span>
+      <span class="font-label-caps text-[10px]">Studio</span>
+    </a>
     <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
       href="/library/">
       <span class="material-symbols-outlined">menu_book</span>

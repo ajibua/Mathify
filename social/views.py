@@ -12,6 +12,13 @@ class GroupViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = Group.objects.prefetch_related('memberships')
+        
+        joined = self.request.query_params.get('joined')
+        if joined == 'true' and self.request.user.is_authenticated:
+            qs = qs.filter(memberships__user=self.request.user)
+        elif joined == 'false' and self.request.user.is_authenticated:
+            qs = qs.exclude(memberships__user=self.request.user)
+
         query = self.request.query_params.get('q')
         if query:
             from django.db.models import Q
@@ -49,7 +56,6 @@ class GroupViewSet(viewsets.ModelViewSet):
         group = self.get_object()
         qs = group.messages.select_related('sender').order_by('created_at')
         return Response(MessageSerializer(qs, many=True).data)
-
 
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer

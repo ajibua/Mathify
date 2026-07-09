@@ -97,7 +97,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ── Django REST Framework ──────────────────────────────────────────────────────
+# Django REST Framework
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -110,7 +110,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
 }
 
-# ── JWT ────────────────────────────────────────────────────────────────────────
+# JWT
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
@@ -118,7 +118,7 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
 }
 
-# ── CORS ───────────────────────────────────────────────────────────────────────
+# CORS 
 
-CORS_ALLOW_ALL_ORIGINS = DEBUG  # tighten this in production
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:3000').split(',')
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in config('CORS_ALLOWED_ORIGINS', default='http://localhost:3000').split(',') if origin.strip()]

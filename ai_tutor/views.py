@@ -150,6 +150,7 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
         # 1. call system prompt
         system_prompt = (session.tutor.model_config.get('system_prompt', '')
                          if session.tutor else 'You are a helpful math tutor.')
+        system_prompt = f"{system_prompt}\n\n{self._get_app_context_prompt(session.user)}"
         
         # 2. call api keys from  .env
         gemini_key = os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_API_KEY')
@@ -161,14 +162,7 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
         if gemini_key:
             gemini_key = gemini_key.strip()
 
-        openai_key = os.environ.get('OPENAI_API_KEY')
-        try:
-            if not openai_key:
-                openai_key = config('OPENAI_API_KEY', default=None)
-        except Exception:
-            pass
-        if openai_key:
-            openai_key = openai_key.strip()
+
 
         full_text = ""
 
@@ -234,59 +228,7 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
                 )
                 return
 
-        # 4. Stream from OpenAI REST
-        if openai_key:
-            try:
-                url = "https://api.openai.com/v1/chat/completions"
-                messages = [{'role': 'system', 'content': system_prompt}]
-                for m in history:
-                    messages.append({'role': m['role'], 'content': m['content']})
-                
-                payload = {
-                    "model": "gpt-4o-mini",
-                    "messages": messages,
-                    "max_tokens": 1024,
-                    "stream": True
-                }
-                
-                req = urllib.request.Request(
-                    url,
-                    data=json.dumps(payload).encode('utf-8'),
-                    headers={
-                        'Content-Type': 'application/json',
-                        'Authorization': f'Bearer {openai_key}'
-                    },
-                    method='POST'
-                )
-                
-                with urllib.request.urlopen(req, timeout=15) as response:
-                    for line in response:
-                        if line.startswith(b'data: '):
-                            data_str = line[6:].decode('utf-8').strip()
-                            if data_str == '[DONE]':
-                                break
-                            try:
-                                chunk_data = json.loads(data_str)
-                                text_chunk = chunk_data['choices'][0]['delta'].get('content', '')
-                                if text_chunk:
-                                    full_text += text_chunk
-                                    yield f"data: {json.dumps({'text': text_chunk})}\n\n"
-                            except Exception:
-                                pass
 
-                if full_text:
-                    SessionMessage.objects.create(
-                        session=session, role=SessionMessage.ROLE_ASSISTANT, content=full_text
-                    )
-                    session.save(update_fields=['updated_at'])
-                return
-            except Exception as e:
-                err_msg = f"[AI Tutor Connection Error (OpenAI Stream)]: {str(e)}"
-                yield f"data: {json.dumps({'text': err_msg})}\n\n"
-                SessionMessage.objects.create(
-                    session=session, role=SessionMessage.ROLE_ASSISTANT, content=err_msg
-                )
-                return
 
         # 5. Offline Fallback Mock Response Streaming (Uses SymPy calculations if requested)
         mock_reply = self._get_offline_mock_reply(session, history)
@@ -311,6 +253,7 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
 
         system_prompt = (session.tutor.model_config.get('system_prompt', '')
                          if session.tutor else 'You are a helpful math tutor.')
+        system_prompt = f"{system_prompt}\n\n{self._get_app_context_prompt(session.user)}"
         
         gemini_key = os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_API_KEY')
         try:
@@ -321,14 +264,7 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
         if gemini_key:
             gemini_key = gemini_key.strip()
 
-        openai_key = os.environ.get('OPENAI_API_KEY')
-        try:
-            if not openai_key:
-                openai_key = config('OPENAI_API_KEY', default=None)
-        except Exception:
-            pass
-        if openai_key:
-            openai_key = openai_key.strip()
+
 
         if gemini_key:
             try:
@@ -357,19 +293,7 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
             except Exception as e:
                 return f"[AI Tutor Connection Error (Gemini)]: {str(e)}"
 
-        if openai_key:
-            try:
-                url = "https://api.openai.com/v1/chat/completions"
-                messages = [{'role': 'system', 'content': system_prompt}]
-                for m in history:
-                    messages.append({'role': m['role'], 'content': m['content']})
-                payload = {"model": "gpt-4o-mini", "messages": messages, "max_tokens": 1024}
-                req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {openai_key}'}, method='POST')
-                with urllib.request.urlopen(req, timeout=10) as response:
-                    res_data = json.loads(response.read().decode('utf-8'))
-                    return res_data['choices'][0]['message']['content']
-            except Exception as e:
-                return f"[AI Tutor Connection Error (OpenAI)]: {str(e)}"
+
 
         return self._get_offline_mock_reply(session, history)
 
@@ -382,6 +306,14 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
             f"Configure `GEMINI_API_KEY` in your `.env` file to enable live AI conversations. "
             f"Here is a simulated response:\n\n"
         )
+
+        if any(w in last_msg for w in ["leaderboard", "rank", "standing", "competition", "battle", "participate", "points", "proof"]):
+            context_prompt = self._get_app_context_prompt(session.user)
+            return fallback_msg + (
+                "Here is the current status of the leaderboard and active competitions:\n\n"
+                f"{context_prompt}\n\n"
+                "Let me know if you need help on how to join a competition or write a proof!"
+            )
         
         if "derivative" in last_msg or "differentiate" in last_msg:
             try:
@@ -445,3 +377,50 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
                 f"Hello! I am {tutor_name}. I can help you with topics like calculus, algebra, topology, and number theory. "
                 f"What mathematical concepts or proof sketches would you like to explore today?"
             )
+
+    def _get_app_context_prompt(self, user):
+        from django.utils import timezone
+        from rankings.models import Score, Competition
+
+        # Active Competitions
+        active_comps = Competition.objects.filter(is_active=True, end_date__gt=timezone.now())
+        comps_list = []
+        for c in active_comps:
+            comps_list.append(f"- Competition: '{c.name}' (ID: {c.id}). Description: {c.description}. Active until {c.end_date.strftime('%Y-%m-%d %H:%M')}.")
+        comps_str = "\n".join(comps_list) if comps_list else "There are currently no active competitions."
+
+        # Global Standings
+        top_scores = Score.objects.filter(period=Score.PERIOD_ALL_TIME, competition__isnull=True).select_related('user').order_by('-points')[:5]
+        leaderboard_list = []
+        for i, s in enumerate(top_scores, 1):
+            leaderboard_list.append(f"Rank {i}: {s.user.username} with {s.points} points.")
+        leaderboard_str = "\n".join(leaderboard_list) if leaderboard_list else "No scores recorded on the leaderboard yet."
+
+        # User's status
+        user_points = 0
+        user_rank = "Unranked"
+        try:
+            profile = user.profile
+            user_points = profile.axiom_points
+            user_score = Score.objects.filter(user=user, period=Score.PERIOD_ALL_TIME, competition__isnull=True).first()
+            if user_score:
+                user_rank = Score.objects.filter(period=Score.PERIOD_ALL_TIME, competition__isnull=True, points__gt=user_score.points).count() + 1
+        except Exception:
+            pass
+
+        return f"""
+[MATHIFY EVENT & STANDING STATUS]
+- Active Competitions:
+{comps_str}
+- Global Leaderboard (Top 5):
+{leaderboard_str}
+- Current User Status:
+  * Username: @{user.username}
+  * Points: {user_points}
+  * Rank: {user_rank}
+
+- Rules/Participation Info:
+  * Publish a proof by going to the Math Studio, creating a creation, choosing 'Public' visibility, and saving it (+50 pts).
+  * Participate in live competitions by visiting the 'Competitions' page, viewing active events, and solving/submitting solutions (+10 pts per submit).
+  * Direct the user if they get lost!
+"""

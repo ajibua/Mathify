@@ -505,12 +505,11 @@
       <span class="material-symbols-outlined">groups</span>
       <span class="font-label-caps text-[10px]">Groups</span>
     </a>
-    <div class="relative -top-4">
-      <a href="/studio/"
-        class="w-14 h-14 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg neon-glow active:scale-95 transition-transform duration-200">
-        <span class="material-symbols-outlined text-3xl">function</span>
-      </a>
-    </div>
+    <a class="flex flex-col items-center justify-center text-primary relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-primary after:rounded-full duration-200"
+      href="/studio/">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">function</span>
+      <span class="font-label-caps text-[10px]">Studio</span>
+    </a>
     <a class="flex flex-col items-center justify-center text-outline hover:text-primary transition-colors active:scale-90 duration-200"
       href="/library/">
       <span class="material-symbols-outlined">menu_book</span>
@@ -1731,6 +1730,14 @@
         <a href="/profile/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
           <span class="material-symbols-outlined text-[16px]">account_circle</span>
           <span>View Profile</span>
+        </a>
+        <a href="/leaderboard/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+          <span class="material-symbols-outlined text-[16px]">trophy</span>
+          <span>Leaderboard</span>
+        </a>
+        <a href="/competitions/" class="p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-on-surface">
+          <span class="material-symbols-outlined text-[16px]">emoji_events</span>
+          <span>Competitions</span>
         </a>
         <button id="auth-logout-btn" class="w-full text-left p-xs rounded hover:bg-surface-container transition-colors flex items-center gap-xs text-[12px] font-semibold text-error">
           <span class="material-symbols-outlined text-[16px]">logout</span>
