@@ -1848,6 +1848,28 @@
         });
       }
 
+      async function loadNavbarAvatar() {
+        try {
+          const res = await API.req('/api/accounts/me/');
+          if (res && res.ok) {
+            const data = await res.json();
+            if (data && data.profile && data.profile.avatar) {
+              const avatarImg = document.querySelector('img[alt="user_profile_avatar"]');
+              if (avatarImg) avatarImg.src = data.profile.avatar;
+            }
+            const avatarContainer = document.querySelector('img[alt="user_profile_avatar"]')?.parentElement;
+            if (avatarContainer) {
+              avatarContainer.addEventListener('click', () => {
+                window.location.href = '/profile/';
+              });
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      await loadNavbarAvatar();
+
       await loadDrafts();
     })();
   </script>

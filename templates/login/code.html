@@ -127,18 +127,25 @@
       </div>
       <!-- Social Logins -->
       <div class="grid grid-cols-3 gap-sm">
-        <button
+        <!-- Google -->
+        <a href="/api/accounts/oauth/google/login/"
           class="flex items-center justify-center py-md rounded-lg border border-outline-variant bg-surface-container-high hover:bg-surface-bright transition-all active:scale-95 group">
           <img alt="Google" class="w-5 h-5 opacity-80 group-hover:opacity-100 transition-opacity"
             data-alt="The iconic Google multi-colored G logo rendered with high contrast against a dark charcoal background. The style is minimalist and clean, with soft ambient light reflections suggesting a glass-like texture that aligns with a premium dark-mode interface."
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIVld1QUG9blOlPB5JZOh6ITF1zWO-aSa3LsVNfLID37Tv0EDDqKI42tez5BHIk7FwRsnFhwWqRr4fwfmPnFZZpQOf1B_-OsJspIzJ6Gm-08MGKeRpXIxvnfqHETgGFSJAgvRmgEF6DBFCBhI3vYvdz58auTX_NRmhJi4plNyfFrVFwD-1PSjoaxMcffGLgiBiUuvsZO52QklEq8fmZDxVSzQDChKteAv9sU5P2xDqhGP6Sgh64RWKGnKrS0XATWzTmUwvVrWRWRw" />
-        </button>
-        <button
+        </a>
+        <!-- Microsoft -->
+        <a href="/api/accounts/oauth/microsoft/login/"
           class="flex items-center justify-center py-md rounded-lg border border-outline-variant bg-surface-container-high hover:bg-surface-bright transition-all active:scale-95 group">
-          <span class="material-symbols-outlined text-on-surface opacity-80 group-hover:opacity-100 transition-opacity"
-            style="font-variation-settings: 'FILL' 1;">terminal</span>
-        </button>
-        <button
+          <svg class="w-5 h-5 opacity-80 group-hover:opacity-100 transition-opacity" viewBox="0 0 23 23">
+            <rect x="0" y="0" width="10" height="10" fill="#f25022"/>
+            <rect x="11" y="0" width="10" height="10" fill="#7fba00"/>
+            <rect x="0" y="11" width="10" height="10" fill="#00a4ef"/>
+            <rect x="11" y="11" width="10" height="10" fill="#ffb900"/>
+          </svg>
+        </a>
+        <!-- Apple -->
+        <button onclick="window.alert('Apple Sign-In is not configured for your school district.')"
           class="flex items-center justify-center py-md rounded-lg border border-outline-variant bg-surface-container-high hover:bg-surface-bright transition-all active:scale-95 group">
           <span class="material-symbols-outlined text-on-surface opacity-80 group-hover:opacity-100 transition-opacity"
             style="font-variation-settings: 'FILL' 1;">ios</span>
@@ -256,6 +263,16 @@
   </script>
 
   <script>
+    (function handleOAuthCallback() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const oauthAccess = urlParams.get('access');
+      const oauthRefresh = urlParams.get('refresh');
+      if (oauthAccess && oauthRefresh) {
+        API.setTokens(oauthAccess, oauthRefresh);
+        window.location.href = '/';
+      }
+    })();
+
     document.querySelector('form').onsubmit = async (e) => {
       e.preventDefault();
       const inputs = e.target.querySelectorAll('input');
