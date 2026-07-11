@@ -1,5 +1,6 @@
 .env
 venv/
+.venv/
 node_modules/
 .DS_Store
 __pycache__/
@@ -10,4 +11,3 @@ __pycache__/
 *.sqlite3
 migrations/
 db.sqlite3
-media/
