@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/main.css' %}?v=2.2" />
   <link
     href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist:wght@100;300;400;500;700;900&display=swap"
     rel="stylesheet" />
@@ -58,6 +58,7 @@
       min-height: 100dvh;
     }
   </style>
+  <script src="{% static 'js/theme.js' %}?v=2.2"></script>
 </head>
 
 <body class="bg-black">
@@ -85,6 +86,7 @@
           class="hidden absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold items-center justify-center"
           data-notification-count></span>
       </button>
+      <button class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150" id="theme-toggle-btn">light_mode</button>
       <button
         class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
         data-profile-menu-btn>
@@ -136,7 +138,7 @@
     </div>
   </aside>
   <!-- Main Canvas -->
-  <main class="pt-24 pb-28 md:pb-36 md:!pl-[320px] px-margin-mobile md:pr-margin-desktop min-h-screen">
+  <main class="pt-24 pb-12 md:pb-24 md:!pl-[320px] px-margin-mobile md:pr-margin-desktop min-h-screen">
     <!-- Search Bar (Toggleable) -->
     <section class="mb-lg hidden" id="search-section">
       <div
@@ -274,7 +276,7 @@
       </div>
     </section>
     <!-- Collaboration / Feed Integration Preview -->
-    <section class="glass-panel rounded-xl p-lg relative overflow-hidden mb-lg">
+    <section class="glass-panel rounded-xl p-lg relative overflow-hidden">
       <div class="relative z-10">
         <h3 class="font-headline-sm text-headline-sm text-on-surface mb-sm">Collaborative Review</h3>
         <p class="text-on-surface-variant font-body-md text-body-md max-w-lg mb-md">Invite peers to review your proof
@@ -652,7 +654,7 @@
     function showCustomAlert(message, title = 'Notification') {
       return new Promise((resolve) => {
         const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.className = 'fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
         overlay.innerHTML = `
       <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
         <div class="flex justify-between items-center">
@@ -692,7 +694,7 @@
     function showCustomConfirm(message, title = 'Confirmation') {
       return new Promise((resolve) => {
         const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.className = 'fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
         overlay.innerHTML = `
       <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
         <div class="flex justify-between items-center">
@@ -734,7 +736,7 @@
     function showCustomPrompt(message, defaultValue = '', title = 'Input Required') {
       return new Promise((resolve) => {
         const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.className = 'fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
         overlay.innerHTML = `
       <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
         <div class="flex justify-between items-center">
@@ -1546,13 +1548,39 @@
           recordingPublishBtn.disabled = true;
           recordingPublishBtn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">sync</span> Publishing...';
 
-          setTimeout(async () => {
-            await window.alert("Axiom video uploaded and published to the social hub feed!", "Success");
+          try {
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            const file = new File([blob], `axiom_explainer_${Date.now()}.webm`, { type: 'video/webm' });
+            
+            const body = new FormData();
+            body.append('post_type', 'video');
+            body.append('content', 'My Axiom explainer video from the Studio!');
+            body.append('media', file);
+
+            const res = await fetch('/api/feed/posts/', {
+              method: 'POST',
+              headers: {
+                ...(API.getAccess() ? { 'Authorization': `Bearer ${API.getAccess()}` } : {}),
+              },
+              body,
+            });
+
+            if (res.ok) {
+              await window.alert("Axiom video uploaded and published to the social hub feed successfully!", "Success");
+              recordingModal.classList.add('hidden');
+              stopStream();
+            } else {
+              const errData = await res.json().catch(() => ({}));
+              console.error("Publish failed:", errData);
+              await window.alert("Failed to publish video: " + (errData.detail || errData.media || "unknown error"), "Error");
+            }
+          } catch (err) {
+            console.error("Publish failed:", err);
+            await window.alert("Failed to upload video: " + err.message, "Error");
+          } finally {
             recordingPublishBtn.disabled = false;
             recordingPublishBtn.innerHTML = origText;
-            recordingModal.classList.add('hidden');
-            stopStream();
-          }, 1500);
+          }
         });
       }
 
@@ -1847,28 +1875,6 @@
           }
         });
       }
-
-      async function loadNavbarAvatar() {
-        try {
-          const res = await API.req('/api/accounts/me/');
-          if (res && res.ok) {
-            const data = await res.json();
-            if (data && data.profile && data.profile.avatar) {
-              const avatarImg = document.querySelector('img[alt="user_profile_avatar"]');
-              if (avatarImg) avatarImg.src = data.profile.avatar;
-            }
-            const avatarContainer = document.querySelector('img[alt="user_profile_avatar"]')?.parentElement;
-            if (avatarContainer) {
-              avatarContainer.addEventListener('click', () => {
-                window.location.href = '/profile/';
-              });
-            }
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      }
-      await loadNavbarAvatar();
 
       await loadDrafts();
     })();

@@ -17,7 +17,7 @@ class Post(models.Model):
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts'
     )
-    content = models.TextField()
+    content = models.TextField(blank=True, default='')
     latex_content = models.TextField(blank=True)  # raw LaTeX for formula posts
     media = models.FileField(upload_to='posts/media/', blank=True, null=True)
     post_type = models.CharField(max_length=20, choices=POST_TYPES, default=TYPE_TEXT)

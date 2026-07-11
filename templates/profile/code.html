@@ -4,12 +4,14 @@
 <head>
   <meta charset="utf-8" />
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/main.css' %}?v=2.2" />
   <link
     href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist:wght@100;300;400;500;700;900&display=swap"
     rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>Mathify | Profile</title>
   <style>
@@ -45,39 +47,68 @@
 
     .stat-card {
       backdrop-filter: blur(20px);
-      background: rgba(30, 30, 30, 0.55);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(235, 240, 245, 0.8);
+      border: 1px solid rgba(217, 225, 236, 0.8);
       transition: all 0.3s ease;
     }
 
     .stat-card:hover {
-      border-color: rgba(0, 218, 248, 0.4);
+      border-color: rgba(0, 86, 210, 0.4);
       transform: translateY(-2px);
     }
 
+    html.dark .stat-card {
+      background: rgba(30, 30, 30, 0.55);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    html.dark .stat-card:hover {
+      border-color: rgba(0, 218, 248, 0.4);
+    }
+
     .badge-chip {
-      background: rgba(42, 42, 42, 0.8);
-      border: 1px solid rgba(0, 218, 248, 0.2);
+      background: rgba(245, 247, 250, 0.8);
+      border: 1px solid rgba(0, 86, 210, 0.2);
       transition: all 0.2s ease;
     }
 
     .badge-chip:hover {
+      border-color: #0056d2;
+      background: rgba(0, 86, 210, 0.1);
+    }
+
+    html.dark .badge-chip {
+      background: rgba(42, 42, 42, 0.8);
+      border-color: rgba(0, 218, 248, 0.2);
+    }
+
+    html.dark .badge-chip:hover {
       border-color: #00daf8;
       background: rgba(0, 218, 248, 0.1);
     }
 
     .post-card {
-      background: rgba(28, 27, 27, 0.85);
+      background: rgba(245, 247, 250, 0.85);
       backdrop-filter: blur(10px);
-      border: 1px solid #282828;
+      border: 1px solid rgba(217, 225, 236, 0.8);
       transition: all 0.2s ease;
     }
 
     .post-card:hover {
-      border-color: #00daf8;
+      border-color: #0056d2;
       transform: translateY(-1px);
     }
+
+    html.dark .post-card {
+      background: rgba(28, 27, 27, 0.85);
+      border-color: #282828;
+    }
+
+    html.dark .post-card:hover {
+      border-color: #00daf8;
+    }
   </style>
+  <script src="{% static 'js/theme.js' %}?v=2.2"></script>
 </head>
 
 <body class="bg-surface-container-lowest min-h-screen pb-12 md:pb-24">
@@ -89,17 +120,13 @@
       <span class="material-symbols-outlined text-[20px]">arrow_back</span>
     </button>
     <span class="font-headline-sm text-headline-sm text-on-surface" id="header-username">Profile</span>
-    <div class="relative flex items-center">
-      <button id="menu-btn" class="text-outline hover:text-on-surface transition-colors focus:outline-none">
-        <span class="material-symbols-outlined">more_vert</span>
-      </button>
-      <div id="profile-menu-dropdown"
-        class="hidden absolute right-0 top-10 w-48 glass-panel rounded-xl shadow-xl p-sm flex flex-col gap-xs border border-white/10 text-on-surface z-50">
-      </div>
-    </div>
+    <button class="material-symbols-outlined text-outline hover:text-on-surface transition-colors mr-sm active:scale-95 duration-150" id="theme-toggle-btn">light_mode</button>
+    <button id="menu-btn" class="text-outline hover:text-on-surface transition-colors">
+      <span class="material-symbols-outlined">more_vert</span>
+    </button>
   </header>
 
-  <main class="max-w-[1200px] mx-auto min-h-screen pb-28 md:pb-36">
+  <main class="max-w-[1200px] mx-auto min-h-screen">
 
     <!-- Profile Hero -->
     <section class="px-gutter pt-lg pb-md">
@@ -138,15 +165,15 @@
       <!-- Stats Row -->
       <div class="grid grid-cols-3 gap-sm mt-lg">
         <div class="stat-card rounded-xl p-md text-center">
-          <p class="font-headline-sm text-headline-sm font-bold" style="color: #00daf8;" id="stat-points">—</p>
+          <p class="font-headline-sm text-headline-sm font-bold text-primary dark:text-[#00daf8]" id="stat-points">—</p>
           <p class="font-label-caps text-label-caps text-primary-fixed-dim mt-xs">AXIOM PTS</p>
         </div>
         <div class="stat-card rounded-xl p-md text-center">
-          <p class="font-headline-sm text-headline-sm font-bold" style="color: #a9f900;" id="stat-followers">—</p>
+          <p class="font-headline-sm text-headline-sm font-bold text-[#5c9300] dark:text-[#a9f900]" id="stat-followers">—</p>
           <p class="font-label-caps text-label-caps text-outline mt-xs">FOLLOWERS</p>
         </div>
         <div class="stat-card rounded-xl p-md text-center">
-          <p class="font-headline-sm text-headline-sm font-bold" style="color: #baf2ff;" id="stat-following">—</p>
+          <p class="font-headline-sm text-headline-sm font-bold text-[#007b99] dark:text-[#baf2ff]" id="stat-following">—</p>
           <p class="font-label-caps text-label-caps text-outline mt-xs">FOLLOWING</p>
         </div>
       </div>
@@ -177,8 +204,8 @@
               <span class="material-symbols-outlined text-2xl">trophy</span>
             </div>
             <div>
-              <h3 class="font-headline-sm text-headline-sm text-white group-hover:text-primary transition-colors">Leaderboard</h3>
-              <p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Check global rankings.</p>
+              <h3 class="font-headline-sm text-headline-sm text-white group-hover:text-primary transition-colors">Axiom Leaderboard</h3>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Check global computational standings and rankings.</p>
             </div>
           </div>
           <span class="material-symbols-outlined text-outline group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
@@ -191,8 +218,8 @@
               <span class="material-symbols-outlined text-2xl">emoji_events</span>
             </div>
             <div>
-              <h3 class="font-headline-sm text-headline-sm text-white group-hover:text-secondary-fixed transition-colors">Competitions.</h3>
-              <p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Join live math competitions and get entangled with theorems and proofs.</p>
+              <h3 class="font-headline-sm text-headline-sm text-white group-hover:text-secondary-fixed transition-colors">Axiom Battles</h3>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Join live math competitions and prove theorems.</p>
             </div>
           </div>
           <span class="material-symbols-outlined text-outline group-hover:text-secondary-fixed group-hover:translate-x-1 transition-all">chevron_right</span>
@@ -339,24 +366,14 @@
         return res;
       },
       requireAuth() { if (!this.getAccess()) window.location.href = '/login/'; },
-      logout() { this.clearTokens(); window.location.href = '/login/'; },
-      getCurrentUserId() {
-        const token = this.getAccess();
-        if (!token) return null;
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          return payload.user_id;
-        } catch (e) {
-          return null;
-        }
-      }
+      logout() { this.clearTokens(); window.location.href = '/login/'; }
     };
 
     // ── Custom Modal Dialog System ───────────────────────────
     function showCustomAlert(message, title = 'Notification') {
       return new Promise((resolve) => {
         const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.className = 'fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
         overlay.innerHTML = `
       <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
         <div class="flex justify-between items-center">
@@ -396,7 +413,7 @@
     function showCustomConfirm(message, title = 'Confirmation') {
       return new Promise((resolve) => {
         const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.className = 'fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
         overlay.innerHTML = `
       <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
         <div class="flex justify-between items-center">
@@ -438,7 +455,7 @@
     function showCustomPrompt(message, defaultValue = '', title = 'Input Required') {
       return new Promise((resolve) => {
         const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.className = 'fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
         overlay.innerHTML = `
       <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
         <div class="flex justify-between items-center">
@@ -511,8 +528,7 @@
       const params = new URLSearchParams(window.location.search);
       const userId = params.get('user');
       const endpoint = userId ? `/api/accounts/users/${userId}/` : '/api/accounts/me/';
-      const currentUserId = API.getCurrentUserId();
-      const isOwnProfile = !userId || String(userId) === String(currentUserId);
+      const isOwnProfile = !userId;
 
       const [meRes, profileRes] = await Promise.all([
         API.req(endpoint),
@@ -523,9 +539,6 @@
       const user = await meRes.json();
       const profile = profileRes ? await profileRes.json() : user.profile || {};
       activeProfileData = profile;
-      if (isOwnProfile) {
-        activeUserEmail = user.email || '';
-      }
 
       // ── Populate header + name ────────────────────────────────────────────────
       document.getElementById('header-username').textContent = `@${user.username}`;
@@ -618,23 +631,56 @@
       const postsContainer = document.getElementById('posts-container');
 
       if (Array.isArray(posts) && posts.length) {
-        postsContainer.innerHTML = posts.slice(0, 5).map(p => `
-      <div class="post-card rounded-2xl p-lg">
-        <div class="flex items-center justify-between mb-sm">
-          <span class="font-label-caps text-label-caps text-primary-fixed-dim uppercase">${p.post_type}</span>
+        postsContainer.innerHTML = posts.slice(0, 5).map(p => {
+          const isVideo = p.media && /\.(mp4|webm|ogg)(\?|$)/i.test(p.media);
+          const isImage = p.media && /\.(png|jpe?g|gif|webp)(\?|$)/i.test(p.media);
+          
+          let mathHtml = '';
+          if (p.latex_content) {
+            try {
+              if (typeof katex !== 'undefined') {
+                mathHtml = katex.renderToString(p.latex_content, {
+                  displayMode: true,
+                  throwOnError: false
+                });
+              } else {
+                mathHtml = p.latex_content;
+              }
+            } catch (err) {
+              mathHtml = p.latex_content;
+            }
+          }
+
+          return `
+      <div class="post-card rounded-2xl p-lg flex flex-col gap-xs">
+        <div class="flex items-center justify-between mb-xs">
+          <span class="font-label-caps text-label-caps text-primary-fixed-dim uppercase font-bold">${p.post_type}</span>
           <span class="font-label-caps text-label-caps text-outline">${new Date(p.created_at).toLocaleDateString()}</span>
         </div>
         <p class="font-body-md text-on-surface line-clamp-3">${p.content}</p>
-        ${p.latex_content ? `<div class="mt-md p-md rounded-xl bg-surface-container-lowest border-l-2 border-secondary-fixed font-math-display text-secondary-fixed text-body-sm overflow-x-auto">${p.latex_content}</div>` : ''}
-        <div class="flex items-center gap-md mt-md text-outline">
+        ${p.latex_content ? `<div class="mt-xs p-md rounded-xl bg-surface-container-lowest border-l-2 border-secondary-fixed text-secondary-fixed text-body-sm overflow-x-auto">${mathHtml}</div>` : ''}
+        ${p.media ? `
+          <div class="mt-xs">
+            ${isVideo ? `
+              <div class="max-h-96 rounded-lg overflow-hidden border border-outline-variant/20 bg-black/10">
+                <video class="w-full h-full object-contain" src="${p.media}" controls></video>
+              </div>
+            ` : ''}
+            ${isImage ? `
+              <img class="w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity" src="${p.media}" data-lightbox-trigger alt=""/>
+            ` : ''}
+          </div>
+        ` : ''}
+        <div class="flex items-center gap-md mt-sm text-outline">
           <span class="flex items-center gap-xs font-label-caps text-label-caps">
-            <span class="material-symbols-outlined text-[16px]">favorite</span>${p.likes_count}
+            <span class="material-symbols-outlined text-[16px] ${p.is_liked ? 'liked-heart' : ''}">favorite</span>${p.likes_count}
           </span>
           <span class="flex items-center gap-xs font-label-caps text-label-caps">
             <span class="material-symbols-outlined text-[16px]">comment</span>${p.comments_count}
           </span>
         </div>
-      </div>`).join('');
+      </div>`;
+        }).join('');
       } else {
         postsContainer.innerHTML = `
       <div class="rounded-2xl border border-outline-variant/20 p-xl text-center">
@@ -674,7 +720,6 @@
 
     // ── Edit Profile Modal Logic ───────────────────────────────────────────────
     let activeProfileData = null;
-    let activeUserEmail = '';
 
     function closeEditModal() {
       document.getElementById('edit-profile-modal').classList.add('hidden');
@@ -708,13 +753,6 @@
         document.getElementById('edit-bio').value = activeProfileData.bio || '';
         document.getElementById('edit-dept').value = activeProfileData.department?.id || '';
         document.getElementById('edit-year').value = activeProfileData.year_of_study || '';
-
-        const emailInput = document.getElementById('edit-email');
-        const emailConfirmInput = document.getElementById('edit-email-confirm');
-        if (emailInput && emailConfirmInput) {
-          emailInput.value = activeUserEmail || '';
-          emailConfirmInput.value = activeUserEmail || '';
-        }
 
         const preview = document.getElementById('edit-avatar-preview');
         if (preview) {
@@ -755,30 +793,6 @@
           const orig = btn.textContent;
           btn.disabled = true;
           btn.textContent = 'Saving...';
-
-          const email = document.getElementById('edit-email').value.trim();
-          const emailConfirm = document.getElementById('edit-email-confirm').value.trim();
-
-          if (email !== emailConfirm) {
-            await window.alert('Emails do not match.', 'Validation Error');
-            btn.disabled = false;
-            btn.textContent = orig;
-            return;
-          }
-
-          // Update User Email
-          const userRes = await API.req('/api/accounts/me/', {
-            method: 'PATCH',
-            body: JSON.stringify({ email })
-          });
-
-          if (!userRes || !userRes.ok) {
-            btn.disabled = false;
-            btn.textContent = orig;
-            const errData = userRes ? await userRes.json() : {};
-            await window.alert(errData.email?.[0] || 'Error updating email address.', 'Error');
-            return;
-          }
 
           const bio = document.getElementById('edit-bio').value;
           const deptId = document.getElementById('edit-dept').value;
@@ -831,83 +845,6 @@
         }
       });
     }
-
-    // ── Profile Page Three-Dots Menu Dropdown ─────────────────
-    const menuBtn = document.getElementById('menu-btn');
-    const profileMenuDropdown = document.getElementById('profile-menu-dropdown');
-    
-    if (menuBtn && profileMenuDropdown) {
-      menuBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        
-        const params = new URLSearchParams(window.location.search);
-        const userId = params.get('user');
-        const currentUserId = API.getCurrentUserId();
-        const isOwnProfile = !userId || String(userId) === String(currentUserId);
-
-        // Populate items dynamically
-        if (isOwnProfile) {
-          profileMenuDropdown.innerHTML = `
-            <button onclick="openEditModal()" class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline hover:text-on-surface w-full text-left font-body-sm">
-              <span class="material-symbols-outlined text-md">edit</span>Edit Profile
-            </button>
-            <button onclick="copyProfileLink()" class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline hover:text-on-surface w-full text-left font-body-sm">
-              <span class="material-symbols-outlined text-md">link</span>Copy Profile Link
-            </button>
-            <button onclick="handleSignOut()" class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline hover:text-error w-full text-left font-body-sm">
-              <span class="material-symbols-outlined text-md">logout</span>Sign Out
-            </button>
-          `;
-        } else {
-          profileMenuDropdown.innerHTML = `
-            <button onclick="copyProfileLink()" class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline hover:text-on-surface w-full text-left font-body-sm">
-              <span class="material-symbols-outlined text-md">link</span>Copy Profile Link
-            </button>
-            <button onclick="handleBlockUser()" class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline hover:text-error w-full text-left font-body-sm">
-              <span class="material-symbols-outlined text-md">block</span>Block User
-            </button>
-            <button onclick="handleReportProfile()" class="flex items-center gap-sm p-sm rounded-lg hover:bg-surface-variant transition-colors text-outline hover:text-error w-full text-left font-body-sm">
-              <span class="material-symbols-outlined text-md">flag</span>Report Profile
-            </button>
-          `;
-        }
-
-        profileMenuDropdown.classList.toggle('hidden');
-      });
-
-      document.addEventListener('click', (e) => {
-        if (profileMenuDropdown && !profileMenuDropdown.contains(e.target) && e.target !== menuBtn && !menuBtn.contains(e.target)) {
-          profileMenuDropdown.classList.add('hidden');
-        }
-      });
-    }
-
-    function copyProfileLink() {
-      const params = new URLSearchParams(window.location.search);
-      const userId = params.get('user');
-      const url = window.location.origin + window.location.pathname + (userId ? `?user=${userId}` : '');
-      navigator.clipboard.writeText(url).then(() => {
-        window.alert('Profile link copied to clipboard!', 'Success');
-      }).catch(err => {
-        window.alert('Failed to copy link.', 'Error');
-      });
-      if (profileMenuDropdown) profileMenuDropdown.classList.add('hidden');
-    }
-
-    async function handleBlockUser() {
-      if (profileMenuDropdown) profileMenuDropdown.classList.add('hidden');
-      if (await window.confirm('Are you sure you want to block this user?', 'Block User')) {
-        window.alert('User has been blocked successfully.', 'Success');
-      }
-    }
-
-    async function handleReportProfile() {
-      if (profileMenuDropdown) profileMenuDropdown.classList.add('hidden');
-      const reason = await window.prompt('Please enter the reason for reporting this profile:', '', 'Report Profile');
-      if (reason !== null && reason.trim() !== '') {
-        window.alert('Thank you. Your report has been submitted for review.', 'Report Submitted');
-      }
-    }
   </script>
 
   <!-- Edit Profile Modal Markup -->
@@ -932,18 +869,6 @@
               <input type="file" id="edit-avatar" accept="image/*" class="hidden" onchange="previewAvatar(this)" />
             </label>
           </div>
-        </div>
-        <div class="flex flex-col gap-xs">
-          <label class="font-label-caps text-label-caps text-outline">Email Address</label>
-          <input type="email" id="edit-email" required
-            class="w-full bg-surface-container-high border border-outline-variant/30 rounded-lg p-sm text-on-surface font-body-md focus:outline-none focus:border-primary"
-            placeholder="sigma@mathaxiom.edu" />
-        </div>
-        <div class="flex flex-col gap-xs">
-          <label class="font-label-caps text-label-caps text-outline">Confirm Email Address</label>
-          <input type="email" id="edit-email-confirm" required
-            class="w-full bg-surface-container-high border border-outline-variant/30 rounded-lg p-sm text-on-surface font-body-md focus:outline-none focus:border-primary"
-            placeholder="sigma@mathaxiom.edu" />
         </div>
         <div class="flex flex-col gap-xs">
           <label class="font-label-caps text-label-caps text-outline">Bio</label>
@@ -977,6 +902,61 @@
       </form>
     </div>
   </div>
+
+  <!-- Full-screen Lightbox Modal -->
+  <div id="lightbox-modal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden flex items-center justify-center opacity-0 transition-opacity duration-300 pointer-events-none">
+    <button id="close-lightbox-btn" class="absolute top-md right-md text-white hover:text-primary transition-colors material-symbols-outlined text-[36px] cursor-pointer select-none pointer-events-auto bg-black/40 hover:bg-black/60 p-xs rounded-full flex items-center justify-center">close</button>
+    <div class="max-w-[90%] max-h-[90%] flex items-center justify-center pointer-events-auto">
+      <img id="lightbox-img" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl select-none" src="" alt="Full size image">
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const lightboxModal = document.getElementById('lightbox-modal');
+      const lightboxImg = document.getElementById('lightbox-img');
+      const closeLightboxBtn = document.getElementById('close-lightbox-btn');
+
+      window.openLightbox = function(src) {
+        if (!lightboxModal || !lightboxImg) return;
+        lightboxImg.src = src;
+        lightboxModal.classList.remove('hidden');
+        lightboxModal.classList.remove('pointer-events-none');
+        setTimeout(() => {
+          lightboxModal.classList.remove('opacity-0');
+        }, 10);
+      };
+
+      window.closeLightbox = function() {
+        if (!lightboxModal) return;
+        lightboxModal.classList.add('opacity-0');
+        lightboxModal.classList.add('pointer-events-none');
+        setTimeout(() => {
+          lightboxModal.classList.add('hidden');
+          if (lightboxImg) lightboxImg.src = '';
+        }, 300);
+      };
+
+      if (closeLightboxBtn) {
+        closeLightboxBtn.addEventListener('click', window.closeLightbox);
+      }
+      if (lightboxModal) {
+        lightboxModal.addEventListener('click', (e) => {
+          if (e.target === lightboxModal) window.closeLightbox();
+        });
+      }
+
+      const postsContainer = document.getElementById('posts-container');
+      if (postsContainer) {
+        postsContainer.addEventListener('click', (e) => {
+          const trigger = e.target.closest('[data-lightbox-trigger]');
+          if (trigger) {
+            window.openLightbox(trigger.src);
+          }
+        });
+      }
+    })();
+  </script>
 
 </body>
 

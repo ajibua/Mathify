@@ -3,7 +3,7 @@
 <html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 {% load static %}
-<link rel="stylesheet" href="{% static 'css/main.css' %}"/>
+<link rel="stylesheet" href="{% static 'css/main.css' %}?v=2.2"/>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist:wght@100;300;400;500;700;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <!-- Markdown & LaTeX Support -->
@@ -97,7 +97,8 @@
       min-height: 100dvh;
     }
   </style>
-  </head>
+    <script src="{% static 'js/theme.js' %}?v=2.2"></script>
+</head>
 <body class="bg-background text-on-background overflow-hidden flex flex-col h-screen">
   <!-- TopAppBar -->
   <header
@@ -123,6 +124,7 @@
           class="hidden absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold items-center justify-center"
           data-notification-count></span>
       </button>
+      <button class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150" id="theme-toggle-btn">light_mode</button>
       <button
         class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
         data-profile-menu-btn>
@@ -447,7 +449,7 @@ const API = {
 function showCustomAlert(message, title = 'Notification') {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
-    overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+    overlay.className = 'fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
     overlay.innerHTML = `
       <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
         <div class="flex justify-between items-center">
@@ -487,7 +489,7 @@ function showCustomAlert(message, title = 'Notification') {
 function showCustomConfirm(message, title = 'Confirmation') {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
-    overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+    overlay.className = 'fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
     overlay.innerHTML = `
       <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
         <div class="flex justify-between items-center">
@@ -529,7 +531,7 @@ function showCustomConfirm(message, title = 'Confirmation') {
 function showCustomPrompt(message, defaultValue = '', title = 'Input Required') {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
-    overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+    overlay.className = 'fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
     overlay.innerHTML = `
       <div class="w-full max-w-sm glass-panel rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
         <div class="flex justify-between items-center">
@@ -1250,28 +1252,6 @@ loadNotificationCount();
       }
     });
   }
-
-  async function loadNavbarAvatar() {
-    try {
-      const res = await API.req('/api/accounts/me/');
-      if (res && res.ok) {
-        const data = await res.json();
-        if (data && data.profile && data.profile.avatar) {
-          const avatarImg = document.querySelector('img[alt="user_profile_avatar"]');
-          if (avatarImg) avatarImg.src = data.profile.avatar;
-        }
-        const avatarContainer = document.querySelector('img[alt="user_profile_avatar"]')?.parentElement;
-        if (avatarContainer) {
-          avatarContainer.addEventListener('click', () => {
-            window.location.href = '/profile/';
-          });
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }
-  await loadNavbarAvatar();
 
   await ensureSession();
   await loadSessions();

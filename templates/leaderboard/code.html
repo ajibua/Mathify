@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/main.css' %}?v=2.2" />
   <link
     href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist:wght@100;300;400;500;700;900&display=swap"
     rel="stylesheet" />
@@ -52,6 +52,7 @@
       min-height: 100dvh;
     }
   </style>
+  <script src="{% static 'js/theme.js' %}?v=2.2"></script>
 </head>
 
 <body class="bg-background text-on-surface">
@@ -79,6 +80,7 @@
           class="hidden absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold items-center justify-center"
           data-notification-count></span>
       </button>
+      <button class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150" id="theme-toggle-btn">light_mode</button>
       <button
         class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-150 relative"
         data-profile-menu-btn>
@@ -752,28 +754,6 @@
           `;
         }
       }
-
-      async function loadNavbarAvatar() {
-        try {
-          const res = await API.req('/api/accounts/me/');
-          if (res && res.ok) {
-            const data = await res.json();
-            if (data && data.profile && data.profile.avatar) {
-              const avatarImg = document.querySelector('img[alt="user_profile_avatar"]');
-              if (avatarImg) avatarImg.src = data.profile.avatar;
-            }
-            const avatarContainer = document.querySelector('img[alt="user_profile_avatar"]')?.parentElement;
-            if (avatarContainer) {
-              avatarContainer.addEventListener('click', () => {
-                window.location.href = '/profile/';
-              });
-            }
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      }
-      await loadNavbarAvatar();
 
       await loadLeaderboard();
       await loadActiveChallenge();

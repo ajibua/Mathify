@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/main.css' %}?v=2.2" />
   <link
     href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist:wght@100;300;400;500;700;900&display=swap"
     rel="stylesheet" />
@@ -54,6 +54,7 @@
       min-height: 100dvh;
     }
   </style>
+  <script src="{% static 'js/theme.js' %}?v=2.2"></script>
 </head>
 
 <body class="bg-background overflow-hidden flex flex-col h-[100dvh]">

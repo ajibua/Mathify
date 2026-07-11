@@ -143,6 +143,7 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
     def _stream_ai_reply(self, session: ChatSession, history: list):
         import os
         import urllib.request
+        import urllib.error
         import json
         import time
         from decouple import config
@@ -169,7 +170,7 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
         # 3. Stream from Gemini REST
         if gemini_key:
             try:
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse&key={gemini_key}"
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:streamGenerateContent?alt=sse&key={gemini_key}"
                 contents = []
                 for m in history:
                     role = 'model' if m['role'] == 'assistant' else 'user'
@@ -220,6 +221,19 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
                     )
                     session.save(update_fields=['updated_at'])
                 return
+            except urllib.error.HTTPError as e:
+                try:
+                    err_body = e.read().decode('utf-8')
+                    err_json = json.loads(err_body)
+                    details = err_json.get('error', {}).get('message', str(e))
+                except Exception:
+                    details = str(e)
+                err_msg = f"[AI Tutor Connection Error (Gemini Stream)]: {details}"
+                yield f"data: {json.dumps({'text': err_msg})}\n\n"
+                SessionMessage.objects.create(
+                    session=session, role=SessionMessage.ROLE_ASSISTANT, content=err_msg
+                )
+                return
             except Exception as e:
                 err_msg = f"[AI Tutor Connection Error (Gemini Stream)]: {str(e)}"
                 yield f"data: {json.dumps({'text': err_msg})}\n\n"
@@ -248,6 +262,7 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
         # Standard blocking request (retained as compatibility fallback)
         import os
         import urllib.request
+        import urllib.error
         import json
         from decouple import config
 
@@ -268,7 +283,7 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
 
         if gemini_key:
             try:
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={gemini_key}"
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={gemini_key}"
                 contents = []
                 for m in history:
                     role = 'model' if m['role'] == 'assistant' else 'user'
@@ -290,6 +305,14 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
                 with urllib.request.urlopen(req, timeout=10) as response:
                     res_data = json.loads(response.read().decode('utf-8'))
                     return res_data['candidates'][0]['content']['parts'][0]['text']
+            except urllib.error.HTTPError as e:
+                try:
+                    err_body = e.read().decode('utf-8')
+                    err_json = json.loads(err_body)
+                    details = err_json.get('error', {}).get('message', str(e))
+                except Exception:
+                    details = str(e)
+                return f"[AI Tutor Connection Error (Gemini)]: {details}"
             except Exception as e:
                 return f"[AI Tutor Connection Error (Gemini)]: {str(e)}"
 

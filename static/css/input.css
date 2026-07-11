@@ -123,4 +123,176 @@
     background-position: right 1rem center;
     background-size: 1.5em;
   }
+}/* ── Light Mode Color Overrides ──────────────────────────────────── */
+html:not(.dark) body,
+html:not(.dark) body.bg-black,
+html:not(.dark) body.bg-background,
+html:not(.dark) body.bg-surface-container-lowest {
+  background-color: #ffffff !important;
+  color: #1f1f1f !important;
+}
+
+html:not(.dark) aside,
+html:not(.dark) header,
+html:not(.dark) .glass-panel,
+html:not(.dark) .glass-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(217, 225, 236, 0.8) !important;
+  color: #1f1f1f !important;
+}
+
+/* Background Utilities */
+html:not(.dark) .bg-surface-container { background-color: #f5f7fa !important; }
+html:not(.dark) .bg-surface-container-high { background-color: #ebf0f5 !important; }
+html:not(.dark) .bg-surface-container-highest { background-color: #e1e7f0 !important; }
+html:not(.dark) .bg-surface-container-lowest { background-color: #ffffff !important; }
+html:not(.dark) .bg-surface { background-color: #ffffff !important; }
+html:not(.dark) .bg-background { background-color: #ffffff !important; }
+
+/* Text Utilities */
+html:not(.dark) .text-on-background,
+html:not(.dark) .text-on-surface,
+html:not(.dark) .text-white,
+html:not(.dark) .text-white\/90,
+html:not(.dark) .text-white\/80,
+html:not(.dark) .text-white\/70,
+html:not(.dark) .text-white\/50 {
+  color: #1f1f1f !important;
+}
+
+html:not(.dark) .text-on-surface-variant { color: #5f5f5f !important; }
+html:not(.dark) .text-outline { color: #7f7f7f !important; }
+html:not(.dark) .text-outline-variant { color: #9f9f9f !important; }
+
+/* Primary - Coursera Blue (#0056D2) */
+html:not(.dark) .text-primary,
+html:not(.dark) .text-primary-fixed-dim,
+html:not(.dark) .text-primary-container {
+  color: #0056d2 !important;
+}
+html:not(.dark) .bg-primary-container {
+  background-color: #e6f0fd !important;
+  color: #00419e !important;
+}
+html:not(.dark) .text-on-primary-container {
+  color: #00419e !important;
+}
+html:not(.dark) .bg-primary,
+html:not(.dark) .bg-primary-fixed-dim {
+  background-color: #0056d2 !important;
+  color: #ffffff !important;
+}
+html:not(.dark) .bg-primary .text-on-primary,
+html:not(.dark) .bg-primary-fixed-dim .text-on-primary-fixed-dim,
+html:not(.dark) .bg-primary-fixed-dim .text-on-primary-fixed {
+  color: #ffffff !important;
+}
+
+/* Secondary - Secondary Blue/Teal Accent */
+html:not(.dark) .text-secondary,
+html:not(.dark) .text-secondary-fixed,
+html:not(.dark) .text-secondary-fixed-dim,
+html:not(.dark) .text-secondary-container {
+  color: #0056d2 !important;
+}
+html:not(.dark) .bg-secondary-fixed,
+html:not(.dark) .bg-secondary-container,
+html:not(.dark) .bg-secondary,
+html:not(.dark) .bg-secondary-fixed-dim {
+  background-color: #0056d2 !important;
+  color: #ffffff !important;
+}
+html:not(.dark) .bg-secondary-fixed .text-on-secondary-fixed,
+html:not(.dark) .bg-secondary-fixed-dim .text-on-secondary-fixed-dim,
+html:not(.dark) .bg-secondary .text-on-secondary,
+html:not(.dark) .bg-secondary-container .text-on-secondary-container {
+  color: #ffffff !important;
+}
+
+/* Borders */
+html:not(.dark) .border-white\/10 { border-color: rgba(217, 225, 236, 0.8) !important; }
+html:not(.dark) .border-white\/5 { border-color: rgba(217, 225, 236, 0.5) !important; }
+html:not(.dark) .border-outline-variant { border-color: rgba(217, 225, 236, 0.8) !important; }
+html:not(.dark) .border-outline-variant\/30 { border-color: rgba(217, 225, 236, 0.4) !important; }
+
+/* Math items */
+html:not(.dark) .math-inset {
+  background: #f2f7fe !important;
+  border-left-color: #0056d2 !important;
+  color: #00419e !important;
+}
+html:not(.dark) .math-input-container {
+  background: #ffffff !important;
+  border-color: rgba(217, 225, 236, 0.8) !important;
+}
+
+/* Inputs and interactive elements */
+html:not(.dark) input,
+html:not(.dark) select,
+html:not(.dark) textarea {
+  color: #1f1f1f !important;
+}
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+  color: #7f7f7f !important;
+}
+
+/* ── TikTok Style Liked Heart Animation ─────────────────────────── */
+@keyframes heart-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
+.liked-heart {
+  font-variation-settings: 'FILL' 1 !important;
+  color: #fe2c55 !important;
+  display: inline-block;
+  animation: heart-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ── Comments Drawer Styling ────────────────────────────────────── */
+#comments-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 40 !important;
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(4px) !important;
+  transition: opacity 0.3s ease-in-out !important;
+}
+
+#comments-drawer {
+  position: fixed !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  z-index: 50 !important;
+  width: 100% !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  transition: transform 0.3s ease-in-out !important;
+  background-color: #ffffff !important;
+  color: #1f1f1f !important;
+  border-left: 1px solid rgba(217, 225, 236, 0.8) !important;
+}
+
+html.dark #comments-drawer {
+  background-color: #131313 !important;
+  color: #e5e2e1 !important;
+  border-left-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+@media (min-width: 640px) {
+  #comments-drawer {
+    width: 450px !important;
+  }
+}
+
+.translate-x-full {
+  transform: translateX(100%) !important;
+}
+
+.translate-x-0 {
+  transform: translateX(0) !important;
 }
