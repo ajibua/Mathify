@@ -610,7 +610,9 @@ loadNotificationCount();
   API.requireAuth();
 
   let sessionId = localStorage.getItem('mx_chat_session');
-  const tutorId = localStorage.getItem('mx_tutor_id');
+  if (sessionId === 'null' || sessionId === 'undefined') sessionId = null;
+  let tutorId = localStorage.getItem('mx_tutor_id');
+  if (tutorId === 'null' || tutorId === 'undefined') tutorId = null;
   const textarea  = document.querySelector('textarea');
   const chatArea  = document.getElementById('chat-area');
 
@@ -759,8 +761,16 @@ loadNotificationCount();
   }
 
   window.switchSession = (sId, tId) => {
-    localStorage.setItem('mx_chat_session', String(sId));
-    if (tId) localStorage.setItem('mx_tutor_id', String(tId));
+    if (sId && sId !== 'null' && sId !== 'undefined') {
+      localStorage.setItem('mx_chat_session', String(sId));
+    } else {
+      localStorage.removeItem('mx_chat_session');
+    }
+    if (tId && tId !== 'null' && tId !== 'undefined') {
+      localStorage.setItem('mx_tutor_id', String(tId));
+    } else {
+      localStorage.removeItem('mx_tutor_id');
+    }
     window.location.reload();
   };
 
@@ -822,7 +832,10 @@ loadNotificationCount();
   async function ensureSession() {
     if (sessionId) return;
     const body = { title: 'Tutor Session' };
-    if (tutorId) body.tutor_id = parseInt(tutorId);
+    const parsedTutorId = parseInt(tutorId);
+    if (tutorId && !isNaN(parsedTutorId)) {
+      body.tutor_id = parsedTutorId;
+    }
 
     const res = await API.req('/api/ai-tutor/sessions/', {
       method: 'POST',

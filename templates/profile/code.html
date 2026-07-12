@@ -135,7 +135,7 @@
       <div class="relative mb-xl">
         <!-- Decorative cover gradient -->
         <div
-          class="w-full h-24 rounded-2xl bg-gradient-to-br from-primary-container/20 via-surface-container to-secondary-fixed/10 border border-outline-variant/20">
+          class="w-full h-24 rounded-2xl profile-cover-banner">
         </div>
 
         <!-- Avatar -->
@@ -204,8 +204,8 @@
               <span class="material-symbols-outlined text-2xl">trophy</span>
             </div>
             <div>
-              <h3 class="font-headline-sm text-headline-sm text-white group-hover:text-primary transition-colors">Axiom Leaderboard</h3>
-              <p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Check global computational standings and rankings.</p>
+              <h3 class="font-headline-sm text-headline-sm text-white group-hover:text-primary transition-colors">Leaderboard</h3>
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Check global rankings.</p>
             </div>
           </div>
           <span class="material-symbols-outlined text-outline group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
@@ -218,7 +218,7 @@
               <span class="material-symbols-outlined text-2xl">emoji_events</span>
             </div>
             <div>
-              <h3 class="font-headline-sm text-headline-sm text-white group-hover:text-secondary-fixed transition-colors">Axiom Battles</h3>
+              <h3 class="font-headline-sm text-headline-sm text-white group-hover:text-secondary-fixed transition-colors">Competitions</h3>
               <p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Join live math competitions and prove theorems.</p>
             </div>
           </div>
@@ -231,7 +231,7 @@
     <section class="px-gutter mt-lg">
       <div class="flex items-center justify-between mb-md">
         <h2 class="font-headline-sm text-headline-sm text-on-surface">Posts</h2>
-        <button class="font-label-caps text-label-caps text-primary-fixed-dim hover:underline">VIEW ALL</button>
+        <button class="font-label-caps text-label-caps text-primary-fixed-dim hover:underline">View All.</button>
       </div>
       <div class="flex flex-col gap-md" id="posts-container">
         <!-- Skeleton -->
@@ -597,11 +597,36 @@
         <span class="material-symbols-outlined text-[16px]">logout</span>
       </button>`;
       } else {
+        const currentUserId = API.getCurrentUserId();
+        // Fetch current user's follows
+        const [myFollowsRes, targetFollowsRes] = await Promise.all([
+          API.req('/api/feed/follows/'),
+          API.req(`/api/feed/follows/?follower=${user.id}`)
+        ]);
+        const myFollows = myFollowsRes ? await myFollowsRes.json() : [];
+        const targetFollows = targetFollowsRes ? await targetFollowsRes.json() : [];
+        
+        const myFollowsList = myFollows.results || myFollows || [];
+        const targetFollowsList = targetFollows.results || targetFollows || [];
+        
+        const amIFollowing = myFollowsList.some(f => String(f.following_user_id || f.following) === String(user.id));
+        const isTargetFollowingMe = targetFollowsList.some(f => String(f.following_user_id || f.following) === String(currentUserId));
+        const isFriend = amIFollowing && isTargetFollowingMe;
+
+        let messageBtnHtml = '';
+        if (isFriend) {
+          messageBtnHtml = `
+            <a href="/chats/?dm=${user.id}" class="flex items-center gap-xs px-md py-sm rounded-xl bg-secondary-container text-on-secondary-container font-label-caps text-label-caps hover:opacity-90 transition-all active:scale-95 ml-xs">
+              <span class="material-symbols-outlined text-[16px]">chat</span> Message
+            </a>
+          `;
+        }
+
         actions.innerHTML = `
-      <button id="follow-btn" onclick="toggleFollow(${user.id})"
-        class="flex items-center gap-xs px-md py-sm rounded-xl bg-primary-container text-on-primary-container font-label-caps text-label-caps neon-glow hover:opacity-90 transition-all active:scale-95">
-        <span class="material-symbols-outlined text-[16px]">person_add</span> Follow
-      </button>`;
+      <button id="follow-btn" onclick="toggleFollow(${user.id})" data-following="${amIFollowing}"
+        class="flex items-center gap-xs px-md py-sm rounded-xl ${amIFollowing ? 'bg-surface-container-high text-on-surface' : 'bg-primary-container text-on-primary-container neon-glow'} font-label-caps text-label-caps hover:opacity-90 transition-all active:scale-95">
+        <span class="material-symbols-outlined text-[16px]">${amIFollowing ? 'person_remove' : 'person_add'}</span> ${amIFollowing ? 'Unfollow' : 'Follow'}
+      </button>${messageBtnHtml}`;
       }
 
       // ── Badges ────────────────────────────────────────────────────────────────
@@ -707,6 +732,10 @@
         btn.dataset.following = 'false';
         btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">person_add</span> Follow`;
         btn.className = btn.className.replace('bg-surface-container-high text-on-surface', 'bg-primary-container text-on-primary-container neon-glow');
+        
+        // Remove message button if it exists since we unfollowed
+        const msgBtn = btn.nextElementSibling;
+        if (msgBtn && msgBtn.tagName === 'A') msgBtn.remove();
       } else {
         await API.req('/api/feed/follows/', {
           method: 'POST',
@@ -715,6 +744,22 @@
         btn.dataset.following = 'true';
         btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">person_remove</span> Unfollow`;
         btn.className = btn.className.replace('bg-primary-container text-on-primary-container neon-glow', 'bg-surface-container-high text-on-surface');
+        
+        // Re-check if they are following us to add message button
+        const currentUserId = API.getCurrentUserId();
+        const res = await API.req(`/api/feed/follows/?follower=${userId}`);
+        if (res) {
+          const targetFollows = await res.json();
+          const targetFollowsList = targetFollows.results || targetFollows || [];
+          const isTargetFollowingMe = targetFollowsList.some(f => String(f.following_user_id || f.following) === String(currentUserId));
+          if (isTargetFollowingMe) {
+            btn.insertAdjacentHTML('afterend', `
+              <a href="/chats/?dm=${userId}" class="flex items-center gap-xs px-md py-sm rounded-xl bg-secondary-container text-on-secondary-container font-label-caps text-label-caps hover:opacity-90 transition-all active:scale-95 ml-xs">
+                <span class="material-symbols-outlined text-[16px]">chat</span> Message
+              </a>
+            `);
+          }
+        }
       }
     }
 

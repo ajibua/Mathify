@@ -45,6 +45,11 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
+  .profile-cover-banner {
+    background: linear-gradient(135deg, rgba(0, 224, 255, 0.2) 0%, rgba(32, 31, 31, 1) 50%, rgba(169, 249, 0, 0.1) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
   /* Neon glows */
   .neon-glow {
     box-shadow: 0 0 15px rgba(0, 218, 248, 0.2);
@@ -216,6 +221,11 @@ html:not(.dark) .border-white\/10 { border-color: rgba(217, 225, 236, 0.8) !impo
 html:not(.dark) .border-white\/5 { border-color: rgba(217, 225, 236, 0.5) !important; }
 html:not(.dark) .border-outline-variant { border-color: rgba(217, 225, 236, 0.8) !important; }
 html:not(.dark) .border-outline-variant\/30 { border-color: rgba(217, 225, 236, 0.4) !important; }
+
+html:not(.dark) .profile-cover-banner {
+  background: linear-gradient(135deg, rgba(0, 86, 210, 0.15) 0%, rgba(235, 240, 245, 1) 50%, rgba(148, 219, 0, 0.15) 100%) !important;
+  border-color: rgba(217, 225, 236, 0.8) !important;
+}
 
 /* Math items */
 html:not(.dark) .math-inset {

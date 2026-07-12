@@ -14,7 +14,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   // Load dynamic header profile avatar if logged in
-  if (window.API && typeof API.getAccess === 'function' && API.getAccess()) {
+  if (typeof API !== 'undefined' && typeof API.getAccess === 'function' && API.getAccess()) {
     API.req('/api/accounts/me/profile/')
       .then(res => {
         if (res && res.ok) return res.json();

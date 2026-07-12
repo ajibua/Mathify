@@ -2,16 +2,10 @@ from django.http import StreamingHttpResponse
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
+from django.utils import timezone
+from rankings.models import Score, Competition
 from .models import TutorProfile, ChatSession, SessionMessage
-from .serializers import (
-    TutorProfileSerializer,
-    ChatSessionSerializer,
-    ChatSessionListSerializer,
-    SessionMessageSerializer,
-    SendMessageSerializer,
-)
-
+from .serializers import TutorProfileSerializer, ChatSessionSerializer, ChatSessionListSerializer, SessionMessageSerializer, SendMessageSerializer
 
 class TutorProfileViewSet(viewsets.ReadOnlyModelViewSet):
     """Directory of available AI tutors."""
@@ -132,7 +126,7 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
             for m in SessionMessage.objects.filter(session=session)
         ]
 
-        # Return streaming response
+        # Return response
         response = StreamingHttpResponse(
             self._stream_ai_reply(session, history),
             content_type='text/event-stream'
@@ -170,7 +164,7 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
         # 3. Stream from Gemini REST
         if gemini_key:
             try:
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:streamGenerateContent?alt=sse&key={gemini_key}"
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse&key={gemini_key}"
                 contents = []
                 for m in history:
                     role = 'model' if m['role'] == 'assistant' else 'user'
@@ -242,16 +236,14 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
                 )
                 return
 
-
-
-        # 5. Offline Fallback Mock Response Streaming (Uses SymPy calculations if requested)
+        # 5. Fallback Mock Response 
         mock_reply = self._get_offline_mock_reply(session, history)
         words = mock_reply.split(' ')
         for i, word in enumerate(words):
             chunk = word + (' ' if i < len(words) - 1 else '')
             full_text += chunk
             yield f"data: {json.dumps({'text': chunk})}\n\n"
-            time.sleep(0.02)  # Fast simulated typing
+            time.sleep(0.02)
 
         SessionMessage.objects.create(
             session=session, role=SessionMessage.ROLE_ASSISTANT, content=full_text
@@ -259,7 +251,6 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
         session.save(update_fields=['updated_at'])
 
     def _get_ai_reply(self, session: ChatSession, history: list) -> str:
-        # Standard blocking request (retained as compatibility fallback)
         import os
         import urllib.request
         import urllib.error
@@ -279,11 +270,9 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
         if gemini_key:
             gemini_key = gemini_key.strip()
 
-
-
         if gemini_key:
             try:
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={gemini_key}"
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={gemini_key}"
                 contents = []
                 for m in history:
                     role = 'model' if m['role'] == 'assistant' else 'user'
@@ -402,8 +391,6 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
             )
 
     def _get_app_context_prompt(self, user):
-        from django.utils import timezone
-        from rankings.models import Score, Competition
 
         # Active Competitions
         active_comps = Competition.objects.filter(is_active=True, end_date__gt=timezone.now())
@@ -446,4 +433,5 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
   * Publish a proof by going to the Math Studio, creating a creation, choosing 'Public' visibility, and saving it (+50 pts).
   * Participate in live competitions by visiting the 'Competitions' page, viewing active events, and solving/submitting solutions (+10 pts per submit).
   * Direct the user if they get lost!
+  * You can assist user on how to solve a problem and give a perfect explanation of the problem and help user visit the basics of the problem so they get a better understanding of it.
 """

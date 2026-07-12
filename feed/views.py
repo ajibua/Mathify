@@ -89,3 +89,19 @@ class FollowViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(follower=self.request.user)
+
+    @action(detail=False, methods=['get'])
+    def friends(self, request):
+        user = request.user
+        # Mutual follows: current user follows them, and they follow current user back
+        following_ids = Follow.objects.filter(follower=user).values_list('following_id', flat=True)
+        mutual_follows = Follow.objects.filter(
+            follower_id__in=following_ids,
+            following=user
+        ).select_related('follower__profile__department')
+        
+        # Serialize the matching users
+        from accounts.serializers import UserSerializer
+        users = [f.follower for f in mutual_follows]
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)

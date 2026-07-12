@@ -69,6 +69,60 @@ class MessageViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(sender=self.request.user)
 
+    @action(detail=False, methods=['get'])
+    def conversations(self, request):
+        from django.db.models import Q
+        user = request.user
+        # Find all direct messages (where group is null and sender or recipient is current user)
+        direct_msgs = Message.objects.filter(
+            group__isnull=True
+        ).filter(
+            Q(sender=user) | Q(recipient=user)
+        ).order_by('-created_at')
+        
+        seen_partners = set()
+        conversations = []
+        for msg in direct_msgs:
+            partner = msg.recipient if msg.sender == user else msg.sender
+            if not partner or partner.id in seen_partners:
+                continue
+            seen_partners.add(partner.id)
+            
+            # Serialize partner using UserSerializer
+            from accounts.serializers import UserSerializer
+            conversations.append({
+                'id': partner.id,
+                'user': UserSerializer(partner).data,
+                'last_message': {
+                    'content': msg.content,
+                    'media': msg.media.url if msg.media else None,
+                    'created_at': msg.created_at,
+                    'sender': msg.sender.username
+                }
+            })
+            
+        return Response(conversations)
+
+    @action(detail=False, methods=['get'])
+    def history(self, request):
+        from django.db.models import Q
+        user_id = request.query_params.get('user_id')
+        if not user_id:
+            return Response({'detail': 'user_id query param required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = request.user
+        messages = Message.objects.filter(
+            group__isnull=True
+        ).filter(
+            (Q(sender=user) & Q(recipient_id=user_id)) |
+            (Q(sender_id=user_id) & Q(recipient=user))
+        ).order_by('created_at')
+        
+        # Mark incoming messages as read
+        messages.filter(recipient=user, is_read=False).update(is_read=True)
+        
+        return Response(MessageSerializer(messages, many=True).data)
+
 
 class CallViewSet(viewsets.ModelViewSet):
     serializer_class = CallSerializer
