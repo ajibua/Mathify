@@ -57,6 +57,14 @@ class GroupViewSet(viewsets.ModelViewSet):
         qs = group.messages.select_related('sender').order_by('created_at')
         return Response(MessageSerializer(qs, many=True).data)
 
+    @action(detail=True, methods=['get'])
+    def current_call(self, request, pk=None):
+        group = self.get_object()
+        call = group.calls.filter(status__in=[Call.STATUS_PENDING, Call.STATUS_ACTIVE]).first()
+        if call:
+            return Response(CallSerializer(call).data)
+        return Response(None)
+
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -129,7 +137,42 @@ class CallViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Call.objects.filter(initiator=self.request.user)
+        from django.db.models import Q
+        user = self.request.user
+        return Call.objects.filter(
+            Q(initiator=user) | Q(group__memberships__user=user)
+        ).distinct()
 
     def perform_create(self, serializer):
-        serializer.save(initiator=self.request.user)
+        from django.utils import timezone
+        call = serializer.save(
+            initiator=self.request.user,
+            status=Call.STATUS_ACTIVE,
+            started_at=timezone.now()
+        )
+        call.participants.add(self.request.user)
+
+    @action(detail=True, methods=['post'])
+    def join(self, request, pk=None):
+        from django.utils import timezone
+        call = self.get_object()
+        if call.status == Call.STATUS_ENDED:
+            return Response({'detail': 'Call has already ended.'}, status=status.HTTP_400_BAD_REQUEST)
+        call.participants.add(request.user)
+        if call.status == Call.STATUS_PENDING:
+            call.status = Call.STATUS_ACTIVE
+            if not call.started_at:
+                call.started_at = timezone.now()
+            call.save()
+        return Response(CallSerializer(call).data)
+
+    @action(detail=True, methods=['post'])
+    def leave(self, request, pk=None):
+        from django.utils import timezone
+        call = self.get_object()
+        call.participants.remove(request.user)
+        if call.participants.count() == 0:
+            call.status = Call.STATUS_ENDED
+            call.ended_at = timezone.now()
+            call.save()
+        return Response(CallSerializer(call).data)

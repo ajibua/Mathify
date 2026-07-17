@@ -7,6 +7,8 @@ from sympy.parsing.sympy_parser import (
 
 transformations = standard_transformations + (implicit_multiplication_application,)
 
+import re
+
 def parse_math(expr_str):
     """
     Safely parse a mathematical expression string into a SymPy object.
@@ -22,7 +24,26 @@ def parse_math(expr_str):
         cleaned = cleaned.replace('\\pi', 'pi')
         cleaned = cleaned.replace('{', '(').replace('}', ')')
         cleaned = cleaned.replace('^', '**')
-        return parse_expr(cleaned, transformations=transformations)
+
+        # 1. Lexical validation (blacklist unsafe characters and words)
+        if re.search(r'[^a-zA-Z0-9\s\+\-\*\/\^\(\)\.\,\!\=\<\>\_]', cleaned):
+            raise ValueError("Expression contains invalid characters.")
+
+        forbidden = ['import', 'eval', 'exec', 'lambda', 'class', 'def', 'os', 'sys', 'subprocess', 'builtin', '__']
+        for word in forbidden:
+            if word in cleaned:
+                raise ValueError(f"Expression contains forbidden term: {word}")
+
+        # 2. Strict evaluation context (disable builtins to prevent RCE)
+        safe_globals = {
+            '__builtins__': {},
+        }
+        # Add basic math symbols and functions from sympy
+        for name in ['sin', 'cos', 'tan', 'log', 'exp', 'pi', 'Symbol', 'Integer', 'Float', 'Symbol']:
+            if hasattr(sp, name):
+                safe_globals[name] = getattr(sp, name)
+
+        return parse_expr(cleaned, global_dict=safe_globals, transformations=transformations)
     except Exception as e:
         raise ValueError(f"Could not parse expression '{expr_str}': {str(e)}")
 

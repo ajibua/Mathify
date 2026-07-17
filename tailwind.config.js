@@ -59,6 +59,9 @@ module.exports = {
         // Background
         'background':                 '#131313',
         'on-background':              '#e5e2e1',
+        // Accent Colors
+        'accent':                     '#FF6B00',
+        'accent-gold':                '#FFB800',
       },
 
       spacing: {

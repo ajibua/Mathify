@@ -72,8 +72,24 @@ class ScoreViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def award_points(self, request):
-        points = int(request.data.get('points', 10))
         competition_id = request.data.get('competition_id')
+        if not competition_id:
+            from rest_framework import status
+            return Response({'detail': 'competition_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        from django.utils import timezone
+        from rest_framework import status
+        from .models import Competition
+
+        comp = Competition.objects.filter(id=competition_id, is_active=True).first()
+        if not comp:
+            return Response({'detail': 'Active competition not found.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        now = timezone.now()
+        if now < comp.start_date or now > comp.end_date:
+            return Response({'detail': 'Competition is not currently active.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        points = 10  # Enforce strictly 10 points per participation request
         user = request.user
         
         # Increment user Profile points
@@ -88,20 +104,15 @@ class ScoreViewSet(viewsets.ModelViewSet):
         score_global.points += points
         score_global.save()
 
-        # Increment competition standings score (if competition_id is provided)
-        score_comp = None
-        if competition_id:
-            from .models import Competition
-            comp = Competition.objects.filter(id=competition_id, is_active=True).first()
-            if comp:
-                score_comp, _ = Score.objects.get_or_create(
-                    user=user, period=Score.PERIOD_ALL_TIME, competition=comp
-                )
-                score_comp.points += points
-                score_comp.save()
+        # Increment competition standings score
+        score_comp, _ = Score.objects.get_or_create(
+            user=user, period=Score.PERIOD_ALL_TIME, competition=comp
+        )
+        score_comp.points += points
+        score_comp.save()
 
         return Response({
             'axiom_points': profile.axiom_points,
             'global_points': score_global.points,
-            'competition_points': score_comp.points if score_comp else None
+            'competition_points': score_comp.points
         })

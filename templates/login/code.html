@@ -80,7 +80,7 @@
     <!-- Main Login Canvas -->
     <div class="w-full max-w-[440px] flex flex-col items-center">
     <!-- Login Card -->
-    <div class="glass-card w-full p-lg md:p-xl rounded-xl flex flex-col gap-md">
+    <div id="login-card" class="glass-card w-full p-lg md:p-xl rounded-xl flex flex-col gap-md">
       <div class="flex flex-col gap-xs mb-sm">
         <h2 class="font-headline-sm text-headline-sm text-on-surface">Welcome back.</h2>
         <p class="font-body-sm text-body-sm text-outline">Signin to get access to the community.</p>
@@ -156,6 +156,58 @@
           <span class="font-bold text-sm text-on-surface opacity-80 group-hover:opacity-100 transition-opacity shrink-0">Microsoft</span>
         </a>
       </div>
+    </div>
+
+    <!-- Forgot Password Request Card -->
+    <div id="forgot-card" class="glass-card w-full p-lg md:p-xl rounded-xl hidden flex flex-col gap-md">
+      <div class="flex flex-col gap-xs mb-sm">
+        <h2 class="font-headline-sm text-headline-sm text-on-surface">Reset Password.</h2>
+        <p class="font-body-sm text-body-sm text-outline">Enter your email to request a reset link.</p>
+      </div>
+      <form class="flex flex-col gap-md" id="forgot-form" onsubmit="event.preventDefault()">
+        <div class="flex flex-col gap-sm">
+          <label class="font-label-caps text-label-caps text-on-surface-variant px-xs">Email:</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline text-[20px]">mail</span>
+            <input id="forgot-email-input" class="w-full bg-surface-container-high border border-outline-variant rounded-lg py-md pl-[48px] pr-md text-on-surface font-body-md placeholder:text-outline/50 transition-all focus:bg-surface-bright" placeholder="yourname@email.com" type="email" required />
+          </div>
+        </div>
+        <button type="submit" class="w-full bg-secondary-fixed text-on-secondary-fixed font-headline-sm text-headline-sm py-md rounded-lg mt-md hover:opacity-90 active:scale-95 transition-all neon-glow-lime flex items-center justify-center gap-sm">
+          Send Reset Link
+          <span class="material-symbols-outlined">send</span>
+        </button>
+        <button type="button" id="back-to-login-btn" class="w-full bg-transparent text-outline font-label-caps text-label-caps py-sm rounded-lg hover:text-on-surface transition-colors cursor-pointer">
+          Back to Login
+        </button>
+      </form>
+    </div>
+
+    <!-- Reset Password Confirm Card -->
+    <div id="reset-confirm-card" class="glass-card w-full p-lg md:p-xl rounded-xl hidden flex flex-col gap-md">
+      <div class="flex flex-col gap-xs mb-sm">
+        <h2 class="font-headline-sm text-headline-sm text-on-surface">Set New Password.</h2>
+        <p class="font-body-sm text-body-sm text-outline">Choose a strong, secure new password.</p>
+      </div>
+      <form class="flex flex-col gap-md" id="reset-confirm-form" onsubmit="event.preventDefault()">
+        <div class="flex flex-col gap-sm">
+          <label class="font-label-caps text-label-caps text-on-surface-variant px-xs">New Password:</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline text-[20px]">lock</span>
+            <input id="new-password-input" class="w-full bg-surface-container-high border border-outline-variant rounded-lg py-md pl-[48px] pr-md text-on-surface font-body-md placeholder:text-outline/50 transition-all focus:bg-surface-bright" placeholder="••••••••" type="password" required />
+          </div>
+        </div>
+        <div class="flex flex-col gap-sm">
+          <label class="font-label-caps text-label-caps text-on-surface-variant px-xs">Confirm Password:</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline text-[20px]">lock_reset</span>
+            <input id="confirm-password-input" class="w-full bg-surface-container-high border border-outline-variant rounded-lg py-md pl-[48px] pr-md text-on-surface font-body-md placeholder:text-outline/50 transition-all focus:bg-surface-bright" placeholder="••••••••" type="password" required />
+          </div>
+        </div>
+        <button type="submit" class="w-full bg-secondary-fixed text-on-secondary-fixed font-headline-sm text-headline-sm py-md rounded-lg mt-md hover:opacity-90 active:scale-95 transition-all neon-glow-lime flex items-center justify-center gap-sm">
+          Save New Password
+          <span class="material-symbols-outlined">save</span>
+        </button>
+      </form>
     </div>
     <!-- Footer Link -->
     <div class="mt-xl text-center">
@@ -313,10 +365,156 @@
       }
     };
 
-    // Fix Sign Up link
+    function showCustomAlert(message, title = 'Notification') {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/85 backdrop-blur-sm opacity-0 transition-opacity duration-300';
+        overlay.innerHTML = `
+      <div class="w-full max-w-sm glass-card rounded-2xl border border-white/10 p-lg flex flex-col gap-md shadow-2xl bg-surface/90 text-on-surface transform scale-95 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+          <h3 class="font-headline-sm text-headline-sm text-primary font-bold">${title}</h3>
+          <button class="close-modal-btn text-outline hover:text-on-surface transition-colors p-1 rounded-full hover:bg-white/5 flex items-center justify-center cursor-pointer">
+            <span class="material-symbols-outlined text-md">close</span>
+          </button>
+        </div>
+        <div class="text-body-md text-on-surface-variant leading-relaxed">${message}</div>
+        <div class="flex justify-end mt-sm">
+          <button class="confirm-modal-btn px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-150 text-sm cursor-pointer">OK</button>
+        </div>
+      </div>
+    `;
+        document.body.appendChild(overlay);
+        const card = overlay.querySelector('.glass-card');
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('opacity-0');
+          card.classList.remove('scale-95');
+        });
+
+        const close = () => {
+          overlay.classList.add('opacity-0');
+          card.classList.add('scale-95');
+          setTimeout(() => {
+            overlay.remove();
+            resolve();
+          }, 300);
+        };
+
+        overlay.querySelector('.close-modal-btn').onclick = close;
+        overlay.querySelector('.confirm-modal-btn').onclick = close;
+      });
+    }
+
+    // Fix Sign Up & Forgot Password links
+    const loginCard = document.getElementById('login-card');
+    const forgotCard = document.getElementById('forgot-card');
+    const resetConfirmCard = document.getElementById('reset-confirm-card');
+
     document.querySelectorAll('a[href="#"]').forEach(a => {
-      if (a.textContent.trim().toLowerCase().includes('sign up')) a.href = '/register/';
+      if (a.textContent.trim().toLowerCase().includes('sign up')) {
+        a.href = '/register/';
+      } else if (a.textContent.trim().toLowerCase().includes('forgot password')) {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (loginCard && forgotCard) {
+            loginCard.classList.add('hidden');
+            forgotCard.classList.remove('hidden');
+          }
+        });
+      }
     });
+
+    const backToLoginBtn = document.getElementById('back-to-login-btn');
+    if (backToLoginBtn) {
+      backToLoginBtn.addEventListener('click', () => {
+        if (forgotCard && loginCard) {
+          forgotCard.classList.add('hidden');
+          loginCard.classList.remove('hidden');
+        }
+      });
+    }
+
+    // Check query params for reset state
+    const urlParams = new URLSearchParams(window.location.search);
+    const isReset = urlParams.get('reset') === 'true';
+    const uid = urlParams.get('uid');
+    const token = urlParams.get('token');
+
+    if (isReset && uid && token) {
+      if (loginCard && resetConfirmCard) {
+        loginCard.classList.add('hidden');
+        resetConfirmCard.classList.remove('hidden');
+      }
+    }
+
+    // Request Reset Form Submit
+    const forgotForm = document.getElementById('forgot-form');
+    if (forgotForm) {
+      forgotForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('forgot-email-input').value.trim();
+        const btn = forgotForm.querySelector('button[type=submit]');
+        const orig = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> Sending...';
+
+        const res = await fetch('/api/accounts/password-reset/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        btn.disabled = false;
+        btn.innerHTML = orig;
+
+        if (res.ok) {
+          await showCustomAlert('If an account exists with this email, a reset link has been sent.', 'Email Sent');
+          if (forgotCard && loginCard) {
+            forgotCard.classList.add('hidden');
+            loginCard.classList.remove('hidden');
+          }
+        } else {
+          showCustomAlert('Failed to send password reset link. Please try again.', 'Error');
+        }
+      };
+    }
+
+    // Save New Password Form Submit
+    const resetConfirmForm = document.getElementById('reset-confirm-form');
+    if (resetConfirmForm) {
+      resetConfirmForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const password = document.getElementById('new-password-input').value;
+        const confirmPassword = document.getElementById('confirm-password-input').value;
+        const btn = resetConfirmForm.querySelector('button[type=submit]');
+        const orig = btn.innerHTML;
+
+        if (password !== confirmPassword) {
+          showCustomAlert('Passwords do not match.', 'Error');
+          return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> Saving...';
+
+        const res = await fetch('/api/accounts/password-reset/confirm/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uid, token, password })
+        });
+
+        btn.disabled = false;
+        btn.innerHTML = orig;
+
+        if (res.ok) {
+          await showCustomAlert('Your password has been reset successfully. Please log in with your new password.', 'Success');
+          window.location.href = '/login/';
+        } else {
+          showCustomAlert('Reset token is invalid or has expired.', 'Error');
+        }
+      };
+    }
   </script>
 
 </body>

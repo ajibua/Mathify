@@ -157,11 +157,26 @@ class GoogleCallbackView(APIView):
                 last_name=last_name,
                 password=secrets.token_urlsafe(32)
             )
-            Profile.objects.create(user=user)
 
         # Generate SimpleJWT tokens
         refresh = RefreshToken.for_user(user)
-        return redirect(f'/login/?access={refresh.access_token}&refresh={refresh}')
+        from django.http import HttpResponse
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Authenticating...</title>
+        </head>
+        <body>
+            <script>
+                localStorage.setItem('mx_access', '{refresh.access_token}');
+                localStorage.setItem('mx_refresh', '{refresh}');
+                window.location.href = '/';
+            </script>
+        </body>
+        </html>
+        """
+        return HttpResponse(html_content)
 
 
 class MicrosoftLoginView(APIView):
@@ -259,11 +274,26 @@ class MicrosoftCallbackView(APIView):
                 last_name=last_name,
                 password=secrets.token_urlsafe(32)
             )
-            Profile.objects.create(user=user)
 
         # Generate SimpleJWT tokens
         refresh = RefreshToken.for_user(user)
-        return redirect(f'/login/?access={refresh.access_token}&refresh={refresh}')
+        from django.http import HttpResponse
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Authenticating...</title>
+        </head>
+        <body>
+            <script>
+                localStorage.setItem('mx_access', '{refresh.access_token}');
+                localStorage.setItem('mx_refresh', '{refresh}');
+                window.location.href = '/';
+            </script>
+        </body>
+        </html>
+        """
+        return HttpResponse(html_content)
 
 
 # Password Reset Views

@@ -151,11 +151,6 @@
           <span class="material-symbols-outlined">domain</span>
           <span class="font-body-md text-body-md">Departments</span>
         </button>
-        <button data-filter-type="competition"
-          class="px-md py-sm rounded-lg flex items-center gap-md text-left transition-colors duration-150 cursor-pointer w-full bg-surface-variant text-on-surface-variant hover:bg-surface-bright">
-          <span class="material-symbols-outlined">trophy</span>
-          <span class="font-body-md text-body-md">Competitions</span>
-        </button>
       </div>
     </nav>
     <!-- Chat/Groups List -->
@@ -187,8 +182,6 @@
           class="px-md py-xs rounded-full bg-surface-variant text-on-surface-variant text-sm whitespace-nowrap hover:bg-surface-bright transition-colors">Study Groups</button>
         <button data-filter-type="department"
           class="px-md py-xs rounded-full bg-surface-variant text-on-surface-variant text-sm whitespace-nowrap hover:bg-surface-bright transition-colors">Departments</button>
-        <button data-filter-type="competition"
-          class="px-md py-xs rounded-full bg-surface-variant text-on-surface-variant text-sm whitespace-nowrap hover:bg-surface-bright transition-colors">Competitions</button>
       </div>
       <!-- List Items -->
       <div id="groups-list" class="flex-grow overflow-y-auto custom-scrollbar flex flex-col">
@@ -214,6 +207,20 @@
           </div>
           <!-- Chat Header Actions (Leave button) -->
           <div id="chat-header-actions" class="flex items-center gap-sm">
+          </div>
+        </div>
+        <!-- Active Call Banner -->
+        <div id="active-call-banner" class="hidden bg-secondary-fixed/10 border-b border-secondary-fixed/20 p-sm flex items-center justify-between z-10">
+          <div class="flex items-center gap-sm">
+            <span class="w-2.5 h-2.5 rounded-full bg-secondary-fixed animate-pulse shrink-0"></span>
+            <div class="text-xs">
+              <span class="text-secondary-fixed font-bold block md:inline-block">Active Call Ongoing</span>
+              <span class="text-outline md:ml-sm" id="active-call-participants">0 participants</span>
+            </div>
+          </div>
+          <div class="flex gap-sm">
+            <button id="join-call-btn" onclick="joinActiveCall()" class="px-md py-1 bg-secondary-fixed text-black font-bold text-xs rounded-lg active:scale-95 transition-all">Join Call</button>
+            <button id="leave-call-btn" onclick="leaveActiveCall()" class="px-md py-1 bg-error text-white font-bold text-xs rounded-lg active:scale-95 transition-all hidden">Leave</button>
           </div>
         </div>
         <!-- Chat Messages -->
@@ -445,10 +452,12 @@
       },
       async req(url, opts = {}) {
         const headers = {
-          'Content-Type': 'application/json',
           ...(this.getAccess() ? { 'Authorization': `Bearer ${this.getAccess()}` } : {}),
           ...(opts.headers || {})
         };
+        if (!(opts.body instanceof FormData) && !headers['Content-Type']) {
+          headers['Content-Type'] = 'application/json';
+        }
         let res = await fetch(url, { ...opts, headers });
         if (res.status === 401) {
           const ok = await this.refresh();
@@ -793,7 +802,7 @@
   </script>
 
   <script>
-    // ── Chats and Groups Page Execution Logic ────────────────────────────────────────
+    // ── Chats and Groups Page Execution Logic ───
     let currentGroupId = null;
     let currentRecipientId = null;
     let chatPollInterval = null;
@@ -832,6 +841,8 @@
 
         if (headerActions) {
           headerActions.innerHTML = `
+        <button onclick="initiateVoiceCall()" class="material-symbols-outlined text-outline hover:text-primary transition-colors p-1.5 rounded-full hover:bg-white/5 flex items-center justify-center" title="Voice Call">call</button>
+        <button onclick="initiateVideoCall()" class="material-symbols-outlined text-outline hover:text-primary transition-colors p-1.5 rounded-full hover:bg-white/5 flex items-center justify-center" title="Video Call">videocam</button>
         <button onclick="leaveGroup(${group.id})" class="px-sm py-xs border border-error/30 text-error hover:bg-error/10 font-semibold rounded-lg text-xs transition-colors flex items-center gap-1 active:scale-95 duration-150">
           <span class="material-symbols-outlined text-[14px]">logout</span>
           <span>Leave Group</span>
@@ -970,6 +981,15 @@
 
     async function loadMessages() {
       if (!currentGroupId && !currentRecipientId) return;
+
+      // Poll active call details
+      if (currentGroupId) {
+        checkCurrentCall();
+      } else {
+        const banner = document.getElementById('active-call-banner');
+        if (banner) banner.classList.add('hidden');
+      }
+
       const url = currentGroupId 
         ? `/api/social/groups/${currentGroupId}/messages/`
         : `/api/social/messages/history/?user_id=${currentRecipientId}`;
@@ -1073,11 +1093,8 @@
         body.append('content', content || '');
         body.append('media', file);
 
-        res = await fetch('/api/social/messages/', {
+        res = await API.req('/api/social/messages/', {
           method: 'POST',
-          headers: {
-            ...(API.getAccess() ? { 'Authorization': `Bearer ${API.getAccess()}` } : {}),
-          },
           body,
         });
       } else {
@@ -1307,9 +1324,138 @@
       });
     }
 
+    // ── Calling Features JS ───────────────────────────
+    let currentActiveCallId = null;
+    let myUsername = '';
+
+    async function fetchMyUsername() {
+      try {
+        const res = await API.req('/api/accounts/me/');
+        if (res && res.ok) {
+          const data = await res.json();
+          if (data && data.username) {
+            myUsername = data.username;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load user info:", e);
+      }
+    }
+
+    async function checkCurrentCall() {
+      if (!currentGroupId) {
+        const banner = document.getElementById('active-call-banner');
+        if (banner) banner.classList.add('hidden');
+        return;
+      }
+      try {
+        const res = await API.req(`/api/social/groups/${currentGroupId}/current_call/`);
+        if (!res) return;
+        const call = await res.json();
+        const banner = document.getElementById('active-call-banner');
+        const participantsText = document.getElementById('active-call-participants');
+        const joinBtn = document.getElementById('join-call-btn');
+        const leaveBtn = document.getElementById('leave-call-btn');
+        
+        if (banner && participantsText && joinBtn && leaveBtn) {
+          if (call && call.status !== 'ended') {
+            banner.classList.remove('hidden');
+            participantsText.textContent = `${call.participants_count} active (caller: @${call.initiator_username})`;
+            
+            if (myUsername && call.participants.includes(myUsername)) {
+              joinBtn.classList.add('hidden');
+              leaveBtn.classList.remove('hidden');
+              currentActiveCallId = call.id;
+            } else {
+              joinBtn.classList.remove('hidden');
+              leaveBtn.classList.add('hidden');
+            }
+          } else {
+            banner.classList.add('hidden');
+            currentActiveCallId = null;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to check active call:", e);
+      }
+    }
+
+    async function joinActiveCall() {
+      try {
+        const res = await API.req(`/api/social/groups/${currentGroupId}/current_call/`);
+        if (res && res.ok) {
+          const call = await res.json();
+          if (call) {
+            const joinRes = await API.req(`/api/social/calls/${call.id}/join/`, { method: 'POST' });
+            if (joinRes && joinRes.ok) {
+              await checkCurrentCall();
+              await window.alert("You have joined the call!", "Voice Call");
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Failed to join call:", e);
+      }
+    }
+
+    async function leaveActiveCall() {
+      if (!currentActiveCallId) return;
+      try {
+        const res = await API.req(`/api/social/calls/${currentActiveCallId}/leave/`, { method: 'POST' });
+        if (res && res.ok) {
+          currentActiveCallId = null;
+          await checkCurrentCall();
+          await window.alert("You have left the call.", "Voice Call");
+        }
+      } catch (e) {
+        console.error("Failed to leave call:", e);
+      }
+    }
+
+    async function initiateVoiceCall() {
+      if (!currentGroupId) return;
+      if (await window.confirm("Are you sure you want to start a voice call in this group?", "Voice Call")) {
+        try {
+          const res = await API.req('/api/social/calls/', {
+            method: 'POST',
+            body: JSON.stringify({ group: currentGroupId })
+          });
+          if (res && res.ok) {
+            const call = await res.json();
+            currentActiveCallId = call.id;
+            await checkCurrentCall();
+            await window.alert("Voice call initiated!", "Voice Call");
+          }
+        } catch (e) {
+          console.error("Failed to initiate voice call:", e);
+        }
+      }
+    }
+
+    async function initiateVideoCall() {
+      if (!currentGroupId) return;
+      if (await window.confirm("Are you sure you want to start a video call in this group?", "Video Call")) {
+        try {
+          const res = await API.req('/api/social/calls/', {
+            method: 'POST',
+            body: JSON.stringify({ group: currentGroupId })
+          });
+          if (res && res.ok) {
+            const call = await res.json();
+            currentActiveCallId = call.id;
+            await checkCurrentCall();
+            await window.alert("Video call initiated!", "Video Call");
+          }
+        } catch (e) {
+          console.error("Failed to initiate video call:", e);
+        }
+      }
+    }
+
     // Initial Load
     (async () => {
       API.requireAuth();
+      await fetchMyUsername();
       loadNotificationCount();
 
       // Check for ?dm=<id> query parameter to auto-open direct message chat

@@ -45,17 +45,17 @@ urlpatterns = [
 # ── Frontend template routes ───────────────────────────────────────────────
 
 TEMPLATE_ROUTES = [
-    ('ai-tutor-directory/', 'ai_tutor_directory/code.html'),
-    ('axiom-rank-leaderboard/', 'axiom_rank_leaderboard/code.html'),
-    ('calculus-ai-chat/', 'calculus_ai_chat/code.html'),
-    ('feed-math-toks/', 'feed_math_toks/code.html'),
+    ('ai-tutor-directory/', 'ai_chat/code.html'),
+    ('axiom-rank-leaderboard/', 'leaderboard/code.html'),
+    ('calculus-ai-chat/', 'ai_chat/code.html'),
+    ('feed-math-toks/', 'feed/code.html'),
     ('groups-chats/', 'groups_chats/code.html'),
     ('groups-chats-with-calls/', 'groups_chats_with_calls/code.html'),
-    ('join-the-department/', 'join_the_department/code.html'),
-    ('login-to-axiom/', 'login_to_axiom/code.html'),
-    ('math-library/', 'math_library/code.html'),
-    ('math-studio/', 'math_studio/code.html'),
-    ('study-groups-competitions/', 'study_groups_competitions/code.html'),
+    ('join-the-department/', 'register/code.html'),
+    ('login-to-axiom/', 'login/code.html'),
+    ('math-library/', 'library/code.html'),
+    ('math-studio/', 'studio/code.html'),
+    ('study-groups-competitions/', 'competitions/code.html'),
 ]
 
 for route, template_name in TEMPLATE_ROUTES:

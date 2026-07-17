@@ -45,10 +45,13 @@ class UserSerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True)
+    department_id = serializers.PrimaryKeyRelatedField(
+        queryset=Department.objects.all(), write_only=True, required=False, allow_null=True
+    )
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'username', 'first_name', 'last_name', 'password', 'password2']
+        fields = ['email', 'username', 'first_name', 'last_name', 'password', 'password2', 'department_id']
 
     def validate(self, data):
         if data['password'] != data.pop('password2'):
@@ -56,6 +59,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        department = validated_data.pop('department_id', None)
         user = CustomUser.objects.create_user(**validated_data)
-        Profile.objects.create(user=user)
+        if department:
+            profile = user.profile
+            profile.department = department
+            profile.save()
         return user

@@ -1,7 +1,6 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
 from .models import Category, Tag, Resource, Bookmark
 from .serializers import CategorySerializer, TagSerializer, ResourceSerializer, BookmarkSerializer
 

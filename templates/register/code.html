@@ -286,6 +286,27 @@
   </script>
 
   <script>
+    // Fetch departments dynamically
+    (async () => {
+      try {
+        const res = await fetch('/api/accounts/departments/');
+        if (res.ok) {
+          const depts = await res.json();
+          const select = document.getElementById('interest');
+          if (select && depts.length) {
+            const deptParam = new URLSearchParams(window.location.search).get('dept');
+            select.innerHTML = '<option class="bg-surface" disabled="" ' + (!deptParam ? 'selected="" ' : '') + 'value="">Select Specialization</option>' +
+              depts.map(d => {
+                const isSelected = deptParam && (d.name.toLowerCase() === deptParam.toLowerCase() || d.name.toLowerCase().includes(deptParam.toLowerCase()));
+                return `<option class="bg-surface" value="${d.id}" ${isSelected ? 'selected' : ''}>${d.name}</option>`;
+              }).join('');
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load departments:", e);
+      }
+    })();
+
     document.querySelector('form').onsubmit = async (e) => {
       e.preventDefault();
       const d = Object.fromEntries(new FormData(e.target));
@@ -305,7 +326,8 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: d.email, password: d.password, password2: d.password,
-          username, first_name, last_name
+          username, first_name, last_name,
+          department_id: d.interest ? parseInt(d.interest) : null
         })
       });
 

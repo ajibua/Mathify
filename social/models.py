@@ -104,6 +104,9 @@ class Call(models.Model):
         related_name='calls', null=True, blank=True
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    participants = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name='joined_calls', blank=True
+    )
     started_at = models.DateTimeField(null=True, blank=True)
     ended_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

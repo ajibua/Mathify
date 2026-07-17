@@ -2,6 +2,12 @@ from django.http import StreamingHttpResponse
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+import os
+import urllib.request
+import urllib.error
+import json
+import time
+from decouple import config
 from django.utils import timezone
 from rankings.models import Score, Competition
 from .models import TutorProfile, ChatSession, SessionMessage
@@ -135,12 +141,7 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
         return response
 
     def _stream_ai_reply(self, session: ChatSession, history: list):
-        import os
-        import urllib.request
-        import urllib.error
-        import json
-        import time
-        from decouple import config
+        
 
         # 1. call system prompt
         system_prompt = (session.tutor.model_config.get('system_prompt', '')
@@ -251,12 +252,6 @@ class ChatSessionViewSet(viewsets.ModelViewSet):
         session.save(update_fields=['updated_at'])
 
     def _get_ai_reply(self, session: ChatSession, history: list) -> str:
-        import os
-        import urllib.request
-        import urllib.error
-        import json
-        from decouple import config
-
         system_prompt = (session.tutor.model_config.get('system_prompt', '')
                          if session.tutor else 'You are a helpful math tutor.')
         system_prompt = f"{system_prompt}\n\n{self._get_app_context_prompt(session.user)}"

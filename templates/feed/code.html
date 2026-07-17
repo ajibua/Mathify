@@ -6,6 +6,8 @@
   <meta charset="utf-8" />
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/main.css' %}?v=2.2" />
+  <script src="{% static 'js/api.js' %}?v=2.2"></script>
+  <script src="{% static 'js/dialogs.js' %}?v=2.2"></script>
   <link
     href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Geist:wght@100;300;400;500;700;900&display=swap"
     rel="stylesheet" />
@@ -368,9 +370,6 @@
   </script>
 
   <script>
-
-    // Mathify API
-    const API = {
       getAccess: () => localStorage.getItem('mx_access'),
       getRefresh: () => localStorage.getItem('mx_refresh'),
       getCurrentUserId() {

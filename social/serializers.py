@@ -44,8 +44,17 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class CallSerializer(serializers.ModelSerializer):
     initiator = serializers.StringRelatedField(read_only=True)
+    initiator_username = serializers.CharField(source='initiator.username', read_only=True)
+    participants = serializers.SlugRelatedField(many=True, read_only=True, slug_field='username')
+    participants_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Call
-        fields = ['id', 'initiator', 'group', 'status', 'started_at', 'ended_at', 'created_at']
+        fields = [
+            'id', 'initiator', 'initiator_username', 'group', 'status',
+            'participants', 'participants_count', 'started_at', 'ended_at', 'created_at'
+        ]
         read_only_fields = ['id', 'initiator', 'created_at']
+
+    def get_participants_count(self, obj):
+        return obj.participants.count()

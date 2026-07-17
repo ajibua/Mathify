@@ -1,5 +1,8 @@
 from django.shortcuts import render
 
+def landing(request):
+    return render(request, 'landing/code.html')
+
 def login(request):
     return render(request, 'login/code.html')
 
@@ -20,7 +23,7 @@ def groups(request):
     return render(request, 'groups_chats/code.html')
 
 def groups_calls(request):
-    return render(request, 'groups_chats_with_calls/code.html')
+    return render(request, 'groups_chats/code.html')
 
 def leaderboard(request):
     return render(request, 'leaderboard/code.html')
