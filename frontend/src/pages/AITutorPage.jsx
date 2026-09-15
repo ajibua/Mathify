@@ -288,7 +288,7 @@ export function AITutorPage() {
   };
 
   return (
-    <div className="ai-tutor-shell" style={{ width: '100%', height: 'calc(100vh - var(--nav-height) - 76px)', minHeight: '560px' }}>
+    <div className="ai-tutor-shell" style={{ width: '100%', height: '100%' }}>
       <div
         className="ai-tutor-layout card"
         style={{
@@ -512,7 +512,7 @@ export function AITutorPage() {
           </header>
 
           {/* Messages Stream */}
-          <div className="ai-tutor-messages" style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div ref={messagesContainerRef} className="ai-tutor-messages" style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {messages.length === 0 ? (
               <div className="ai-tutor-empty-state" style={{ margin: 'auto', maxWidth: '640px', textAlign: 'center', width: '100%', padding: '16px 8px' }}>
                 <div
