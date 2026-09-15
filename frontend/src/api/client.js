@@ -1,4 +1,4 @@
-export const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://mathify-backend-one.vercel.app' : '');
+export const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '');
 
 export const API = {
   _refreshPromise: null, // Dedupes concurrent refresh calls
@@ -21,9 +21,10 @@ export const API = {
     const token = this.getAccess();
     if (!token) return null;
     try {
-      const base64 = token.split('.')[1];
-      // Handles multi-byte UTF-8 claims safely
-      const payload = JSON.parse(decodeURIComponent(escape(atob(base64))));
+      const base64 = token.split('.')[1]?.replace(/-/g, '+').replace(/_/g, '/');
+      if (!base64) return null;
+      const bytes = Uint8Array.from(atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')), (char) => char.charCodeAt(0));
+      const payload = JSON.parse(new TextDecoder().decode(bytes));
       return payload.user_id;
     } catch {
       return null;
@@ -78,14 +79,23 @@ export const API = {
       headers['Content-Type'] = 'application/json';
     }
 
+    const isPrivateRequest = Boolean(token || headers.Authorization || opts.method && opts.method !== 'GET');
+    if (isPrivateRequest) {
+      headers['Cache-Control'] = 'no-store';
+    }
+
     try {
-      let res = await fetch(url, { ...opts, headers });
+      let res = await fetch(url, {
+        ...opts,
+        cache: isPrivateRequest ? 'no-store' : opts.cache,
+        headers,
+      });
 
       if (res.status === 401 && this.getRefresh()) {
         const ok = await this.refresh();
         if (ok) {
           headers['Authorization'] = `Bearer ${this.getAccess()}`;
-          res = await fetch(url, { ...opts, headers });
+          res = await fetch(url, { ...opts, cache: 'no-store', headers });
 
           if (res.status === 401) {
             this.clearTokens();

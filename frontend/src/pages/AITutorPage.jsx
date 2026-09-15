@@ -192,7 +192,15 @@ export function AITutorPage() {
     ]);
 
     try {
-      const res = await API.req('/api/ai-tutor/chat/?stream=true', {
+      const payload = {
+        content: displayText,
+        ...(file ? {
+          file_data: await fileToBase64(file),
+          file_name: file.name,
+          file_mime: file.type,
+        } : {}),
+      };
+      const res = await API.req(`/api/ai-tutor/sessions/${sessionId}/send-stream/`, {
         method: 'POST',
         body: JSON.stringify({
           message: messageText,
@@ -226,10 +234,6 @@ export function AITutorPage() {
             if (trimmed.startsWith('data: ')) {
               try {
                 const payload = JSON.parse(trimmed.slice(6));
-                if (payload.session_id && payload.session_id !== activeSessionId) {
-                  setActiveSessionId(payload.session_id);
-                  fetchSessions();
-                }
                 if (payload.text) {
                   accumulatedText += payload.text;
                   const currentText = accumulatedText;
@@ -615,6 +619,12 @@ export function AITutorPage() {
                       )}
                       {m.content ? (
                         <div style={{ position: 'relative' }}>
+                                  {m.file_name && (
+                                    <div className="ai-tutor-file-badge">
+                                      <span className="material-symbols-outlined">attach_file</span>
+                                      {m.file_name}
+                                    </div>
+                                  )}
                           <MathRenderer content={m.content} />
                           {m.isStreaming && (
                             <span

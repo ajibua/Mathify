@@ -4,6 +4,13 @@ import { API, resolveMediaUrl } from '../api/client';
 import MathRenderer from '../components/common/MathRenderer';
 import ConfirmModal from '../components/common/ConfirmModal';
 
+function formatFileSize(bytes) {
+  if (!bytes) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  const unitIndex = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  return `${(bytes / (1024 ** unitIndex)).toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
 export function FeedPage() {
   const { user, isAuthenticated } = useAuth();
   const [posts, setPosts] = useState([]);
@@ -38,6 +45,21 @@ export function FeedPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   const [newPostsAvailable, setNewPostsAvailable] = useState(0);
+
+  const clearSelectedFile = () => {
+    if (selectedFilePreview) URL.revokeObjectURL(selectedFilePreview);
+    setSelectedFile(null);
+    setSelectedFilePreview('');
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (selectedFilePreview) URL.revokeObjectURL(selectedFilePreview);
+    setSelectedFile(file);
+    setSelectedFilePreview(URL.createObjectURL(file));
+    event.target.value = '';
+  };
 
   const categories = [
     { id: 'all', label: 'All Fields' },
@@ -363,7 +385,7 @@ export function FeedPage() {
             >
               {user?.username?.[0]?.toUpperCase() || 'M'}
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="feed-composer-body" style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
                 <button
                   type="button"
