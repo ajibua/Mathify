@@ -485,7 +485,7 @@ export function AITutorPage() {
               </div>
               <div style={{ minWidth: 0, overflow: 'hidden' }}>
                 <h2 style={{ fontSize: '14.5px', margin: 0, fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  AI Math Tutor
+                  Math'd AI Tutor
                 </h2>
                 <div style={{ fontSize: '11.5px', color: 'var(--text-subtle)', display: 'flex', alignItems: 'center', gap: '5px' }}>
                   <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10B981', flexShrink: 0 }} />

@@ -106,10 +106,34 @@ export function GroupsPage() {
       if (res.ok) {
         const data = await res.json();
         const list = data.results || data;
-        const validList = Array.isArray(list) ? list : [];
+        let validList = Array.isArray(list) ? list : [];
+
+        // Support deep link ?groupId=...
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetGroupId = urlParams.get('groupId') || urlParams.get('group') || urlParams.get('id');
+
+        // If targetGroupId is specified but not yet in the user's groups list, fetch it directly
+        if (targetGroupId && !validList.some((g) => String(g.id) === String(targetGroupId))) {
+          try {
+            const singleRes = await API.get(`/api/social/groups/${targetGroupId}/`);
+            if (singleRes.ok) {
+              const singleData = await singleRes.json();
+              if (singleData && singleData.id) {
+                validList = [singleData, ...validList];
+              }
+            }
+          } catch {
+            // quiet fallback
+          }
+        }
+
         setGroups(validList);
         if (validList.length > 0) {
           setActiveGroup((prev) => {
+            if (targetGroupId) {
+              const matched = validList.find((g) => String(g.id) === String(targetGroupId));
+              if (matched) return matched;
+            }
             if (prev && validList.some((g) => g.id === prev.id)) {
               return validList.find((g) => g.id === prev.id);
             }
@@ -512,10 +536,22 @@ export function GroupsPage() {
   const copyMeetingLink = (code) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const link = `${origin}/meet/${code}`;
-    navigator.clipboard.writeText(link).then(() => {
-      setCopiedToast('Meeting link copied to clipboard!');
-      setTimeout(() => setCopiedToast(''), 2500);
-    });
+    if (navigator.share) {
+      navigator.share({
+        title: "Join our Math'd Study Call",
+        text: `Join our live math study call on Math'd: ${link}`,
+        url: link,
+      }).catch(() => {
+        navigator.clipboard?.writeText(link);
+        setCopiedToast('Meeting link copied to clipboard!');
+        setTimeout(() => setCopiedToast(''), 2500);
+      });
+    } else {
+      navigator.clipboard.writeText(link).then(() => {
+        setCopiedToast('Meeting link copied to clipboard!');
+        setTimeout(() => setCopiedToast(''), 2500);
+      });
+    }
   };
 
   const handleSendMessage = async (e) => {
@@ -787,6 +823,11 @@ export function GroupsPage() {
                     onClick={() => {
                       setActiveGroup(g);
                       setSidebarOpen(false);
+                      try {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('groupId', g.id);
+                        window.history.replaceState(null, '', url.toString());
+                      } catch { }
                     }}
                     style={{
                       padding: '14px',
@@ -1232,16 +1273,30 @@ export function GroupsPage() {
                         <div
                           onClick={() => {
                             setOptionsMenuOpen(false);
-                            navigator.clipboard?.writeText(window.location.href);
-                            setCopiedToast('Room link copied!');
-                            setTimeout(() => setCopiedToast(''), 2500);
+                            const origin = typeof window !== 'undefined' ? window.location.origin : '';
+                            const shareUrl = `${origin}/groups?groupId=${activeGroup.id}`;
+                            if (navigator.share) {
+                              navigator.share({
+                                title: `${activeGroup.name} on Math'd`,
+                                text: `Join my study group "${activeGroup.name}" on Math'd!`,
+                                url: shareUrl,
+                              }).catch(() => {
+                                navigator.clipboard?.writeText(shareUrl);
+                                setCopiedToast('Group link copied!');
+                                setTimeout(() => setCopiedToast(''), 2500);
+                              });
+                            } else {
+                              navigator.clipboard?.writeText(shareUrl);
+                              setCopiedToast('Group link copied!');
+                              setTimeout(() => setCopiedToast(''), 2500);
+                            }
                           }}
                           style={{ padding: '9px 15px', fontSize: '12.5px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--text)' }}
                           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.06)')}
                           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                         >
                           <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>share</span>
-                          <span>Share Room Link</span>
+                          <span>Share Group Link</span>
                         </div>
 
                         {(activeGroup.is_member || Number(activeGroup.created_by_id) === Number(API.getCurrentUserId() || user?.id)) && (

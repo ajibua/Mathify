@@ -1773,3 +1773,18 @@ button, input, textarea, select {
   }
 }
 
+/* Interactive Clickable Links in MathRenderer & Chat */
+.math-link {
+  color: var(--primary) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+  font-weight: 600 !important;
+  word-break: break-all !important;
+  transition: all 0.15s ease !important;
+}
+
+.math-link:hover {
+  color: var(--primary-hover) !important;
+  opacity: 0.85 !important;
+}
+

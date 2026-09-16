@@ -103,6 +103,17 @@ export function MathRenderer({ content, displayMode = false, className = '' }) {
 
       t = t.replace(/(^|[^*])\*([^*]+?)\*/g, '$1<em>$2</em>');
       t = t.replace(/`([^`]+?)`/g, '<code class="math-inline-code">$1</code>');
+      // Markdown links: [Title](url)
+      t = t.replace(/\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g, (_, label, url) => {
+        return saveToken(`<a href="${url}" target="_blank" rel="noopener noreferrer" class="math-link">${escapeHtml(label)}</a>`);
+      });
+
+      // Raw URLs: https://... or http://...
+      t = t.replace(/\b(https?:\/\/[^\s<]+)/g, (url) => {
+        const cleanUrl = url.replace(/[.,;!?)]+$/, '');
+        const trailing = url.slice(cleanUrl.length);
+        return `${saveToken(`<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="math-link">${escapeHtml(cleanUrl)}</a>`)}${trailing}`;
+      });
 
       t = t.replace(/\r?\n\r?\n/g, '<div class="math-paragraph-spacer"></div>');
 

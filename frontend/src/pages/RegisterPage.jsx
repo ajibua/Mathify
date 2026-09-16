@@ -165,20 +165,20 @@ export function RegisterPage() {
           onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-subtle)')}
         >
           <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
-          Back to Mathify
+          Back to Math'd
         </Link>
 
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <h1 className="font-display" style={{ fontSize: '28px', color: 'var(--text)', marginBottom: '6px' }}>
-            Join Mathify
+            Join Math'd
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
             {step === 1
-              ? 'Create your credentials & select your academic role.'
+              ? 'Create your account & choose your role.'
               : role === 'student'
-                ? 'Customize your Scholar & Student profile.'
-                : 'Set up your Host, Organizer, or Lecturer profile.'}
+                ? 'Tell us a bit about yourself.'
+                : 'Set up your host profile.'}
           </p>
         </div>
 

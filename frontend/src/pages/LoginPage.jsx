@@ -155,7 +155,7 @@ export function LoginPage() {
           onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-subtle)')}
         >
           <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
-          Back to Mathify
+          Back to Math'd
         </Link>
 
         {isResetFlow ? (
@@ -166,7 +166,7 @@ export function LoginPage() {
                 Set New Password
               </h1>
               <p style={{ color: 'var(--text-muted)', fontSize: '13.5px' }}>
-                Choose a strong new password for your Mathify account.
+                Choose a strong new password for your Math'd account.
               </p>
             </div>
 
@@ -238,7 +238,7 @@ export function LoginPage() {
                 Welcome Back
               </h1>
               <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
-                Sign in to access your research proofs and peer network.
+                Sign in to access your study rooms, math notes, and challenges.
               </p>
             </div>
 

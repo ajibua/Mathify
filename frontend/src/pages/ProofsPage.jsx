@@ -382,7 +382,7 @@ export function ProofsPage() {
             style={{ padding: '10px 18px', fontSize: '13.5px', display: 'flex', alignItems: 'center', gap: '8px' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>draw</span>
-            <span>Write a Proof</span>
+            <span>Write Solution or Proof</span>
           </button>
         </div>
 
@@ -401,7 +401,7 @@ export function ProofsPage() {
             <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text)' }}>
               {allProofs.length}
             </div>
-            <div style={{ fontSize: '11.5px', color: 'var(--text-subtle)' }}>Shared Proofs</div>
+            <div style={{ fontSize: '11.5px', color: 'var(--text-subtle)' }}>Shared Solutions</div>
           </div>
           <div>
             <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text)' }}>
@@ -413,7 +413,7 @@ export function ProofsPage() {
             <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--primary)' }}>
               Q.E.D.
             </div>
-            <div style={{ fontSize: '11.5px', color: 'var(--text-subtle)' }}>Step-by-Step Rigor</div>
+            <div style={{ fontSize: '11.5px', color: 'var(--text-subtle)' }}>Step-by-Step Solutions</div>
           </div>
         </div>
       </div>
@@ -441,7 +441,7 @@ export function ProofsPage() {
             }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>history_edu</span>
-            Proofs ({filteredProofs.length})
+            Solutions ({filteredProofs.length})
           </button>
           <button
             type="button"
@@ -530,7 +530,7 @@ export function ProofsPage() {
                   transition: 'all 0.15s ease',
                 }}
               >
-                All Preprints ({allProofs.length})
+                All Solutions ({allProofs.length})
               </button>
               {isAuthenticated && (
                 <button
@@ -547,7 +547,7 @@ export function ProofsPage() {
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  My Works
+                  My Solutions
                 </button>
               )}
             </div>
@@ -556,7 +556,7 @@ export function ProofsPage() {
               <input
                 type="text"
                 className="glass-input"
-                placeholder="Search proofs, axioms, or authors..."
+                placeholder="Search solutions, formulas, or topics..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ padding: '7px 12px', fontSize: '13px', width: '100%' }}

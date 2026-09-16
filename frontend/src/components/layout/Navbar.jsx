@@ -156,7 +156,7 @@ export function Navbar() {
             color: 'var(--text)',
           }}
         >
-          Mathify
+          Math'd
         </span>
       </Link>
 
@@ -556,7 +556,7 @@ export function Navbar() {
                     &forall;
                   </span>
                   <span className="font-display" style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text)' }}>
-                    Mathify
+                    Math'd
                   </span>
                 </div>
                 <button
@@ -628,7 +628,7 @@ export function Navbar() {
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {user?.username || 'Mathematician'}
+                      {user?.username || 'Student'}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
                       <span

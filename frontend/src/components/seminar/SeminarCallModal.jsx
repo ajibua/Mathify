@@ -862,10 +862,22 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
   const handleCopyLink = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const shareUrl = `${origin}/meet/${meetingCode}`;
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2400);
-    });
+    if (navigator.share) {
+      navigator.share({
+        title: "Join our Math'd Study Call",
+        text: `Join our live study call on Math'd: ${shareUrl}`,
+        url: shareUrl,
+      }).catch(() => {
+        navigator.clipboard?.writeText(shareUrl);
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2400);
+      });
+    } else {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2400);
+      });
+    }
   };
 
   const formatTime = (secs) => {

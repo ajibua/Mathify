@@ -636,7 +636,7 @@ export function CompetitionsPage() {
                               border: isSolved ? '1px solid rgba(34, 197, 94, 0.3)' : '1px solid var(--primary-border)',
                             }}
                           >
-                            {isSolved ? '✓ SOLVED (+10 pts)' : `+${q.points || 10} Axiom Points`}
+                            {isSolved ? '✓ SOLVED (+10 pts)' : `+${q.points || 10} Math Points`}
                           </span>
                         </div>
 
@@ -652,7 +652,7 @@ export function CompetitionsPage() {
                               check_circle
                             </span>
                             <span style={{ fontSize: '13px', color: '#22C55E', fontWeight: 600 }}>
-                              Solved correctly! Points have been credited to your Axiom profile.
+                              Solved correctly! Points have been added to your profile.
                             </span>
                           </div>
                         ) : (

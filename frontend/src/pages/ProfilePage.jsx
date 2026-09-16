@@ -264,7 +264,7 @@ export function ProfilePage() {
             <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--primary)' }}>
               {profile?.axiom_points ?? profile?.points ?? profile?.score ?? 0}
             </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Axiom Points</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Math Points</div>
           </div>
           <div>
             <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--secondary)' }}>
@@ -276,7 +276,7 @@ export function ProfilePage() {
             <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--accent)' }}>
               {userPosts.length}
             </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Proofs Published</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Solutions Shared</div>
           </div>
         </div>
       </div>
@@ -285,13 +285,13 @@ export function ProfilePage() {
       <div className="glass-card" style={{ padding: '24px', marginBottom: '24px' }}>
         <h2 style={{ fontSize: '18px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span className="material-symbols-outlined" style={{ color: 'var(--accent-gold)' }}>military_tech</span>
-          Honors & Badges
+          Badges & Achievements
         </h2>
 
         <div className="profile-achievements-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px' }}>
           {badges.length === 0 ? (
             <p style={{ fontSize: '13px', color: 'var(--text-subtle)', textAlign: 'center', gridColumn: '1 / -1', padding: '16px 0' }}>
-              No honors earned yet. Complete problem sprints or publish verified proofs to unlock badges.
+              No badges earned yet. Solve challenges or share solutions to unlock badges!
             </p>
           ) : (
             badges.map((ub) => {
@@ -340,10 +340,10 @@ export function ProfilePage() {
 
       {/* Authored Proofs & Posts */}
       <div className="glass-card" style={{ padding: '24px' }}>
-        <h2 style={{ fontSize: '18px', marginBottom: '16px' }}>Published Works & Notes</h2>
+        <h2 style={{ fontSize: '18px', marginBottom: '16px' }}>My Posts & Notes</h2>
         {userPosts.length === 0 ? (
           <p style={{ fontSize: '13px', color: 'var(--text-subtle)', textAlign: 'center', padding: '20px 0' }}>
-            No posts published yet. Share a proof from the Feed to showcase your work!
+            No posts shared yet. Share a problem or solution on the Feed to get started!
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
