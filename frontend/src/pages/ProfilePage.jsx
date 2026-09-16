@@ -69,11 +69,14 @@ export function ProfilePage() {
           setYear(p.year_of_study || '');
         }
 
-        // Load Badges
-        const badgesRes = await API.get('/api/rankings/badges/');
+        // Load User Badges
+        const badgesRes = await API.get('/api/rankings/user-badges/');
         if (badgesRes.ok) {
           const b = await badgesRes.json();
-          setBadges(b.results || b);
+          const list = b.results || b;
+          setBadges(Array.isArray(list) ? list : []);
+        } else {
+          setBadges([]);
         }
 
         // Load authored posts
@@ -259,13 +262,13 @@ export function ProfilePage() {
         >
           <div>
             <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--primary)' }}>
-              {profile?.points ?? profile?.score ?? 140}
+              {profile?.points ?? profile?.score ?? 0}
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Axiom Points</div>
           </div>
           <div>
             <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--secondary)' }}>
-              {badges.length || 3}
+              {badges.length}
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Badges Unlocked</div>
           </div>
@@ -286,43 +289,52 @@ export function ProfilePage() {
         </h2>
 
         <div className="profile-achievements-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px' }}>
-          {badges.map((b) => (
-            <div
-              key={b.id || b.name}
-              style={{
-                background: 'rgba(255, 255, 255, 0.03)',
-                border: '1px solid var(--border)',
-                borderRadius: '12px',
-                padding: '14px',
-                textAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              <div
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(255, 184, 0, 0.12)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--accent-gold)',
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>
-                  {b.icon || 'workspace_premium'}
-                </span>
-              </div>
-              <div style={{ fontWeight: 700, fontSize: '13px' }}>{b.name || 'Proof Master'}</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-subtle)', lineHeight: 1.3 }}>
-                {b.description || 'Awarded for solving complex challenges'}
-              </div>
-            </div>
-          ))}
+          {badges.length === 0 ? (
+            <p style={{ fontSize: '13px', color: 'var(--text-subtle)', textAlign: 'center', gridColumn: '1 / -1', padding: '16px 0' }}>
+              No honors earned yet. Complete problem sprints or publish verified proofs to unlock badges.
+            </p>
+          ) : (
+            badges.map((ub) => {
+              const b = ub.badge || ub;
+              return (
+                <div
+                  key={ub.id || b.name}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '12px',
+                    padding: '14px',
+                    textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(255, 184, 0, 0.12)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'var(--accent-gold)',
+                    }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>
+                      {b.icon || 'workspace_premium'}
+                    </span>
+                  </div>
+                  <div style={{ fontWeight: 700, fontSize: '13px' }}>{b.name}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-subtle)', lineHeight: 1.3 }}>
+                    {b.description}
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 

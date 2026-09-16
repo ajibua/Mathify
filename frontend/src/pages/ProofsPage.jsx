@@ -7,41 +7,7 @@ import ConfirmModal from '../components/common/ConfirmModal';
 import MathGraphStudio from '../components/studio/MathGraphStudio';
 import ProofWalkthroughRecorder from '../components/studio/ProofWalkthroughRecorder';
 
-const SEED_PROOFS = [
-  {
-    id: 'seed-1',
-    title: "Infinitude of Primes (Euclid's Theorem)",
-    author_username: 'Euclid of Alexandria',
-    author_id: 9991,
-    created_at: 'Classical Era (300 BC)',
-    latex_content: 'p_n \\le 2^{2^{n-1}} \\quad \\text{and} \\quad \\prod_{i=1}^k p_i + 1',
-    axiom_cited: 'Fundamental Theorem of Arithmetic',
-    endorsements_count: 42,
-    content: '**Hypothesis:**\nSuppose by contradiction that the set of all prime numbers is finite, denoted as $P = \\{p_1, p_2, \\dots, p_n\\}$.\n\n---\n\n**Theorem Statement:**\nThere exist infinitely many prime numbers.\n\n---\n\n**Derivation Steps:**\nStep 1 [Hypothesis]: Assume $P = \\{p_1, p_2, \\dots, p_n\\}$ is the finite complete list of all primes.\n\nStep 2 [Deduction]: Construct integer $N = p_1 p_2 \\cdots p_n + 1 = \\left(\\prod_{i=1}^n p_i\\right) + 1$.\n\nStep 3 [Fundamental Theorem of Arithmetic]: Since $N > 1$, $N$ must possess at least one prime factor $q$.\n\nStep 4 [Contradiction]: If $q \\in P$, then $q$ divides both $\\prod_{i=1}^n p_i$ and $N$. Hence $q$ divides their difference $N - \\prod_{i=1}^n p_i = 1$, which is impossible since no prime divides 1.\n\nStep 5 [Q.E.D.]: Therefore, $q \\notin P$, contradicting that $P$ contained all primes. The number of primes is infinite.',
-  },
-  {
-    id: 'seed-2',
-    title: 'Irrationality of the Square Root of 2',
-    author_username: 'Pythagorean School',
-    author_id: 9992,
-    created_at: 'Classical Era (500 BC)',
-    latex_content: '\\sqrt{2} \\notin \\mathbb{Q}',
-    axiom_cited: 'Completeness of ℝ',
-    endorsements_count: 38,
-    content: '**Hypothesis:**\nAssume for contradiction that $\\sqrt{2}$ is rational, i.e., $\\sqrt{2} = \\frac{a}{b}$ where $a, b \\in \\mathbb{Z}$, $b \\neq 0$, and $\\gcd(a, b) = 1$.\n\n---\n\n**Theorem Statement:**\nThe square root of 2 is irrational: $\\sqrt{2} \\notin \\mathbb{Q}$.\n\n---\n\n**Derivation Steps:**\nStep 1 [Hypothesis]: $\\sqrt{2} = \\frac{a}{b}$ with $\\gcd(a, b) = 1$.\n\nStep 2 [Algebraic Manipulation]: Squaring both sides yields $2 = \\frac{a^2}{b^2} \\implies a^2 = 2b^2$.\n\nStep 3 [Number Theory Lemma]: Since $a^2$ is even, $a$ must be even. Let $a = 2k$ for some $k \\in \\mathbb{Z}$.\n\nStep 4 [Substitution]: $(2k)^2 = 2b^2 \\implies 4k^2 = 2b^2 \\implies b^2 = 2k^2$, meaning $b$ must also be even.\n\nStep 5 [Contradiction & Q.E.D.]: Both $a$ and $b$ are even, contradicting $\\gcd(a, b) = 1$. Thus $\\sqrt{2}$ cannot be expressed as a ratio of integers.',
-  },
-  {
-    id: 'seed-3',
-    title: "Euler's Identity via Complex Analysis",
-    author_username: 'Leonhard Euler',
-    author_id: 9993,
-    created_at: '1748',
-    latex_content: 'e^{i\\pi} + 1 = 0',
-    axiom_cited: "Euler's Identity",
-    endorsements_count: 64,
-    content: "**Hypothesis:**\nConsider the analytic continuation of exponential, sine, and cosine functions defined over $\\mathbb{C}$ via their power series.\n\n---\n\n**Theorem Statement:**\nEuler's Identity holds universally: $e^{i\\pi} + 1 = 0$.\n\n---\n\n**Derivation Steps:**\nStep 1 [Taylor Expansion]: $e^z = \\sum_{n=0}^{\\infty} \\frac{z^n}{n!}$. For $z = i\\theta$:\n$$e^{i\\theta} = \\sum_{n=0}^\\infty \\frac{(i\\theta)^n}{n!} = \\left(1 - \\frac{\\theta^2}{2!} + \\dots\\right) + i\\left(\\theta - \\frac{\\theta^3}{3!} + \\dots\\right) = \\cos\\theta + i\\sin\\theta$$\n\nStep 2 [Evaluation at $\\theta = \\pi$]: $e^{i\\pi} = \\cos(\\pi) + i\\sin(\\pi) = -1 + i(0) = -1$.\n\nStep 3 [Q.E.D.]: Adding 1 to both sides yields $e^{i\\pi} + 1 = 0$.",
-  },
-];
+
 
 export function ProofsPage() {
   const { user, isAuthenticated } = useAuth();
@@ -629,7 +595,7 @@ export function ProofsPage() {
                   Number(p.author?.id) === Number(currentUserId)
                 );
                 const isEndorsed = !!endorsedMap[p.id];
-                const baseEndorsements = p.endorsements_count || 12;
+                const baseEndorsements = p.endorsements_count || 0;
                 const currentEndorsements = baseEndorsements + (isEndorsed ? 1 : 0);
 
                 return (
