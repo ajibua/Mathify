@@ -109,8 +109,8 @@ export function FeedPage() {
         setFilePreview(null);
         return;
       }
-      if (isVideo && file.size > 4.5 * 1024 * 1024) {
-        showToast(`Video selected (${(file.size / (1024 * 1024)).toFixed(1)} MB). Note: Serverless limit is 4.5 MB; compressed or short clips upload most reliably.`);
+      if (isVideo) {
+        showToast(`Video selected: ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB)`);
       }
       setSelectedFile(file);
       setFilePreview(URL.createObjectURL(file));
@@ -134,16 +134,62 @@ export function FeedPage() {
 
     try {
       setSubmitting(true);
-      const formData = new FormData();
-      if (content.trim()) formData.append('content', content.trim());
-      if (latex.trim()) formData.append('latex_content', latex.trim());
-      if (selectedFile) {
-        formData.append('media', selectedFile);
-        const isVideo = selectedFile.type?.startsWith('video/') || /\.(mp4|mov|webm|m4v|3gp|mkv|avi|ogv)$/i.test(selectedFile.name);
-        formData.append('post_type', isVideo ? 'video' : 'image');
+      const isVideo = selectedFile && (selectedFile.type?.startsWith('video/') || /\.(mp4|mov|webm|m4v|3gp|mkv|avi|ogv)$/i.test(selectedFile.name));
+
+      let uploadedMediaKey = null;
+
+      // For videos or large media files, request a direct-to-storage presigned upload URL to bypass Vercel's 4.5 MB serverless limit
+      if (selectedFile && (isVideo || selectedFile.size > 3.5 * 1024 * 1024)) {
+        try {
+          showToast('Preparing direct storage upload...');
+          const presignRes = await API.post('/api/feed/posts/upload_url/', {
+            filename: selectedFile.name,
+            content_type: selectedFile.type || (isVideo ? 'video/mp4' : 'application/octet-stream'),
+          });
+          if (presignRes.ok) {
+            const presignData = await presignRes.json();
+            if (presignData.direct_upload && presignData.upload_url) {
+              showToast('Uploading media directly to storage...');
+              const uploadRes = await fetch(presignData.upload_url, {
+                method: 'PUT',
+                body: selectedFile,
+                headers: {
+                  'Content-Type': selectedFile.type || (isVideo ? 'video/mp4' : 'application/octet-stream'),
+                },
+              });
+              if (uploadRes.ok) {
+                uploadedMediaKey = presignData.file_key;
+              } else {
+                console.warn('Direct upload failed with status:', uploadRes.status);
+              }
+            }
+          }
+        } catch (presignErr) {
+          console.warn('Presigned upload error, falling back to standard upload:', presignErr);
+        }
       }
 
-      const res = await API.post('/api/feed/posts/', formData);
+      let res;
+      if (uploadedMediaKey) {
+        // Direct upload succeeded! Send lightweight JSON metadata (100% bypasses serverless 4.5 MB payload limit)
+        res = await API.post('/api/feed/posts/', {
+          content: content.trim(),
+          latex_content: latex.trim(),
+          media: uploadedMediaKey,
+          post_type: isVideo ? 'video' : 'image',
+        });
+      } else {
+        // Standard multipart upload fallback
+        const formData = new FormData();
+        if (content.trim()) formData.append('content', content.trim());
+        if (latex.trim()) formData.append('latex_content', latex.trim());
+        if (selectedFile) {
+          formData.append('media', selectedFile);
+          formData.append('post_type', isVideo ? 'video' : 'image');
+        }
+        res = await API.post('/api/feed/posts/', formData);
+      }
+
       if (res.ok) {
         const newPost = await res.json();
         const hydratedPost = {
@@ -160,7 +206,7 @@ export function FeedPage() {
         setPreviewTab('write');
         showToast('✓ Post published successfully!');
       } else if (res.status === 413) {
-        showToast('This video exceeds the server upload limit (max 4.5 MB on cloud serverless). Please upload a smaller or compressed clip.', 'error');
+        showToast('File exceeds server upload limit (max 50 MB).', 'error');
       } else {
         const err = await res.json().catch(() => ({}));
         const errMsg = err.media
@@ -170,7 +216,7 @@ export function FeedPage() {
       }
     } catch (err) {
       console.error('Failed to create post:', err);
-      showToast('Network error or file upload timeout. If this is a video, ensure it is under 4.5 MB.', 'error');
+      showToast('Network error or file upload timeout. Please try again.', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -521,7 +567,7 @@ export function FeedPage() {
                       </label>
 
                       <label
-                        title="Upload short video clip (MP4, MOV, WebM - max 4.5 MB)"
+                        title="Upload video clip (MP4, MOV, WebM - max 50 MB)"
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',

@@ -14,6 +14,39 @@ const ICE_SERVERS = {
   ],
 };
 
+// Studio-grade acoustic echo cancellation & noise suppression constraints
+const AUDIO_CONSTRAINTS = {
+  echoCancellation: { ideal: true },
+  noiseSuppression: { ideal: true },
+  autoGainControl: { ideal: true },
+  channelCount: { ideal: 1 }, // Mono channel is required for acoustic echo cancellation (AEC) algorithms to prevent feedback
+  sampleRate: { ideal: 48000 },
+  googEchoCancellation: { ideal: true },
+  googAutoGainControl: { ideal: true },
+  googNoiseSuppression: { ideal: true },
+  googHighpassFilter: { ideal: true },
+  googTypingNoiseDetection: { ideal: true },
+};
+
+// Optimizes Opus SDP parameters for crystal-clear voice: disables stereo loopback, enables forward error correction & discontinuous transmission (silences when listening)
+const tuneOpusSdp = (sdp) => {
+  if (!sdp || typeof sdp !== 'string') return sdp;
+  return sdp.replace(
+    /a=fmtp:(\d+) (.*)/g,
+    (match, pt, params) => {
+      if (sdp.includes(`a=rtpmap:${pt} opus/48000`)) {
+        let p = params;
+        if (!p.includes('usedtx=')) p += ';usedtx=1';
+        if (!p.includes('useinbandfec=')) p += ';useinbandfec=1';
+        if (!p.includes('stereo=')) p += ';stereo=0;sprop-stereo=0';
+        if (!p.includes('maxaveragebitrate=')) p += ';maxaveragebitrate=64000';
+        return `a=fmtp:${pt} ${p}`;
+      }
+      return match;
+    }
+  );
+};
+
 export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, initialPreJoin = true }) {
   const { user } = useAuth();
   const [isPreJoin, setIsPreJoin] = useState(initialPreJoin);
@@ -135,20 +168,12 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
         try {
           stream = await navigator.mediaDevices.getUserMedia({
             video: { width: { ideal: 1280 }, height: { ideal: 720 } },
-            audio: {
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true,
-            },
+            audio: AUDIO_CONSTRAINTS,
           });
         } catch (videoErr) {
           console.warn('Camera failed/denied, falling back to audio-only:', videoErr);
           stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true,
-            },
+            audio: AUDIO_CONSTRAINTS,
           });
           setCamEnabled(false);
         }
@@ -182,8 +207,17 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
         });
         audioFilterRef.current.start(stream);
 
+        // Deduplicate tracks when adding to peer connections to prevent audio flanging/echoing
         Object.values(peerConnectionsRef.current).forEach((pc) => {
-          stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+          const senders = pc.getSenders();
+          stream.getTracks().forEach((track) => {
+            const existingSender = senders.find((s) => s.track && s.track.kind === track.kind);
+            if (existingSender) {
+              existingSender.replaceTrack(track);
+            } else {
+              pc.addTrack(track, stream);
+            }
+          });
         });
 
         // If LiveKit is already connected, publish newly acquired tracks
@@ -326,6 +360,11 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
         await room.connect(data.server_url, data.token);
         if (isSubscribed) {
           setLivekitConnected(true);
+          // Disarm and close any existing P2P mesh connections so audio doesn't play twice (eliminates double-audio loopback echo)
+          Object.values(peerConnectionsRef.current).forEach((pc) => {
+            try { pc.close(); } catch { }
+          });
+          peerConnectionsRef.current = {};
           if (!room.canPlaybackAudio) {
             room.startAudio().catch(() => { });
           }
@@ -459,8 +498,14 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
     peerConnectionsRef.current[peerUsername] = pc;
 
     if (localStreamRef.current) {
+      const senders = pc.getSenders();
       localStreamRef.current.getTracks().forEach((track) => {
-        pc.addTrack(track, localStreamRef.current);
+        const existingSender = senders.find((s) => s.track && s.track.kind === track.kind);
+        if (!existingSender) {
+          pc.addTrack(track, localStreamRef.current);
+        } else if (existingSender.track !== track) {
+          existingSender.replaceTrack(track);
+        }
       });
     }
 
@@ -473,6 +518,16 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
     pc.ontrack = (event) => {
       const [stream] = event.streams;
       if (stream) {
+        // Strip duplicate audio tracks so the media element never plays multiple audio tracks concurrently
+        const audioTracks = stream.getAudioTracks();
+        if (audioTracks.length > 1) {
+          for (let i = 1; i < audioTracks.length; i++) {
+            try {
+              audioTracks[i].stop();
+              stream.removeTrack(audioTracks[i]);
+            } catch { }
+          }
+        }
         setRemoteStreams((prev) => ({
           ...prev,
           [peerUsername]: stream,
@@ -491,7 +546,7 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
 
   // Sync participants list with backend
   const syncCallParticipants = useCallback(async () => {
-    if (!group?.id || isPreJoin) return;
+    if (!group?.id || isPreJoin || livekitConnected) return;
     try {
       const res = await API.get(`/api/social/groups/${group.id}/call/`);
       if (res.ok) {
@@ -508,15 +563,9 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
             name: uname,
             isMe: uname === currentUsername,
             isSpeaking: false,
-            role: uname === data.initiator_username ? 'Initiator' : 'Scholar',
+            role: 'Scholar',
           }));
-
-          if (!list.some((p) => p.isMe)) {
-            list.unshift({ id: 0, name: currentUsername, isMe: true, isSpeaking: false, role: 'Scholar' });
-          }
-
-          if (isMountedRef.current) setParticipants(list);
-
+          setParticipants(list);
 
           const currentRemoteUsernames = new Set(
             data.participants.filter((u) => u !== currentUsername)
@@ -533,8 +582,9 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
               const pc = getOrCreatePeerConnection(remoteUser);
               if (currentUsername > remoteUser && pc.signalingState === 'stable' && !pc.currentRemoteDescription) {
                 pc.createOffer()
-                  .then((offer) => pc.setLocalDescription(offer))
-                  .then(() => {
+                  .then(async (offer) => {
+                    const tuned = new RTCSessionDescription({ type: offer.type, sdp: tuneOpusSdp(offer.sdp) });
+                    await pc.setLocalDescription(tuned);
                     sendSignal(remoteUser, 'offer', pc.localDescription);
                   })
                   .catch((err) => console.warn('Offer creation failed:', err));
@@ -544,11 +594,11 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
         }
       }
     } catch { }
-  }, [group?.id, user?.username, isPreJoin, closeAndRemovePeer, getOrCreatePeerConnection]);
+  }, [group?.id, user?.username, isPreJoin, livekitConnected, closeAndRemovePeer, getOrCreatePeerConnection]);
 
   // Poll for incoming WebRTC signals
   const pollSignals = useCallback(async () => {
-    if (!group?.id || isPreJoin) return;
+    if (!group?.id || isPreJoin || livekitConnected) return;
     try {
       const url = `/api/social/groups/${group.id}/call_signals/?since_id=${lastSignalIdRef.current}`;
       const res = await API.get(url);
@@ -570,8 +620,9 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
             if (sig.type === 'offer') {
               await pc.setRemoteDescription(new RTCSessionDescription(sig.payload));
               const answer = await pc.createAnswer();
-              await pc.setLocalDescription(answer);
-              await sendSignal(sender, 'answer', answer);
+              const tuned = new RTCSessionDescription({ type: answer.type, sdp: tuneOpusSdp(answer.sdp) });
+              await pc.setLocalDescription(tuned);
+              await sendSignal(sender, 'answer', pc.localDescription);
             } else if (sig.type === 'answer') {
               if (pc.signalingState === 'have-local-offer') {
                 await pc.setRemoteDescription(new RTCSessionDescription(sig.payload));
@@ -589,8 +640,11 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
               });
               if (user?.username && user.username > sender) {
                 pc.createOffer()
-                  .then((offer) => pc.setLocalDescription(offer))
-                  .then(() => sendSignal(sender, 'offer', pc.localDescription))
+                  .then(async (offer) => {
+                    const tuned = new RTCSessionDescription({ type: offer.type, sdp: tuneOpusSdp(offer.sdp) });
+                    await pc.setLocalDescription(tuned);
+                    sendSignal(sender, 'offer', pc.localDescription);
+                  })
                   .catch((e) => console.warn('Offer error:', e));
               }
             } else if (sig.type === 'leave') {
@@ -613,7 +667,7 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
       }
     } catch { }
 
-  }, [group?.id, user?.username, isPreJoin, closeAndRemovePeer, getOrCreatePeerConnection, cleanupTracksAndConnections, onClose]);
+  }, [group?.id, user?.username, isPreJoin, livekitConnected, closeAndRemovePeer, getOrCreatePeerConnection, cleanupTracksAndConnections, onClose]);
 
 
   // Activate signaling loop only once user enters the conference (isPreJoin === false)
@@ -625,11 +679,17 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
       sendSignal(null, 'join', { username: user?.username });
     }
 
-    syncCallParticipants();
-    pollSignals();
+    if (!livekitConnected) {
+      syncCallParticipants();
+      pollSignals();
+    }
 
-    const syncInterval = setInterval(syncCallParticipants, 4000);
-    const signalInterval = setInterval(pollSignals, 1500);
+    const syncInterval = setInterval(() => {
+      if (!livekitConnected) syncCallParticipants();
+    }, 4000);
+    const signalInterval = setInterval(() => {
+      if (!livekitConnected) pollSignals();
+    }, 1500);
 
     return () => {
       clearInterval(syncInterval);
@@ -643,7 +703,7 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
       });
       peerConnectionsRef.current = {};
     };
-  }, [isPreJoin, group?.id, user?.username]);
+  }, [isPreJoin, group?.id, user?.username, livekitConnected]);
 
   // Timer for call elapsed seconds
   useEffect(() => {

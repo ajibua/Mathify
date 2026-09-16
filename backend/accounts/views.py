@@ -49,7 +49,8 @@ class ProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
-        return get_object_or_404(Profile, user=self.request.user)
+        profile, _ = Profile.objects.get_or_create(user=self.request.user)
+        return profile
 
 
 class UserDetailView(generics.RetrieveAPIView):

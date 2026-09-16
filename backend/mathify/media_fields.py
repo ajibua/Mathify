@@ -66,8 +66,18 @@ class HybridFileField(serializers.FileField):
         if isinstance(data, str):
             data_str = data.strip()
 
+            # Pre-uploaded storage key (e.g. "posts/media/abc_123.mp4")
+            if data_str.startswith('posts/media/') or data_str.startswith('media/') or data_str.startswith('avatars/'):
+                return data_str
+
             if data_str.startswith('http://') or data_str.startswith('https://') or data_str.startswith('/media/'):
-                return self.root.instance and getattr(self.root.instance, self.source or self.field_name, None)
+                if self.root.instance:
+                    return getattr(self.root.instance, self.source or self.field_name, None)
+                from django.conf import settings
+                media_url = getattr(settings, 'MEDIA_URL', '')
+                if media_url and data_str.startswith(media_url):
+                    return data_str[len(media_url):].lstrip('/')
+                return data_str
 
             # Base64 Data URL parsing
             header_mime = None

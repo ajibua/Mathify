@@ -53,6 +53,61 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def upload_url(self, request):
+        """
+        Generate a presigned S3 PUT URL for direct-to-storage upload,
+        bypassing Vercel's 4.5 MB serverless function payload limit.
+        """
+        import uuid
+        import re
+        from django.conf import settings
+        from decouple import config
+
+        filename = request.data.get('filename', 'media')
+        content_type = request.data.get('content_type', 'application/octet-stream')
+
+        safe_name = re.sub(r'[^a-zA-Z0-9_.-]', '_', filename)
+        file_key = f"posts/media/{uuid.uuid4().hex}_{safe_name}"
+
+        use_supabase = getattr(settings, 'USE_SUPABASE_STORAGE', False)
+        if use_supabase:
+            import boto3
+            bucket_name = config('SUPABASE_STORAGE_BUCKET_NAME', default='mathify-media').strip()
+            endpoint = config('SUPABASE_STORAGE_ENDPOINT', default='').strip()
+            access_key = config('SUPABASE_STORAGE_ACCESS_KEY', default='').strip()
+            secret_key = config('SUPABASE_STORAGE_SECRET_KEY', default='').strip()
+            region = config('SUPABASE_STORAGE_REGION', default='eu-west-1').strip()
+
+            try:
+                s3_client = boto3.client(
+                    's3',
+                    endpoint_url=endpoint,
+                    aws_access_key_id=access_key,
+                    aws_secret_access_key=secret_key,
+                    region_name=region,
+                )
+                upload_url = s3_client.generate_presigned_url(
+                    'put_object',
+                    Params={
+                        'Bucket': bucket_name,
+                        'Key': file_key,
+                        'ContentType': content_type,
+                    },
+                    ExpiresIn=3600,
+                )
+                media_url = f"{settings.MEDIA_URL.rstrip('/')}/{file_key}"
+                return Response({
+                    'upload_url': upload_url,
+                    'file_key': file_key,
+                    'media_url': media_url,
+                    'direct_upload': True,
+                })
+            except Exception as e:
+                print(f"[UploadUrl] S3 presign failed: {e}")
+
+        return Response({'direct_upload': False, 'message': 'Direct storage upload not configured.'})
+
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def like(self, request, pk=None):
         post = self.get_object()
