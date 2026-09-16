@@ -164,8 +164,9 @@ class GoogleLoginView(APIView):
             redirect_uri = base_override
         else:
             redirect_uri = request.build_absolute_uri('/api/accounts/oauth/google/callback/')
-            if request.is_secure() or request.headers.get('x-forwarded-proto') == 'https':
-                redirect_uri = redirect_uri.replace('http://', 'https://')
+
+        if redirect_uri.startswith('http://') and not ('localhost' in redirect_uri or '127.0.0.1' in redirect_uri):
+            redirect_uri = redirect_uri.replace('http://', 'https://', 1)
 
         state_payload = json.dumps({'frontend_url': frontend_url})
         state_token = urlsafe_base64_encode(force_bytes(state_payload))
@@ -211,8 +212,9 @@ class GoogleCallbackView(APIView):
             redirect_uri = base_override
         else:
             redirect_uri = request.build_absolute_uri('/api/accounts/oauth/google/callback/')
-            if request.is_secure() or request.headers.get('x-forwarded-proto') == 'https':
-                redirect_uri = redirect_uri.replace('http://', 'https://')
+
+        if redirect_uri.startswith('http://') and not ('localhost' in redirect_uri or '127.0.0.1' in redirect_uri):
+            redirect_uri = redirect_uri.replace('http://', 'https://', 1)
 
         # Exchange auth code for access token
         token_url = 'https://oauth2.googleapis.com/token'
