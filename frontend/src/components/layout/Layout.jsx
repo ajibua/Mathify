@@ -33,7 +33,7 @@ export function Layout({ children }) {
           {children}
         </div>
       </main>
-      {!isAuthPage && <BottomNav />}
+      {!isAuthPage && !isTutorPage && !isGroupsPage && <BottomNav />}
     </div>
   );
 }

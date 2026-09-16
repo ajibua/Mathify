@@ -1394,6 +1394,7 @@ button, input, textarea, select {
     width: 100% !important;
     height: calc(100dvh - var(--nav-height)) !important;
     max-height: calc(100dvh - var(--nav-height)) !important;
+    min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: hidden !important;
@@ -1547,17 +1548,18 @@ button, input, textarea, select {
     height: 100% !important;
   }
 
-  /* Fixed Viewport Boundaries Above BottomNav */
+  /* Full Viewport Boundaries for Dedicated Chat/Tutor Workspaces */
   .groups-page-main,
   .full-height-main {
     position: fixed !important;
     top: var(--nav-height) !important;
     left: 0 !important;
     right: 0 !important;
-    bottom: var(--bottom-nav-height) !important;
+    bottom: 0 !important;
     width: 100% !important;
-    height: calc(100dvh - var(--nav-height) - var(--bottom-nav-height)) !important;
-    max-height: calc(100dvh - var(--nav-height) - var(--bottom-nav-height)) !important;
+    height: calc(100dvh - var(--nav-height)) !important;
+    max-height: calc(100dvh - var(--nav-height)) !important;
+    min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: hidden !important;
@@ -1724,15 +1726,16 @@ button, input, textarea, select {
     font-size: 13.5px;
   }
 
-  /* Anchored Composer docked above BottomNav */
+  /* Anchored Composer docked at bottom with safe-area spacing */
   .groups-composer-area,
   .ai-tutor-composer {
     flex-shrink: 0 !important;
     margin-top: auto !important;
-    padding: 8px 8px max(6px, var(--safe-bottom)) !important;
+    padding: 8px 12px calc(8px + var(--safe-bottom)) !important;
     background: #111115 !important;
     border-top: 1px solid var(--border) !important;
-    z-index: 5 !important;
+    position: relative !important;
+    z-index: 20 !important;
   }
 
   .groups-composer-area .symbol-chip,
