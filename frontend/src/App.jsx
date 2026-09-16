@@ -80,7 +80,7 @@ export function App() {
               <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
               <Route path="/register" element={<PublicOnlyRoute><RegisterPage /></PublicOnlyRoute>} />
               <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
-
+              <Route path="/download" element={<DownloadPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </ErrorBoundary>

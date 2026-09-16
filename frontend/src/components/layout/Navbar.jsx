@@ -697,8 +697,9 @@ export function Navbar() {
                 })}
 
                 {isAuthenticated && (
-                  <Link
-                    to="/profile"
+                  <>
+                    <Link
+                      to="/profile"
                     onClick={() => setShowMobileDrawer(false)}
                     style={{
                       display: 'flex',
@@ -714,7 +715,7 @@ export function Navbar() {
                       border: location.pathname === '/profile' ? '1px solid var(--primary-border)' : '1px solid transparent',
                       marginTop: '4px',
                     }}
-                  >
+                    >
                     <span
                       className="material-symbols-outlined"
                       style={{
@@ -725,7 +726,37 @@ export function Navbar() {
                       person
                     </span>
                     <span>My Profile</span>
-                  </Link>
+                    </Link>
+
+                    <Link
+                      to="/download"
+                    onClick={() => setShowMobileDrawer(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '11px 14px',
+                      borderRadius: '8px',
+                      textDecoration: 'none',
+                      fontSize: '14px',
+                      fontWeight: location.pathname === '/download' ? 600 : 500,
+                      backgroundColor: location.pathname === '/download' ? 'var(--primary-subtle)' : 'transparent',
+                      color: location.pathname === '/download' ? 'var(--primary)' : 'var(--text)',
+                      border: location.pathname === '/download' ? '1px solid var(--primary-border)' : '1px solid transparent',
+                    }}
+                    >
+                    <span
+                      className="material-symbols-outlined"
+                      style={{
+                        fontSize: '20px',
+                        color: location.pathname === '/download' ? 'var(--primary)' : 'var(--text-subtle)',
+                      }}
+                    >
+                      download
+                    </span>
+                    <span>Get App</span>
+                    </Link>
+                  </>
                 )}
               </nav>
 

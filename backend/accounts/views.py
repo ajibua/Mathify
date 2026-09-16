@@ -9,6 +9,7 @@ from django.core.mail import send_mail
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 import urllib.request
 import urllib.parse
 import json
