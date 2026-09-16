@@ -262,7 +262,7 @@ export function ProfilePage() {
         >
           <div>
             <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--primary)' }}>
-              {profile?.points ?? profile?.score ?? 0}
+              {profile?.axiom_points ?? profile?.points ?? profile?.score ?? 0}
             </div>
             <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Axiom Points</div>
           </div>

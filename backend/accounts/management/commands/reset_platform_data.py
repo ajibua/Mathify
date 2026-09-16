@@ -125,9 +125,9 @@ class Command(BaseCommand):
             # 8. Reset Superuser profile stats to 0
             Profile = apps.get_model('accounts', 'Profile')
             su_profile, _ = Profile.objects.get_or_create(user=superuser)
-            su_profile.score = 0
+            su_profile.axiom_points = 0
             su_profile.save()
-            self.stdout.write(f"Reset superuser {superuser.username} profile score to 0.")
+            self.stdout.write(f"Reset superuser {superuser.username} profile axiom_points to 0.")
 
             # 9. Delete all other users
             deleted_users_qs = User.objects.exclude(id=superuser.id)
