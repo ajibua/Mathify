@@ -42,7 +42,6 @@ urlpatterns = [
     path('api/studio/', include('studio.urls')),
     path('api/rankings/', include('rankings.urls')),
     path('api/ai-tutor/', include('ai_tutor.urls')),
-    path('api/notifications/', include('notifications.urls')),
     path('api/', include('notifications.urls')),
 ]
 
