@@ -408,9 +408,6 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
     }
   }, [isPreJoin, camEnabled, screenSharing]);
 
-  // -------------------------------------------------------------
-  // 3. WebRTC Signaling & Multi-User Peer Connections
-  // -------------------------------------------------------------
   const sendSignal = async (recipientUsername, signalType, payload) => {
     if (!group?.id) return;
     try {
@@ -548,7 +545,7 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
   const syncCallParticipants = useCallback(async () => {
     if (!group?.id || isPreJoin || livekitConnected) return;
     try {
-      const res = await API.get(`/api/social/groups/${group.id}/call/`);
+      const res = await API.get(`/api/social/groups/${group.id}/current_call/`);
       if (res.ok) {
         const data = await res.json();
         if (data && (data.status === 'ended' || (data.status === 'idle' && !isPreJoin))) {
@@ -675,7 +672,7 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
     if (isPreJoin) return;
 
     if (group?.id) {
-      API.post(`/api/social/groups/${group.id}/join_call/`, {}).catch(() => { });
+      API.post(`/api/social/groups/${group.id}/current_call/`, {}).catch(() => { });
       sendSignal(null, 'join', { username: user?.username });
     }
 

@@ -284,8 +284,7 @@ export function ProofsPage() {
     }
   };
 
-  // Combine live database proofs with authentic seed proofs
-  const allProofs = [...proofs, ...SEED_PROOFS];
+  const allProofs = proofs;
 
   const currentUserId = API.getCurrentUserId();
 
@@ -501,388 +500,388 @@ export function ProofsPage() {
           />
         </div>
       ) : (
-      <div className="studio-grid">
-        {/* Left Column: Proofs List & Filter (Hidden on mobile if Axiom tab is active) */}
-        <div className={`proofs-col-stream ${mobileTab === 'axioms' ? 'proofs-mobile-hidden' : ''}`}>
-          {/* Filter & Search Bar */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '16px',
-              flexWrap: 'wrap',
-              gap: '10px',
-            }}
-          >
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <button
-                onClick={() => setActiveFilter('all')}
-                style={{
-                  padding: '7px 14px',
-                  borderRadius: '6px',
-                  border: activeFilter === 'all' ? '1px solid var(--primary-border)' : '1px solid var(--border)',
-                  backgroundColor: activeFilter === 'all' ? 'var(--primary-subtle)' : 'transparent',
-                  color: activeFilter === 'all' ? 'var(--primary)' : 'var(--text-muted)',
-                  fontSize: '12.5px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                All Solutions ({allProofs.length})
-              </button>
-              {isAuthenticated && (
+        <div className="studio-grid">
+          {/* Left Column: Proofs List & Filter (Hidden on mobile if Axiom tab is active) */}
+          <div className={`proofs-col-stream ${mobileTab === 'axioms' ? 'proofs-mobile-hidden' : ''}`}>
+            {/* Filter & Search Bar */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '16px',
+                flexWrap: 'wrap',
+                gap: '10px',
+              }}
+            >
+              <div style={{ display: 'flex', gap: '6px' }}>
                 <button
-                  onClick={() => setActiveFilter('my')}
+                  onClick={() => setActiveFilter('all')}
                   style={{
                     padding: '7px 14px',
                     borderRadius: '6px',
-                    border: activeFilter === 'my' ? '1px solid var(--primary-border)' : '1px solid var(--border)',
-                    backgroundColor: activeFilter === 'my' ? 'var(--primary-subtle)' : 'transparent',
-                    color: activeFilter === 'my' ? 'var(--primary)' : 'var(--text-muted)',
+                    border: activeFilter === 'all' ? '1px solid var(--primary-border)' : '1px solid var(--border)',
+                    backgroundColor: activeFilter === 'all' ? 'var(--primary-subtle)' : 'transparent',
+                    color: activeFilter === 'all' ? 'var(--primary)' : 'var(--text-muted)',
                     fontSize: '12.5px',
                     fontWeight: 600,
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  My Solutions
+                  All Solutions ({allProofs.length})
                 </button>
-              )}
-            </div>
-
-            <div style={{ flex: '1 1 200px', maxWidth: '340px' }}>
-              <input
-                type="text"
-                className="glass-input"
-                placeholder="Search solutions, formulas, or topics..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ padding: '7px 12px', fontSize: '13px', width: '100%' }}
-              />
-            </div>
-          </div>
-
-          {/* Proofs Cards Stream */}
-          {loading ? (
-            <div style={{ padding: '50px', textAlign: 'center', color: 'var(--text-muted)' }}>
-              <span className="material-symbols-outlined spin" style={{ fontSize: '32px', color: 'var(--primary)', marginBottom: '8px' }}>
-                progress_activity
-              </span>
-              <p style={{ fontSize: '14px' }}>Loading mathematical proofs...</p>
-            </div>
-          ) : filteredProofs.length === 0 ? (
-            <div className="card" style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)', backgroundColor: '#18181D' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '36px', color: 'var(--primary)', marginBottom: '8px' }}>
-                history_edu
-              </span>
-              <h3 style={{ fontSize: '16px', color: 'var(--text)', margin: '4px 0' }}>No matching proofs found</h3>
-              <p style={{ fontSize: '13px', margin: '4px 0 16px' }}>
-                Try adjusting your search query or author a new theorem preprint.
-              </p>
-              <button onClick={() => setSearchTerm('')} className="btn-secondary" style={{ padding: '6px 14px', fontSize: '12px' }}>
-                Reset Filter
-              </button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {filteredProofs.map((p) => {
-                const isExpanded = expandedProofId === p.id;
-                const authorDisplay = p.author_username || p.author_email || (typeof p.author === 'string' ? p.author : p.author?.username) || 'Mathematician';
-                const isAuthor = currentUserId && (
-                  Number(p.author_id) === Number(currentUserId) ||
-                  Number(p.author?.id) === Number(currentUserId)
-                );
-                const isEndorsed = !!endorsedMap[p.id];
-                const baseEndorsements = p.endorsements_count || 0;
-                const currentEndorsements = baseEndorsements + (isEndorsed ? 1 : 0);
-
-                return (
-                  <article
-                    key={p.id}
-                    className="card"
+                {isAuthenticated && (
+                  <button
+                    onClick={() => setActiveFilter('my')}
                     style={{
-                      padding: '22px 24px',
-                      backgroundColor: '#18181D',
-                      transition: 'border-color 0.15s ease',
+                      padding: '7px 14px',
+                      borderRadius: '6px',
+                      border: activeFilter === 'my' ? '1px solid var(--primary-border)' : '1px solid var(--border)',
+                      backgroundColor: activeFilter === 'my' ? 'var(--primary-subtle)' : 'transparent',
+                      color: activeFilter === 'my' ? 'var(--primary)' : 'var(--text-muted)',
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
                     }}
                   >
-                    {/* Proof Header */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                      <div style={{ flex: 1, minWidth: '220px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                          <span className="badge-academic" style={{ fontSize: '11px', padding: '2px 7px' }}>
-                            Formal Theorem
-                          </span>
-                          <span style={{ fontSize: '12px', color: 'var(--text-subtle)' }}>
-                            {p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Preprint'}
-                          </span>
-                          {p.axiom_cited && (
-                            <span style={{ fontSize: '11px', color: 'var(--primary)', backgroundColor: 'var(--primary-subtle)', padding: '1px 6px', borderRadius: '4px' }}>
-                              {p.axiom_cited}
-                            </span>
-                          )}
-                        </div>
-                        <h2 style={{ fontSize: '18px', fontWeight: 700, margin: '6px 0 2px', color: 'var(--text)', lineHeight: 1.35 }}>
-                          {p.title}
-                        </h2>
-                        <div style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>
-                          Author: <span style={{ color: 'var(--text)', fontWeight: 500 }}>{authorDisplay}</span>
-                        </div>
-                      </div>
+                    My Solutions
+                  </button>
+                )}
+              </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        {isAuthor && typeof p.id === 'number' && (
-                          <button
-                            onClick={() => setProofToDelete(p)}
-                            title="Delete proof"
-                            style={{
-                              background: 'transparent',
-                              border: 'none',
-                              color: 'var(--text-subtle)',
-                              cursor: 'pointer',
-                              padding: '4px',
-                            }}
-                          >
-                            <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#EF4444' }}>delete</span>
-                          </button>
-                        )}
-                        <span
-                          style={{
-                            fontSize: '10.5px',
-                            fontWeight: 700,
-                            padding: '3px 8px',
-                            borderRadius: '4px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                            color: 'var(--text-muted)',
-                            border: '1px solid var(--border)',
-                          }}
-                        >
-                          {p.visibility ? p.visibility.toUpperCase() : 'PUBLIC'}
-                        </span>
-                      </div>
-                    </div>
+              <div style={{ flex: '1 1 200px', maxWidth: '340px' }}>
+                <input
+                  type="text"
+                  className="glass-input"
+                  placeholder="Search solutions, formulas, or topics..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ padding: '7px 12px', fontSize: '13px', width: '100%' }}
+                />
+              </div>
+            </div>
 
-                    {/* Main LaTeX Equation Display */}
-                    {p.latex_content && (
-                      <div className="math-paper" style={{ margin: '14px 0', padding: '14px 18px', borderRadius: '10px' }}>
-                        <div className="katex-display-container">
-                          <MathRenderer content={`$$${p.latex_content}$$`} />
-                        </div>
-                      </div>
-                    )}
+            {/* Proofs Cards Stream */}
+            {loading ? (
+              <div style={{ padding: '50px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <span className="material-symbols-outlined spin" style={{ fontSize: '32px', color: 'var(--primary)', marginBottom: '8px' }}>
+                  progress_activity
+                </span>
+                <p style={{ fontSize: '14px' }}>Loading mathematical proofs...</p>
+              </div>
+            ) : filteredProofs.length === 0 ? (
+              <div className="card" style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)', backgroundColor: '#18181D' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '36px', color: 'var(--primary)', marginBottom: '8px' }}>
+                  history_edu
+                </span>
+                <h3 style={{ fontSize: '16px', color: 'var(--text)', margin: '4px 0' }}>No matching proofs found</h3>
+                <p style={{ fontSize: '13px', margin: '4px 0 16px' }}>
+                  Try adjusting your search query or author a new theorem preprint.
+                </p>
+                <button onClick={() => setSearchTerm('')} className="btn-secondary" style={{ padding: '6px 14px', fontSize: '12px' }}>
+                  Reset Filter
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {filteredProofs.map((p) => {
+                  const isExpanded = expandedProofId === p.id;
+                  const authorDisplay = p.author_username || p.author_email || (typeof p.author === 'string' ? p.author : p.author?.username) || 'Mathematician';
+                  const isAuthor = currentUserId && (
+                    Number(p.author_id) === Number(currentUserId) ||
+                    Number(p.author?.id) === Number(currentUserId)
+                  );
+                  const isEndorsed = !!endorsedMap[p.id];
+                  const baseEndorsements = p.endorsements_count || 0;
+                  const currentEndorsements = baseEndorsements + (isEndorsed ? 1 : 0);
 
-                    {/* Author Walkthrough / Plot Media */}
-                    {p.media && (
-                      <div style={{ margin: '14px 0', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)', backgroundColor: '#121216' }}>
-                        {/\.(mp4|webm|mov|m4v|weba)$/i.test(p.media) || (typeof p.media === 'string' && p.media.startsWith('data:video')) ? (
-                          <div>
-                            <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', color: 'var(--primary)', fontWeight: 600, borderBottom: '1px solid var(--border)' }}>
-                              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>video_camera_front</span>
-                              Theorem Walkthrough Explanation
-                            </div>
-                            <video src={resolveMediaUrl(p.media)} controls playsInline style={{ width: '100%', maxHeight: '340px', display: 'block', backgroundColor: '#000' }} />
-                          </div>
-                        ) : /\.(mp3|wav|m4a|ogg)$/i.test(p.media) || (typeof p.media === 'string' && p.media.startsWith('data:audio')) ? (
-                          <div style={{ padding: '12px 14px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', color: 'var(--primary)', fontWeight: 600, marginBottom: '8px' }}>
-                              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>mic</span>
-                              Audio Walkthrough & Derivation Notes
-                            </div>
-                            <audio src={resolveMediaUrl(p.media)} controls style={{ width: '100%' }} />
-                          </div>
-                        ) : (
-                          <div>
-                            <img
-                              src={resolveMediaUrl(p.media)}
-                              alt="Mathematical Plot"
-                              style={{ width: '100%', maxHeight: '380px', objectFit: 'contain', display: 'block', margin: '0 auto' }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Text Statement or Abstract with KaTeX & Markdown Rendering */}
-                    {p.content && (
-                      <div style={{ fontSize: '13.5px', color: 'var(--text)', lineHeight: 1.6, margin: '12px 0' }}>
-                        <MathRenderer
-                          content={isExpanded ? p.content : getProofPreview(p.content)}
-                        />
-                      </div>
-                    )}
-
-                    {/* Interactive Proof Footer: Endorsements, LaTeX Copy, and Read Derivation */}
-                    <div
+                  return (
+                    <article
+                      key={p.id}
+                      className="card"
                       style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginTop: '14px',
-                        paddingTop: '12px',
-                        borderTop: '1px solid var(--border)',
-                        flexWrap: 'wrap',
-                        gap: '10px',
+                        padding: '22px 24px',
+                        backgroundColor: '#18181D',
+                        transition: 'border-color 0.15s ease',
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                        {/* Interactive Endorse (Q.E.D.) Button */}
-                        <button
-                          type="button"
-                          onClick={() => handleToggleEndorse(p.id)}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            padding: '5px 12px',
-                            borderRadius: '6px',
-                            border: isEndorsed ? '1px solid var(--primary-border)' : '1px solid var(--border)',
-                            backgroundColor: isEndorsed ? 'var(--primary-subtle)' : 'rgba(255, 255, 255, 0.03)',
-                            color: isEndorsed ? 'var(--primary)' : 'var(--text-muted)',
-                            fontSize: '12px',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            transition: 'all 0.15s ease',
-                          }}
-                        >
+                      {/* Proof Header */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ flex: 1, minWidth: '220px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                            <span className="badge-academic" style={{ fontSize: '11px', padding: '2px 7px' }}>
+                              Formal Theorem
+                            </span>
+                            <span style={{ fontSize: '12px', color: 'var(--text-subtle)' }}>
+                              {p.created_at ? new Date(p.created_at).toLocaleDateString() : 'Preprint'}
+                            </span>
+                            {p.axiom_cited && (
+                              <span style={{ fontSize: '11px', color: 'var(--primary)', backgroundColor: 'var(--primary-subtle)', padding: '1px 6px', borderRadius: '4px' }}>
+                                {p.axiom_cited}
+                              </span>
+                            )}
+                          </div>
+                          <h2 style={{ fontSize: '18px', fontWeight: 700, margin: '6px 0 2px', color: 'var(--text)', lineHeight: 1.35 }}>
+                            {p.title}
+                          </h2>
+                          <div style={{ fontSize: '12.5px', color: 'var(--text-muted)' }}>
+                            Author: <span style={{ color: 'var(--text)', fontWeight: 500 }}>{authorDisplay}</span>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {isAuthor && typeof p.id === 'number' && (
+                            <button
+                              onClick={() => setProofToDelete(p)}
+                              title="Delete proof"
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'var(--text-subtle)',
+                                cursor: 'pointer',
+                                padding: '4px',
+                              }}
+                            >
+                              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#EF4444' }}>delete</span>
+                            </button>
+                          )}
                           <span
-                            className="material-symbols-outlined"
                             style={{
-                              fontSize: '16px',
-                              fontVariationSettings: isEndorsed ? "'FILL' 1" : "'FILL' 0",
-                              color: isEndorsed ? 'var(--primary)' : 'var(--text-subtle)',
+                              fontSize: '10.5px',
+                              fontWeight: 700,
+                              padding: '3px 8px',
+                              borderRadius: '4px',
+                              backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                              color: 'var(--text-muted)',
+                              border: '1px solid var(--border)',
                             }}
                           >
-                            verified
+                            {p.visibility ? p.visibility.toUpperCase() : 'PUBLIC'}
                           </span>
-                          <span>{isEndorsed ? 'Endorsed ✓' : 'Endorse (Q.E.D.)'}</span>
-                          <span style={{ fontSize: '11px', opacity: 0.8, marginLeft: '2px' }}>({currentEndorsements})</span>
-                        </button>
+                        </div>
+                      </div>
 
-                        {/* Copy LaTeX Button */}
-                        {p.latex_content && (
+                      {/* Main LaTeX Equation Display */}
+                      {p.latex_content && (
+                        <div className="math-paper" style={{ margin: '14px 0', padding: '14px 18px', borderRadius: '10px' }}>
+                          <div className="katex-display-container">
+                            <MathRenderer content={`$$${p.latex_content}$$`} />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Author Walkthrough / Plot Media */}
+                      {p.media && (
+                        <div style={{ margin: '14px 0', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border)', backgroundColor: '#121216' }}>
+                          {/\.(mp4|webm|mov|m4v|weba)$/i.test(p.media) || (typeof p.media === 'string' && p.media.startsWith('data:video')) ? (
+                            <div>
+                              <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', color: 'var(--primary)', fontWeight: 600, borderBottom: '1px solid var(--border)' }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>video_camera_front</span>
+                                Theorem Walkthrough Explanation
+                              </div>
+                              <video src={resolveMediaUrl(p.media)} controls playsInline style={{ width: '100%', maxHeight: '340px', display: 'block', backgroundColor: '#000' }} />
+                            </div>
+                          ) : /\.(mp3|wav|m4a|ogg)$/i.test(p.media) || (typeof p.media === 'string' && p.media.startsWith('data:audio')) ? (
+                            <div style={{ padding: '12px 14px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', color: 'var(--primary)', fontWeight: 600, marginBottom: '8px' }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>mic</span>
+                                Audio Walkthrough & Derivation Notes
+                              </div>
+                              <audio src={resolveMediaUrl(p.media)} controls style={{ width: '100%' }} />
+                            </div>
+                          ) : (
+                            <div>
+                              <img
+                                src={resolveMediaUrl(p.media)}
+                                alt="Mathematical Plot"
+                                style={{ width: '100%', maxHeight: '380px', objectFit: 'contain', display: 'block', margin: '0 auto' }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Text Statement or Abstract with KaTeX & Markdown Rendering */}
+                      {p.content && (
+                        <div style={{ fontSize: '13.5px', color: 'var(--text)', lineHeight: 1.6, margin: '12px 0' }}>
+                          <MathRenderer
+                            content={isExpanded ? p.content : getProofPreview(p.content)}
+                          />
+                        </div>
+                      )}
+
+                      {/* Interactive Proof Footer: Endorsements, LaTeX Copy, and Read Derivation */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginTop: '14px',
+                          paddingTop: '12px',
+                          borderTop: '1px solid var(--border)',
+                          flexWrap: 'wrap',
+                          gap: '10px',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                          {/* Interactive Endorse (Q.E.D.) Button */}
                           <button
                             type="button"
-                            onClick={() => handleCopyLatex(p.id, p.latex_content)}
+                            onClick={() => handleToggleEndorse(p.id)}
                             style={{
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '5px',
-                              padding: '5px 10px',
+                              gap: '6px',
+                              padding: '5px 12px',
                               borderRadius: '6px',
-                              border: '1px solid var(--border)',
-                              backgroundColor: 'transparent',
-                              color: 'var(--text-muted)',
+                              border: isEndorsed ? '1px solid var(--primary-border)' : '1px solid var(--border)',
+                              backgroundColor: isEndorsed ? 'var(--primary-subtle)' : 'rgba(255, 255, 255, 0.03)',
+                              color: isEndorsed ? 'var(--primary)' : 'var(--text-muted)',
                               fontSize: '12px',
+                              fontWeight: 600,
                               cursor: 'pointer',
+                              transition: 'all 0.15s ease',
                             }}
                           >
-                            <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>content_copy</span>
-                            <span>{copiedId === p.id ? 'Copied! ✓' : 'Copy LaTeX'}</span>
+                            <span
+                              className="material-symbols-outlined"
+                              style={{
+                                fontSize: '16px',
+                                fontVariationSettings: isEndorsed ? "'FILL' 1" : "'FILL' 0",
+                                color: isEndorsed ? 'var(--primary)' : 'var(--text-subtle)',
+                              }}
+                            >
+                              verified
+                            </span>
+                            <span>{isEndorsed ? 'Endorsed ✓' : 'Endorse (Q.E.D.)'}</span>
+                            <span style={{ fontSize: '11px', opacity: 0.8, marginLeft: '2px' }}>({currentEndorsements})</span>
+                          </button>
+
+                          {/* Copy LaTeX Button */}
+                          {p.latex_content && (
+                            <button
+                              type="button"
+                              onClick={() => handleCopyLatex(p.id, p.latex_content)}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                padding: '5px 10px',
+                                borderRadius: '6px',
+                                border: '1px solid var(--border)',
+                                backgroundColor: 'transparent',
+                                color: 'var(--text-muted)',
+                                fontSize: '12px',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>content_copy</span>
+                              <span>{copiedId === p.id ? 'Copied! ✓' : 'Copy LaTeX'}</span>
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Read / Collapse Derivation Toggle */}
+                        {p.content && p.content.length > 240 && (
+                          <button
+                            type="button"
+                            onClick={() => setExpandedProofId(isExpanded ? null : p.id)}
+                            style={{
+                              background: 'transparent',
+                              border: 'none',
+                              color: 'var(--primary)',
+                              fontSize: '12.5px',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '4px',
+                            }}
+                          >
+                            <span>{isExpanded ? 'Collapse Derivation' : 'Read Full Derivation'}</span>
+                            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
+                              {isExpanded ? 'expand_less' : 'expand_more'}
+                            </span>
                           </button>
                         )}
                       </div>
-
-                      {/* Read / Collapse Derivation Toggle */}
-                      {p.content && p.content.length > 240 && (
-                        <button
-                          type="button"
-                          onClick={() => setExpandedProofId(isExpanded ? null : p.id)}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: 'var(--primary)',
-                            fontSize: '12.5px',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            padding: '4px',
-                          }}
-                        >
-                          <span>{isExpanded ? 'Collapse Derivation' : 'Read Full Derivation'}</span>
-                          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
-                            {isExpanded ? 'expand_less' : 'expand_more'}
-                          </span>
-                        </button>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Right Column: Axiom Reference Library (Hidden on mobile if Preprints tab is active) */}
-        <div className={`proofs-col-axioms ${mobileTab === 'preprints' ? 'proofs-mobile-hidden' : ''}`} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          {/* Axiom Reference Notebook */}
-          <div className="card" style={{ padding: '20px', backgroundColor: '#18181D' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="material-symbols-outlined" style={{ color: 'var(--primary)', fontSize: '20px' }}>
-                menu_book
-              </span>
-              Axiom Reference Index
-            </h3>
-            <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: 1.45, marginBottom: '14px' }}>
-              Foundational principles to cite in your mathematical deductions. Click to inspect or cite:
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {axiomReference.map((ax) => (
-                <div
-                  key={ax.name}
-                  style={{
-                    padding: '12px 14px',
-                    backgroundColor: '#141418',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border)',
-                    transition: 'border-color 0.15s ease',
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text)' }}>
-                      {ax.name}
-                    </div>
-                    <button
-                      onClick={() => handleInsertAxiom(ax.latex)}
-                      className="btn-secondary"
-                      title="Insert axiom formula into derivation"
-                      style={{ padding: '3px 8px', fontSize: '11px', borderRadius: '4px' }}
-                    >
-                      Cite Axiom
-                    </button>
-                  </div>
-                  <div style={{ fontSize: '11.5px', color: 'var(--text-subtle)', marginBottom: '6px', lineHeight: 1.35 }}>
-                    {ax.desc}
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'var(--primary)', overflowX: 'auto' }}>
-                    <MathRenderer content={`$${ax.latex}$`} />
-                  </div>
-                </div>
-              ))}
-            </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {/* Formal Rigor Protocol */}
-          <div className="card" style={{ padding: '20px', backgroundColor: '#16161B', border: '1px solid var(--primary-border)' }}>
-            <div className="badge-academic" style={{ marginBottom: '8px' }}>
-              AMS Standards
+          {/* Right Column: Axiom Reference Library (Hidden on mobile if Preprints tab is active) */}
+          <div className={`proofs-col-axioms ${mobileTab === 'preprints' ? 'proofs-mobile-hidden' : ''}`} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            {/* Axiom Reference Notebook */}
+            <div className="card" style={{ padding: '20px', backgroundColor: '#18181D' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className="material-symbols-outlined" style={{ color: 'var(--primary)', fontSize: '20px' }}>
+                  menu_book
+                </span>
+                Axiom Reference Index
+              </h3>
+              <p style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: 1.45, marginBottom: '14px' }}>
+                Foundational principles to cite in your mathematical deductions. Click to inspect or cite:
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {axiomReference.map((ax) => (
+                  <div
+                    key={ax.name}
+                    style={{
+                      padding: '12px 14px',
+                      backgroundColor: '#141418',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border)',
+                      transition: 'border-color 0.15s ease',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text)' }}>
+                        {ax.name}
+                      </div>
+                      <button
+                        onClick={() => handleInsertAxiom(ax.latex)}
+                        className="btn-secondary"
+                        title="Insert axiom formula into derivation"
+                        style={{ padding: '3px 8px', fontSize: '11px', borderRadius: '4px' }}
+                      >
+                        Cite Axiom
+                      </button>
+                    </div>
+                    <div style={{ fontSize: '11.5px', color: 'var(--text-subtle)', marginBottom: '6px', lineHeight: 1.35 }}>
+                      {ax.desc}
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--primary)', overflowX: 'auto' }}>
+                      <MathRenderer content={`$${ax.latex}$`} />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <h3 style={{ fontSize: '14.5px', fontWeight: 600, marginBottom: '6px' }}>
-              Proof Rigor Protocol
-            </h3>
-            <ul style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: 1.6, paddingLeft: '16px', margin: '6px 0 0' }}>
-              <li>State explicit domain and hypothesis premises.</li>
-              <li>Every deduction step should reference an established lemma or axiom.</li>
-              <li>Ensure all quantifiers (∀, ∃) are well-ordered.</li>
-              <li>Sign off verified theorems with Q.E.D. (∎).</li>
-            </ul>
+
+            {/* Formal Rigor Protocol */}
+            <div className="card" style={{ padding: '20px', backgroundColor: '#16161B', border: '1px solid var(--primary-border)' }}>
+              <div className="badge-academic" style={{ marginBottom: '8px' }}>
+                AMS Standards
+              </div>
+              <h3 style={{ fontSize: '14.5px', fontWeight: 600, marginBottom: '6px' }}>
+                Proof Rigor Protocol
+              </h3>
+              <ul style={{ fontSize: '12.5px', color: 'var(--text-muted)', lineHeight: 1.6, paddingLeft: '16px', margin: '6px 0 0' }}>
+                <li>State explicit domain and hypothesis premises.</li>
+                <li>Every deduction step should reference an established lemma or axiom.</li>
+                <li>Ensure all quantifiers (∀, ∃) are well-ordered.</li>
+                <li>Sign off verified theorems with Q.E.D. (∎).</li>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
       )}
 
       {/* Proof Composer Modal (Scrollable, Responsive on Mobile & Desktop) */}
