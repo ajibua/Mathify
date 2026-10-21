@@ -75,7 +75,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'id', 'role', 'avatar', 'bio', 'department', 'department_id',
             'year_of_study', 'institution', 'designation', 'axiom_points', 'updated_at',
         ]
-        read_only_fields = ['axiom_points']
+        read_only_fields = ['role', 'axiom_points']
 
     def to_internal_value(self, data):
         data = data.copy() if hasattr(data, 'copy') else data
@@ -134,7 +134,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        role = validated_data.pop('role', Profile.ROLE_STUDENT)
+        validated_data.pop('role', None)
+        role = Profile.ROLE_STUDENT
         department_obj = validated_data.pop('department_id', None)
         dept_name = validated_data.pop('department', None)
         year_of_study = validated_data.pop('year_of_study', None)

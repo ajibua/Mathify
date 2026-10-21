@@ -11,21 +11,26 @@ const ICE_SERVERS = {
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
     { urls: 'stun:stun2.l.google.com:19302' },
+    ...(typeof import.meta !== 'undefined' && import.meta.env?.VITE_TURN_URL ? [{
+      urls: import.meta.env.VITE_TURN_URL,
+      username: import.meta.env.VITE_TURN_USERNAME || '',
+      credential: import.meta.env.VITE_TURN_CREDENTIAL || '',
+    }] : []),
   ],
 };
 
 // Studio-grade acoustic echo cancellation & noise suppression constraints
 const AUDIO_CONSTRAINTS = {
-  echoCancellation: { ideal: true },
-  noiseSuppression: { ideal: true },
-  autoGainControl: { ideal: true },
-  channelCount: { ideal: 1 }, // Mono channel is required for acoustic echo cancellation (AEC) algorithms to prevent feedback
-  sampleRate: { ideal: 48000 },
-  googEchoCancellation: { ideal: true },
-  googAutoGainControl: { ideal: true },
-  googNoiseSuppression: { ideal: true },
-  googHighpassFilter: { ideal: true },
-  googTypingNoiseDetection: { ideal: true },
+  echoCancellation: true,
+  noiseSuppression: true,
+  autoGainControl: true,
+  channelCount: 1, // Mono channel is required for acoustic echo cancellation (AEC) algorithms to prevent feedback
+  sampleRate: 48000,
+  googEchoCancellation: true,
+  googAutoGainControl: true,
+  googNoiseSuppression: true,
+  googHighpassFilter: true,
+  googTypingNoiseDetection: true,
 };
 
 // Optimizes Opus SDP parameters for crystal-clear voice: disables stereo loopback, enables forward error correction & discontinuous transmission (silences when listening)
@@ -59,8 +64,9 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
   const [audioLevel, setAudioLevel] = useState(0); // 0 to 100 for green room audio meter
   const [copiedLink, setCopiedLink] = useState(false);
   const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [activeMeetingCode, setActiveMeetingCode] = useState(meeting?.meeting_code || '');
 
-  const meetingCode = meeting?.meeting_code || `mtf-${group?.id || 'meet'}`;
+  const meetingCode = activeMeetingCode || meeting?.meeting_code || (group?.id ? `mtf-grp-${group.id}` : 'mtf-meet');
   const [meetingTitle, setMeetingTitle] = useState(meeting?.title || `${group?.name || 'Academic'} Seminar`);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState(meetingTitle);
@@ -103,6 +109,10 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
   const [isHandRaised, setIsHandRaised] = useState(false);
   const [handRaisedUsers, setHandRaisedUsers] = useState({});
   const [livekitConnected, setLivekitConnected] = useState(false);
+  const livekitConnectedRef = useRef(livekitConnected);
+  useEffect(() => {
+    livekitConnectedRef.current = livekitConnected;
+  }, [livekitConnected]);
 
   const localStreamRef = useRef(null);
   const cameraTrackRef = useRef(null);
@@ -548,6 +558,9 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
       const res = await API.get(`/api/social/groups/${group.id}/current_call/`);
       if (res.ok) {
         const data = await res.json();
+        if (data && data.meeting_code && !activeMeetingCode) {
+          setActiveMeetingCode(data.meeting_code);
+        }
         if (data && (data.status === 'ended' || (data.status === 'idle' && !isPreJoin))) {
           cleanupTracksAndConnections();
           onClose();
@@ -672,20 +685,29 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
     if (isPreJoin) return;
 
     if (group?.id) {
-      API.post(`/api/social/groups/${group.id}/current_call/`, {}).catch(() => { });
+      API.post(`/api/social/groups/${group.id}/current_call/`, {})
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            if (data?.meeting_code) {
+              setActiveMeetingCode(data.meeting_code);
+            }
+          }
+        })
+        .catch(() => { });
       sendSignal(null, 'join', { username: user?.username });
     }
 
-    if (!livekitConnected) {
+    if (!livekitConnectedRef.current) {
       syncCallParticipants();
       pollSignals();
     }
 
     const syncInterval = setInterval(() => {
-      if (!livekitConnected) syncCallParticipants();
+      if (!livekitConnectedRef.current) syncCallParticipants();
     }, 4000);
     const signalInterval = setInterval(() => {
-      if (!livekitConnected) pollSignals();
+      if (!livekitConnectedRef.current) pollSignals();
     }, 1500);
 
     return () => {
@@ -700,7 +722,7 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
       });
       peerConnectionsRef.current = {};
     };
-  }, [isPreJoin, group?.id, user?.username, livekitConnected]);
+  }, [isPreJoin, group?.id, user?.username]);
 
   // Timer for call elapsed seconds
   useEffect(() => {
@@ -1155,6 +1177,10 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
                   <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.4 }}>
                     Check your audio and video before entering the seminar. Other scholars in the room will see you once you click join.
                   </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#93C5FD', backgroundColor: 'rgba(59, 130, 246, 0.12)', padding: '6px 10px', borderRadius: '6px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>headphones</span>
+                    <span>Use earphones or headphones for clear, echo-free audio.</span>
+                  </div>
                 </div>
 
                 {/* Copy Link Row */}
@@ -1464,6 +1490,7 @@ export function SeminarCallModal({ group, meeting, onClose, onMeetingEnded, init
                         <video
                           autoPlay
                           playsInline
+                          muted={livekitConnected}
                           ref={(el) => {
                             if (el && el.srcObject !== remoteStream) {
                               el.srcObject = remoteStream;

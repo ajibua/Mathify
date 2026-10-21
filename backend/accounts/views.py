@@ -124,9 +124,6 @@ def get_frontend_url(request, state_frontend=None):
     if state_frontend and is_allowed_origin(state_frontend):
         return state_frontend.rstrip('/')
 
-    req_param = request.GET.get('frontend_redirect', '').strip()
-    if req_param and is_allowed_origin(req_param):
-        return req_param.rstrip('/')
     header_origin = request.headers.get('origin') or request.headers.get('referer')
     if header_origin:
         try:

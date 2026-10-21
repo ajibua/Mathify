@@ -11,7 +11,8 @@
       {
         "allowConstantExport": true
       }
-    ]
+    ],
+    "no-undef": "error"
   },
   "env": {
     "browser": true

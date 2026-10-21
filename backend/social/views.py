@@ -1,6 +1,8 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
+import secrets
 
 from .models import Group, GroupMembership, GroupJoinRequest, Message, Call, CallSignal
 from .serializers import GroupSerializer, GroupMembershipSerializer, GroupJoinRequestSerializer, MessageSerializer, CallSerializer
@@ -53,6 +55,10 @@ def _sync_call_ended(call, user=None):
                 sender=user if (user and getattr(user, 'is_authenticated', False)) else (call.initiator or None),
                 content=ended_content
             )
+
+
+class CallSignalThrottle(ScopedRateThrottle):
+    scope = 'call_signal'
 
 
 class GroupViewSet(viewsets.ModelViewSet):
@@ -176,6 +182,8 @@ class GroupViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get', 'post'])
     def messages(self, request, pk=None):
+        if not request.user.is_authenticated:
+            return Response({'detail': 'Authentication required to access group messages.'}, status=status.HTTP_401_UNAUTHORIZED)
         group = self.get_object()
         if not group.memberships.filter(user=request.user).exists() and group.created_by_id != getattr(request.user, 'id', None):
             return Response({'detail': 'Join this group to access its chat.'}, status=status.HTTP_403_FORBIDDEN)
@@ -231,12 +239,17 @@ class GroupViewSet(viewsets.ModelViewSet):
             if not request.user.is_authenticated:
                 return Response({'detail': 'Authentication required to start or join seminar call.'}, status=status.HTTP_401_UNAUTHORIZED)
             if not call:
+                unique_code = f"mtf-{secrets.token_urlsafe(9)}"
                 call = Call.objects.create(
                     group=group,
                     initiator=request.user,
+                    meeting_code=unique_code,
                     status=Call.STATUS_ACTIVE,
                     started_at=timezone.now()
                 )
+            elif not call.meeting_code:
+                call.meeting_code = f"mtf-{secrets.token_urlsafe(9)}"
+                call.save(update_fields=['meeting_code'])
             call.participants.add(request.user)
             return Response(CallSerializer(call).data)
         if call:
@@ -266,7 +279,7 @@ class GroupViewSet(viewsets.ModelViewSet):
         return Response({'status': 'none'})
 
 
-    @action(detail=True, methods=['get', 'post'])
+    @action(detail=True, methods=['get', 'post'], throttle_classes=[CallSignalThrottle])
     def call_signals(self, request, pk=None):
         import datetime
         from django.utils import timezone
@@ -515,14 +528,12 @@ class CallViewSet(viewsets.ModelViewSet):
         from django.db.models import Q
         user = self.request.user
         return Call.objects.filter(
-            Q(initiator=user) | Q(group__memberships__user=user) | Q(participants=user) | Q(status=Call.STATUS_ACTIVE)
+            Q(initiator=user) | Q(group__memberships__user=user) | Q(participants=user)
         ).distinct()
 
     def perform_create(self, serializer):
-        import uuid
         from django.utils import timezone
-        unique_suffix = uuid.uuid4().hex[:6]
-        code = f"mtf-{unique_suffix[:3]}-{unique_suffix[3:]}"
+        code = f"mtf-{secrets.token_urlsafe(9)}"
         call = serializer.save(
             initiator=self.request.user,
             meeting_code=code,
@@ -549,12 +560,16 @@ class CallViewSet(viewsets.ModelViewSet):
         call = Call.objects.filter(meeting_code=code).first()
         if not call:
             return Response({'detail': 'Meeting not found.'}, status=status.HTTP_404_NOT_FOUND)
+        if call.status == Call.STATUS_ENDED:
+            return Response({'detail': 'This meeting has ended.'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(CallSerializer(call).data)
 
     @action(detail=True, methods=['post'])
     def join(self, request, pk=None):
         from django.utils import timezone
-        call = self.get_object()
+        call = Call.objects.filter(id=pk).first()
+        if not call:
+            return Response({'detail': 'Meeting not found.'}, status=status.HTTP_404_NOT_FOUND)
         if call.status == Call.STATUS_ENDED:
             return Response({'detail': 'Call has already ended.'}, status=status.HTTP_400_BAD_REQUEST)
         call.participants.add(request.user)
@@ -567,7 +582,9 @@ class CallViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def leave(self, request, pk=None):
-        call = self.get_object()
+        call = Call.objects.filter(id=pk).first()
+        if not call:
+            return Response({'detail': 'Meeting not found.'}, status=status.HTTP_404_NOT_FOUND)
         if request.user.is_authenticated:
             call.participants.remove(request.user)
         if call.participants.count() == 0:
@@ -576,7 +593,9 @@ class CallViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def end(self, request, pk=None):
-        call = self.get_object()
+        call = Call.objects.filter(id=pk).first()
+        if not call:
+            return Response({'detail': 'Meeting not found.'}, status=status.HTTP_404_NOT_FOUND)
         user = request.user
         is_host = bool(
             call.initiator_id == user.id or
@@ -590,9 +609,14 @@ class CallViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'], url_path='token')
     def token(self, request, pk=None):
-        call = self.get_object()
+        call = Call.objects.filter(id=pk).first()
+        if not call:
+            return Response({'detail': 'Meeting not found.'}, status=status.HTTP_404_NOT_FOUND)
         if call.status == Call.STATUS_ENDED:
             return Response({'detail': 'Call has already ended.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Record authenticated user as participant upon token retrieval
+        call.participants.add(request.user)
 
         from decouple import config
         livekit_url = config('LIVEKIT_URL', default=None)

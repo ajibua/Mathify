@@ -34,6 +34,7 @@ export function Navbar() {
   useEffect(() => {
     if (!isAuthenticated) return;
     const fetchNotifications = async () => {
+      if (document.hidden) return;
       try {
         const res = await API.get('/api/notifications/?unread=true');
         if (res.ok) {
@@ -49,8 +50,19 @@ export function Navbar() {
       }
     };
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 4000);
-    return () => clearInterval(interval);
+    const interval = setInterval(fetchNotifications, 35000);
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchNotifications();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [isAuthenticated]);
 
   useEffect(() => {

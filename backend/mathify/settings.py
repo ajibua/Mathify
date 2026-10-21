@@ -6,13 +6,11 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 IS_VERCEL = 'VERCEL' in os.environ or config('VERCEL', default=False, cast=bool)
 
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-production')
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-DEBUG = config('DEBUG', default=True, cast=bool)
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-only-secret-key-3094829384234')
 
-ALLOWED_HOSTS = [h.strip() for h in config('ALLOWED_HOSTS', default='*').split(',') if h.strip()]
-if 'testserver' not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append('testserver')
+ALLOWED_HOSTS = ['127.0.0.1:8000', 'localhost:5173', 'mathify-coral.vercel.app', 'mathify-backend-one.vercel.app', '127.0.0.1', 'localhost']
 
 
 INSTALLED_APPS = [
@@ -253,13 +251,14 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': config('THROTTLE_ANON_RATE', default='200/day'),
-        'user': config('THROTTLE_USER_RATE', default='2000/day'),
+        'user': config('THROTTLE_USER_RATE', default='10000/day'),
         'auth': config('THROTTLE_AUTH_RATE', default='15/minute'),
         'password_reset': config('THROTTLE_PW_RESET_RATE', default='5/hour'),
         'ai_tutor': config('THROTTLE_AI_TUTOR_RATE', default='30/minute'),
         'feed_post': config('THROTTLE_FEED_RATE', default='25/minute'),
         'score_award': config('THROTTLE_SCORE_RATE', default='15/hour'),
         'competition_answer': config('THROTTLE_COMPETITION_ANSWER_RATE', default='30/minute'),
+        'call_signal': config('THROTTLE_CALL_SIGNAL_RATE', default='6000/hour'),
     }
 }
 
@@ -271,12 +270,14 @@ SIMPLE_JWT = {
 }
 
 # CORS 
-CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=DEBUG, cast=bool)
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [origin.strip() for origin in config('CORS_ALLOWED_ORIGINS', default='http://localhost:5173,http://127.0.0.1:5173,http://localhost:8000,http://127.0.0.1:8000').split(',') if origin.strip()]
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https://.*\.vercel\.app$",
-]
+if DEBUG:
+    for local_cors in ('http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:8000', 'http://127.0.0.1:8000', 'http://localhost:3000'):
+        if local_cors not in CORS_ALLOWED_ORIGINS:
+            CORS_ALLOWED_ORIGINS.append(local_cors)
+CORS_ALLOWED_ORIGIN_REGEXES = []
 
 # Email & SMTP Configuration
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
